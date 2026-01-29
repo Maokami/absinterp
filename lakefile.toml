@@ -1,0 +1,21 @@
+name = "cslib-absinterp"
+version = "0.1.0"
+defaultTargets = ["AbsInterp"]
+
+[leanOptions]
+# keep defaults for now
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.28.0-rc1"
+
+[[require]]
+name = "cslib"
+scope = "leanprover"
+rev = "main"
+
+[[lean_lib]]
+name = "AbsInterp"
+# Include our local modules.
+globs = ["AbsInterp.*"]
