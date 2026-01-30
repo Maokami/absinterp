@@ -87,6 +87,20 @@ instance : SemilatticeSup Sign where
   sup_le a b c hac hbc := by
     cases a <;> cases b <;> cases c <;> cases hac <;> cases hbc <;> constructor
 
+theorem gammaSign_mono {a b : Sign} (h : a ≤ b) : gammaSign a ⊆ gammaSign b := by
+  intro n hn
+  cases h with
+  | bot b =>
+      cases hn
+  | top a =>
+      simp [gammaSign]
+  | neg =>
+      simpa [gammaSign] using hn
+  | zero =>
+      simpa [gammaSign] using hn
+  | pos =>
+      simpa [gammaSign] using hn
+
 end Data
 
 end AbsInterp
