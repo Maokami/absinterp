@@ -90,16 +90,9 @@ instance : SemilatticeSup Sign where
 theorem gammaSign_mono {a b : Sign} (h : a ≤ b) : gammaSign a ⊆ gammaSign b := by
   intro n hn
   cases h with
-  | bot b =>
-      cases hn
-  | top a =>
-      simp [gammaSign]
-  | neg =>
-      simpa [gammaSign] using hn
-  | zero =>
-      simpa [gammaSign] using hn
-  | pos =>
-      simpa [gammaSign] using hn
+  | bot b => cases hn
+  | top a => simp [gammaSign]
+  | neg | zero | pos => simpa
 
 end Data
 
