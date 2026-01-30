@@ -1,3 +1,3 @@
-# cslib-absinterp
+# AbsInterp
 
-Working space for the CSLib abstract interpretation framework.
+Abstract Interpretation in Lean4
