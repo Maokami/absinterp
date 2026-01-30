@@ -87,6 +87,7 @@ instance : SemilatticeSup Sign where
   sup_le a b c hac hbc := by
     cases a <;> cases b <;> cases c <;> cases hac <;> cases hbc <;> constructor
 
+/-- Concretization is monotone with respect to the sign order. -/
 theorem gammaSign_mono {a b : Sign} (h : a ≤ b) : gammaSign a ⊆ gammaSign b := by
   intro n hn
   cases h with
