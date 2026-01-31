@@ -82,9 +82,7 @@ theorem bevalSign_sound (b : BExp Var) (σ : State Var) (τ : SignState Var)
     (hσ : σ ∈ gammaSignState τ) :
     BExp.eval b σ ∈ Data.gammaBoolAbs (bevalSign b τ) := by
   induction b with
-  | tt =>
-      simp [BExp.eval, bevalSign, Data.gammaBoolAbs]
-  | ff =>
+  | tt | ff =>
       simp [BExp.eval, bevalSign, Data.gammaBoolAbs]
   | eq a b =>
       have ha' := aevalSign_sound a σ τ hσ
@@ -95,11 +93,9 @@ theorem bevalSign_sound (b : BExp Var) (σ : State Var) (τ : SignState Var)
       have hb' := aevalSign_sound b σ τ hσ
       simpa [BExp.eval, bevalSign] using Data.signLe_sound ha' hb'
   | not b hb =>
-      simpa [BExp.eval, bevalSign] using Data.boolNot_sound (a := bevalSign b τ) (v := BExp.eval b σ) hb
+      simpa [BExp.eval, bevalSign] using Data.boolNot_sound hb
   | and b1 b2 hb1 hb2 =>
-      simpa [BExp.eval, bevalSign] using
-        Data.boolAnd_sound (a := bevalSign b1 τ) (b := bevalSign b2 τ)
-          (v := BExp.eval b1 σ) (w := BExp.eval b2 σ) hb1 hb2
+      simpa [BExp.eval, bevalSign] using Data.boolAnd_sound hb1 hb2
 
 end Abstract
 

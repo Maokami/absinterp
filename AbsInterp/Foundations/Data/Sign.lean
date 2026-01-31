@@ -214,10 +214,11 @@ theorem signLe_sound {a b : Sign} {x y : Int}
     (hx : x ∈ gammaSign a) (hy : y ∈ gammaSign b) :
     decide (x ≤ y) ∈ gammaBoolAbs (signLe a b) := by
   cases a <;> cases b <;>
-    simp [signLe, gammaSign, gammaBoolAbs] at hx hy ⊢ <;>
-    first
-      | nlinarith
-      | exact lt_or_ge y x
+    simp [signLe, gammaSign, gammaBoolAbs] at hx hy ⊢
+  all_goals
+    try nlinarith
+  all_goals
+    exact lt_or_ge y x
 
 end Data
 
