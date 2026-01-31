@@ -99,13 +99,10 @@ def boolNot : BoolAbs -> BoolAbs
 
 /-- Abstract boolean conjunction. -/
 def boolAnd : BoolAbs -> BoolAbs -> BoolAbs
-  | .bot, _ => .bot
-  | _, .bot => .bot
-  | .ff, _ => .ff
-  | _, .ff => .ff
-  | .tt, b => b
-  | a, .tt => a
-  | .top, .top => .top
+  | .bot, _ | _, .bot => .bot
+  | .ff, _ | _, .ff => .ff
+  | .tt, .tt => .tt
+  | _, _ => .top
 
 end Data
 
