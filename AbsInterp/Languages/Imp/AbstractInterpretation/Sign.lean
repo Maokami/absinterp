@@ -41,6 +41,14 @@ def SignDomain : AbstractInterpretation.Domain (State Var) where
   A := SignState Var
   gamma := gammaSignState
 
+/-- Abstract evaluation of arithmetic expressions in the sign domain. -/
+def aevalSign : AExp Var -> SignState Var -> Data.Sign
+  | .lit n, _ => Data.signOfInt n
+  | .var x, τ => τ x
+  | .add a b, τ => Data.signAdd (aevalSign a τ) (aevalSign b τ)
+  | .sub a b, τ => Data.signSub (aevalSign a τ) (aevalSign b τ)
+  | .mul a b, τ => Data.signMul (aevalSign a τ) (aevalSign b τ)
+
 end Abstract
 
 end Imp

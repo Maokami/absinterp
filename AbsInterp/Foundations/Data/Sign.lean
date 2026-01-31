@@ -66,6 +66,52 @@ def Sign.sup : Sign -> Sign -> Sign
   | .pos, .pos => .pos
   | _, _ => .top
 
+/-- Sign of a concrete integer. -/
+def signOfInt (n : Int) : Sign :=
+  if n < 0 then
+    .neg
+  else if n = 0 then
+    .zero
+  else
+    .pos
+
+/-- Sign negation. -/
+def signNeg : Sign -> Sign
+  | .bot => .bot
+  | .neg => .pos
+  | .zero => .zero
+  | .pos => .neg
+  | .top => .top
+
+/-- Sign addition (sound but not necessarily precise). -/
+def signAdd : Sign -> Sign -> Sign
+  | .bot, _ => .bot
+  | _, .bot => .bot
+  | .top, _ => .top
+  | _, .top => .top
+  | .zero, b => b
+  | a, .zero => a
+  | .neg, .neg => .neg
+  | .pos, .pos => .pos
+  | _, _ => .top
+
+/-- Sign multiplication (sound but not necessarily precise). -/
+def signMul : Sign -> Sign -> Sign
+  | .bot, _ => .bot
+  | _, .bot => .bot
+  | .zero, _ => .zero
+  | _, .zero => .zero
+  | .top, _ => .top
+  | _, .top => .top
+  | .neg, .neg => .pos
+  | .pos, .pos => .pos
+  | .neg, .pos => .neg
+  | .pos, .neg => .neg
+
+/-- Sign subtraction. -/
+def signSub (a b : Sign) : Sign :=
+  signAdd a (signNeg b)
+
 instance : DecidableLE Sign := by
   intro a b
   cases a <;> cases b <;> first
