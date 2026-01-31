@@ -52,8 +52,8 @@ def aevalSign : AExp Var -> SignState Var -> Data.Sign
 
 /-- Abstract evaluation of boolean expressions in the sign domain. -/
 def bevalSign : BExp Var -> SignState Var -> Data.BoolAbs
-  | .tt, _ => Data.BoolAbs.tt
-  | .ff, _ => Data.BoolAbs.ff
+  | .tt, _ => .tt
+  | .ff, _ => .ff
   | .eq a b, τ => Data.signEq (aevalSign a τ) (aevalSign b τ)
   | .le a b, τ => Data.signLe (aevalSign a τ) (aevalSign b τ)
   | .not b, τ => Data.boolNot (bevalSign b τ)

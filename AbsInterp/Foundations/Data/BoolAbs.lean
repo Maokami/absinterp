@@ -82,6 +82,14 @@ instance : SemilatticeSup BoolAbs where
   sup_le a b c hac hbc := by
     cases a <;> cases b <;> cases c <;> cases hac <;> cases hbc <;> constructor
 
+/-- Concretization is monotone with respect to the abstract boolean order. -/
+theorem gammaBoolAbs_mono {a b : BoolAbs} (h : a ≤ b) : gammaBoolAbs a ⊆ gammaBoolAbs b := by
+  intro v hv
+  cases h with
+  | bot b => cases hv
+  | top a => simp [gammaBoolAbs]
+  | ff | tt => simpa
+
 /-- Abstract boolean negation. -/
 def boolNot : BoolAbs -> BoolAbs
   | .bot => .bot
