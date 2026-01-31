@@ -198,6 +198,28 @@ theorem signSub_sound {a b : Sign} {x y : Int}
   have hy' : -y ∈ gammaSign (signNeg b) := signNeg_sound hy
   simpa [signSub, sub_eq_add_neg] using (signAdd_sound (a := a) (b := signNeg b) hx hy')
 
+/-- `signEq` is sound with respect to concretization. -/
+theorem signEq_sound {a b : Sign} {x y : Int}
+    (hx : x ∈ gammaSign a) (hy : y ∈ gammaSign b) :
+    decide (x = y) ∈ gammaBoolAbs (signEq a b) := by
+  cases a <;> cases b <;>
+    simp [signEq, gammaSign, gammaBoolAbs] at hx hy ⊢
+  all_goals
+    try nlinarith
+  all_goals
+    by_cases h : x = y <;> simp [h]
+
+/-- `signLe` is sound with respect to concretization. -/
+theorem signLe_sound {a b : Sign} {x y : Int}
+    (hx : x ∈ gammaSign a) (hy : y ∈ gammaSign b) :
+    decide (x ≤ y) ∈ gammaBoolAbs (signLe a b) := by
+  cases a <;> cases b <;>
+    simp [signLe, gammaSign, gammaBoolAbs] at hx hy ⊢
+  all_goals
+    try nlinarith
+  all_goals
+    exact lt_or_ge y x
+
 end Data
 
 end AbsInterp

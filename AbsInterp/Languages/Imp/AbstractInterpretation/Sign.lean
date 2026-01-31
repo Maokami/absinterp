@@ -76,6 +76,27 @@ theorem aevalSign_sound (a : AExp Var) (σ : State Var) (τ : SignState Var)
   | mul _ _ ha hb =>
       simpa [AExp.eval, aevalSign] using Data.signMul_sound ha hb
 
+omit [DecidableEq Var] in
+/-- Abstract evaluation of `BExp` is sound with respect to concretization. -/
+theorem bevalSign_sound (b : BExp Var) (σ : State Var) (τ : SignState Var)
+    (hσ : σ ∈ gammaSignState τ) :
+    BExp.eval b σ ∈ Data.gammaBoolAbs (bevalSign b τ) := by
+  induction b with
+  | tt | ff =>
+      simp [BExp.eval, bevalSign, Data.gammaBoolAbs]
+  | eq a b =>
+      have ha' := aevalSign_sound a σ τ hσ
+      have hb' := aevalSign_sound b σ τ hσ
+      simpa [BExp.eval, bevalSign] using Data.signEq_sound ha' hb'
+  | le a b =>
+      have ha' := aevalSign_sound a σ τ hσ
+      have hb' := aevalSign_sound b σ τ hσ
+      simpa [BExp.eval, bevalSign] using Data.signLe_sound ha' hb'
+  | not b hb =>
+      simpa [BExp.eval, bevalSign] using Data.boolNot_sound hb
+  | and b1 b2 hb1 hb2 =>
+      simpa [BExp.eval, bevalSign] using Data.boolAnd_sound hb1 hb2
+
 end Abstract
 
 end Imp
