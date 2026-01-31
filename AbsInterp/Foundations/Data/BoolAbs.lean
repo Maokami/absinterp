@@ -102,6 +102,18 @@ def boolAnd : BoolAbs -> BoolAbs -> BoolAbs
   | .tt, .tt => .tt
   | _, _ => .top
 
+/-- `boolNot` is sound with respect to concretization. -/
+theorem boolNot_sound {a : BoolAbs} {v : Bool} (hv : v ∈ gammaBoolAbs a) :
+    (!v) ∈ gammaBoolAbs (boolNot a) := by
+  cases a <;> simp [gammaBoolAbs, boolNot] at hv ⊢ <;> simpa using hv
+
+/-- `boolAnd` is sound with respect to concretization. -/
+theorem boolAnd_sound {a b : BoolAbs} {v w : Bool}
+    (hv : v ∈ gammaBoolAbs a) (hw : w ∈ gammaBoolAbs b) :
+    (v && w) ∈ gammaBoolAbs (boolAnd a b) := by
+  cases a <;> cases b <;> cases v <;> cases w <;>
+    simp [gammaBoolAbs, boolAnd] at hv hw ⊢
+
 end Data
 
 end AbsInterp
