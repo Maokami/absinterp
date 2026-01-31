@@ -55,8 +55,6 @@ instance : Top BoolAbs := ⟨BoolAbs.top⟩
 def BoolAbs.sup : BoolAbs -> BoolAbs -> BoolAbs
   | .bot, b => b
   | a, .bot => a
-  | .top, _ => .top
-  | _, .top => .top
   | .ff, .ff => .ff
   | .tt, .tt => .tt
   | _, _ => .top
