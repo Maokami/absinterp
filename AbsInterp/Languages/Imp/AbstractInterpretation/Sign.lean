@@ -59,6 +59,23 @@ def bevalSign : BExp Var -> SignState Var -> Data.BoolAbs
   | .not b, τ => Data.boolNot (bevalSign b τ)
   | .and a b, τ => Data.boolAnd (bevalSign a τ) (bevalSign b τ)
 
+omit [DecidableEq Var] in
+/-- Abstract evaluation of `AExp` is sound with respect to concretization. -/
+theorem aevalSign_sound (a : AExp Var) (σ : State Var) (τ : SignState Var)
+    (hσ : σ ∈ gammaSignState τ) :
+    AExp.eval a σ ∈ Data.gammaSign (aevalSign a τ) := by
+  induction a with
+  | lit n =>
+      simpa [AExp.eval, aevalSign] using Data.signOfInt_sound n
+  | var x =>
+      simpa [AExp.eval, aevalSign, gammaSignState] using hσ x
+  | add _ _ ha hb =>
+      simpa [AExp.eval, aevalSign] using Data.signAdd_sound ha hb
+  | sub _ _ ha hb =>
+      simpa [AExp.eval, aevalSign] using Data.signSub_sound ha hb
+  | mul _ _ ha hb =>
+      simpa [AExp.eval, aevalSign] using Data.signMul_sound ha hb
+
 end Abstract
 
 end Imp
