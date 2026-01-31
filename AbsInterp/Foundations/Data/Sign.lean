@@ -115,26 +115,19 @@ def signSub (a b : Sign) : Sign :=
 
 /-- Abstract equality test on signs. -/
 def signEq : Sign -> Sign -> BoolAbs
-  | .bot, _ => .bot
-  | _, .bot => .bot
-  | .top, _ => .top
-  | _, .top => .top
+  | .bot, _ | _, .bot => .bot
+  | .top, _ | _, .top => .top
   | .zero, .zero => .tt
-  | .neg, .neg => .top
-  | .pos, .pos => .top
+  | .neg, .neg | .pos, .pos => .top
   | _, _ => .ff
 
 /-- Abstract less-or-equal test on signs. -/
 def signLe : Sign -> Sign -> BoolAbs
-  | .bot, _ => .bot
-  | _, .bot => .bot
-  | .top, _ => .top
-  | _, .top => .top
-  | .neg, .neg => .top
-  | .pos, .pos => .top
+  | .bot, _ | _, .bot => .bot
+  | .top, _ | _, .top => .top
+  | .neg, .neg | .pos, .pos => .top
   | .neg, _ => .tt
-  | .zero, .zero => .tt
-  | .zero, .pos => .tt
+  | .zero, .zero | .zero, .pos => .tt
   | _, _ => .ff
 
 instance : DecidableLE Sign := by
