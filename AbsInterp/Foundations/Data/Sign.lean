@@ -8,9 +8,11 @@ module
 
 public import Cslib.Init
 public import AbsInterp.Foundations.Data.BoolAbs
+public import Mathlib.Algebra.Order.Ring.Basic
 public import Mathlib.Data.Int.Basic
 public import Mathlib.Data.Set.Lattice
 public import Mathlib.Order.Lattice
+import Mathlib.Tactic
 
 @[expose] public section
 
@@ -158,6 +160,52 @@ theorem gammaSign_mono {a b : Sign} (h : a ≤ b) : gammaSign a ⊆ gammaSign b 
   | bot b => cases hn
   | top a => simp [gammaSign]
   | neg | zero | pos => simpa
+
+/-- `signOfInt` is sound with respect to concretization. -/
+theorem signOfInt_sound (n : Int) : n ∈ gammaSign (signOfInt n) := by
+  by_cases hneg : n < 0
+  · simp [signOfInt, gammaSign, hneg]
+  · by_cases hzero : n = 0
+    · simp [signOfInt, gammaSign, hzero]
+    · have hpos : 0 < n := by
+        obtain hlt | hgt := lt_or_gt_of_ne (a := n) (b := 0) hzero
+        · cases (hneg hlt)
+        · exact hgt
+      simp [signOfInt, gammaSign, hneg, hzero, hpos]
+
+/-- `signNeg` is sound with respect to concretization. -/
+theorem signNeg_sound {a : Sign} {x : Int} (hx : x ∈ gammaSign a) :
+    -x ∈ gammaSign (signNeg a) := by
+  cases a <;> simp [gammaSign, signNeg] at hx ⊢ <;> simpa using hx
+
+/-- `signAdd` is sound with respect to concretization. -/
+theorem signAdd_sound {a b : Sign} {x y : Int}
+    (hx : x ∈ gammaSign a) (hy : y ∈ gammaSign b) :
+    x + y ∈ gammaSign (signAdd a b) := by
+  cases a <;> cases b <;> simp [signAdd, gammaSign] at hx hy ⊢
+  all_goals
+    nlinarith
+
+/-- `signMul` is sound with respect to concretization. -/
+theorem signMul_sound {a b : Sign} {x y : Int}
+    (hx : x ∈ gammaSign a) (hy : y ∈ gammaSign b) :
+    x * y ∈ gammaSign (signMul a b) := by
+  cases a <;> cases b <;> simp [signMul, gammaSign] at hx hy ⊢
+  all_goals
+    try (simp [hx, hy])
+  all_goals
+    first
+      | exact mul_pos_of_neg_of_neg hx hy
+      | exact mul_pos hx hy
+      | exact mul_neg_of_neg_of_pos hx hy
+      | exact mul_neg_of_pos_of_neg hx hy
+
+/-- `signSub` is sound with respect to concretization. -/
+theorem signSub_sound {a b : Sign} {x y : Int}
+    (hx : x ∈ gammaSign a) (hy : y ∈ gammaSign b) :
+    x - y ∈ gammaSign (signSub a b) := by
+  have hy' : -y ∈ gammaSign (signNeg b) := signNeg_sound hy
+  simpa [signSub, sub_eq_add_neg] using (signAdd_sound (a := a) (b := signNeg b) hx hy')
 
 end Data
 
