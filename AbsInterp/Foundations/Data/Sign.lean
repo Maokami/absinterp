@@ -7,6 +7,7 @@ Authors:
 module
 
 public import Cslib.Init
+public import AbsInterp.Foundations.Data.BoolAbs
 public import Mathlib.Data.Int.Basic
 public import Mathlib.Data.Set.Lattice
 public import Mathlib.Order.Lattice
@@ -111,6 +112,23 @@ def signMul : Sign -> Sign -> Sign
 /-- Sign subtraction. -/
 def signSub (a b : Sign) : Sign :=
   signAdd a (signNeg b)
+
+/-- Abstract equality test on signs. -/
+def signEq : Sign -> Sign -> BoolAbs
+  | .bot, _ | _, .bot => .bot
+  | .top, _ | _, .top => .top
+  | .zero, .zero => .tt
+  | .neg, .neg | .pos, .pos => .top
+  | _, _ => .ff
+
+/-- Abstract less-or-equal test on signs. -/
+def signLe : Sign -> Sign -> BoolAbs
+  | .bot, _ | _, .bot => .bot
+  | .top, _ | _, .top => .top
+  | .neg, .neg | .pos, .pos => .top
+  | .neg, _ => .tt
+  | .zero, .zero | .zero, .pos => .tt
+  | _, _ => .ff
 
 instance : DecidableLE Sign := by
   intro a b
