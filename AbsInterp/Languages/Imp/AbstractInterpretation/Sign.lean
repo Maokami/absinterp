@@ -9,6 +9,7 @@ module
 public import Cslib.Init
 public import AbsInterp.Languages.Imp.Basic
 public import AbsInterp.Foundations.Data.Sign
+public import AbsInterp.Foundations.Data.BoolAbs
 public import AbsInterp.Foundations.Semantics.AbstractInterpretation.Basic
 
 @[expose] public section
@@ -48,6 +49,15 @@ def aevalSign : AExp Var -> SignState Var -> Data.Sign
   | .add a b, τ => Data.signAdd (aevalSign a τ) (aevalSign b τ)
   | .sub a b, τ => Data.signSub (aevalSign a τ) (aevalSign b τ)
   | .mul a b, τ => Data.signMul (aevalSign a τ) (aevalSign b τ)
+
+/-- Abstract evaluation of boolean expressions in the sign domain. -/
+def bevalSign : BExp Var -> SignState Var -> Data.BoolAbs
+  | .tt, _ => Data.BoolAbs.tt
+  | .ff, _ => Data.BoolAbs.ff
+  | .eq a b, τ => Data.signEq (aevalSign a τ) (aevalSign b τ)
+  | .le a b, τ => Data.signLe (aevalSign a τ) (aevalSign b τ)
+  | .not b, τ => Data.boolNot (bevalSign b τ)
+  | .and a b, τ => Data.boolAnd (bevalSign a τ) (bevalSign b τ)
 
 end Abstract
 
