@@ -163,20 +163,17 @@ theorem gammaSign_mono {a b : Sign} (h : a ≤ b) : gammaSign a ⊆ gammaSign b 
 
 /-- `signOfInt` is sound with respect to concretization. -/
 theorem signOfInt_sound (n : Int) : n ∈ gammaSign (signOfInt n) := by
-  by_cases hneg : n < 0
+  rcases lt_trichotomy n 0 with hneg | hzero | hpos
   · simp [signOfInt, gammaSign, hneg]
-  · by_cases hzero : n = 0
-    · simp [signOfInt, gammaSign, hzero]
-    · have hpos : 0 < n := by
-        obtain hlt | hgt := lt_or_gt_of_ne (a := n) (b := 0) hzero
-        · cases (hneg hlt)
-        · exact hgt
-      simp [signOfInt, gammaSign, hneg, hzero, hpos]
+  · simp [signOfInt, gammaSign, hzero]
+  · have hneg' : ¬ n < 0 := not_lt_of_gt hpos
+    have hzero' : n ≠ 0 := ne_of_gt hpos
+    simp [signOfInt, gammaSign, hneg', hzero', hpos]
 
 /-- `signNeg` is sound with respect to concretization. -/
 theorem signNeg_sound {a : Sign} {x : Int} (hx : x ∈ gammaSign a) :
     -x ∈ gammaSign (signNeg a) := by
-  cases a <;> simp [gammaSign, signNeg] at hx ⊢ <;> simpa using hx
+  cases a <;> simp_all [gammaSign, signNeg]
 
 /-- `signAdd` is sound with respect to concretization. -/
 theorem signAdd_sound {a b : Sign} {x y : Int}
@@ -190,15 +187,9 @@ theorem signAdd_sound {a b : Sign} {x y : Int}
 theorem signMul_sound {a b : Sign} {x y : Int}
     (hx : x ∈ gammaSign a) (hy : y ∈ gammaSign b) :
     x * y ∈ gammaSign (signMul a b) := by
-  cases a <;> cases b <;> simp [signMul, gammaSign] at hx hy ⊢
+  cases a <;> cases b <;> simp_all [signMul, gammaSign]
   all_goals
-    try (simp [hx, hy])
-  all_goals
-    first
-      | exact mul_pos_of_neg_of_neg hx hy
-      | exact mul_pos hx hy
-      | exact mul_neg_of_neg_of_pos hx hy
-      | exact mul_neg_of_pos_of_neg hx hy
+    nlinarith
 
 /-- `signSub` is sound with respect to concretization. -/
 theorem signSub_sound {a b : Sign} {x y : Int}

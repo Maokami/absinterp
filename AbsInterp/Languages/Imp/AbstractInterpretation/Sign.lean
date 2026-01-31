@@ -69,18 +69,12 @@ theorem aevalSign_sound (a : AExp Var) (σ : State Var) (τ : SignState Var)
       simpa [AExp.eval, aevalSign] using Data.signOfInt_sound n
   | var x =>
       simpa [AExp.eval, aevalSign, gammaSignState] using hσ x
-  | add a b ha hb =>
-      simpa [AExp.eval, aevalSign] using
-        (Data.signAdd_sound (a := aevalSign a τ) (b := aevalSign b τ) (x := AExp.eval a σ)
-          (y := AExp.eval b σ) ha hb)
-  | sub a b ha hb =>
-      simpa [AExp.eval, aevalSign] using
-        (Data.signSub_sound (a := aevalSign a τ) (b := aevalSign b τ) (x := AExp.eval a σ)
-          (y := AExp.eval b σ) ha hb)
-  | mul a b ha hb =>
-      simpa [AExp.eval, aevalSign] using
-        (Data.signMul_sound (a := aevalSign a τ) (b := aevalSign b τ) (x := AExp.eval a σ)
-          (y := AExp.eval b σ) ha hb)
+  | add _ _ ha hb =>
+      simpa [AExp.eval, aevalSign] using Data.signAdd_sound ha hb
+  | sub _ _ ha hb =>
+      simpa [AExp.eval, aevalSign] using Data.signSub_sound ha hb
+  | mul _ _ ha hb =>
+      simpa [AExp.eval, aevalSign] using Data.signMul_sound ha hb
 
 end Abstract
 
