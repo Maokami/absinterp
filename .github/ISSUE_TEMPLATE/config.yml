@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: CSLib upstream discussion
+    url: https://github.com/leanprover/cslib/discussions
+    about: Use this for cross-repo design questions that should be discussed upstream.
