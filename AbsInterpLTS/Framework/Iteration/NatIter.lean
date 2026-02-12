@@ -1,11 +1,12 @@
 import Cslib.Init
 
-import AbsInterpLTS.Core.Semantics
+import AbsInterpLTS.Framework.Semantics
 
 namespace AbsInterpLTS
+namespace Framework
 namespace Iteration
 
-open AbsInterpLTS.Core
+open AbsInterpLTS.Framework
 
 universe u
 
@@ -22,4 +23,5 @@ def iterateNat
   | n + 1 => post (iterateNat post init n)
 
 end Iteration
+end Framework
 end AbsInterpLTS
