@@ -48,6 +48,68 @@ end Hom
 
 section Trace
 
+private theorem composePost_assoc
+    {State : Type u}
+    (post1 post2 post3 : Post State) :
+    composePost (composePost post1 post2) post3 =
+      composePost post1 (composePost post2 post3) := by
+  funext states
+  rfl
+
+private theorem foldl_composePost_acc
+    {State : Type u}
+    {Label : Type v}
+    (stepPost : Label -> Post State) :
+    ∀ (labels : List Label) (acc post0 : Post State),
+      List.foldl
+        (fun current label => composePost current (stepPost label))
+        (composePost acc post0)
+        labels =
+          composePost
+            acc
+            (List.foldl
+              (fun current label => composePost current (stepPost label))
+              post0
+              labels)
+  | [], acc, post0 => by
+      simp
+  | label :: labels, acc, post0 => by
+      simp [List.foldl, foldl_composePost_acc, composePost_assoc]
+
+/--
+Base case of concrete trace lifting:
+`liftTracePost stepPost []` is the identity transformer.
+-/
+@[simp] theorem liftTracePost_nil
+    {State : Type u}
+    {Label : Type v}
+    (stepPost : Label -> Post State) :
+    liftTracePost stepPost [] = (fun states : Set State => states) :=
+  rfl
+
+/--
+Unfold trace lifting on a non-empty label list.
+
+`liftTracePost stepPost (label :: labels)`
+is one concrete step followed by the lifted remainder:
+`composePost (stepPost label) (liftTracePost stepPost labels)`.
+-/
+@[simp] theorem liftTracePost_cons
+    {State : Type u}
+    {Label : Type v}
+    (stepPost : Label -> Post State)
+    (label : Label)
+    (labels : List Label) :
+    liftTracePost stepPost (label :: labels) =
+      composePost (stepPost label) (liftTracePost stepPost labels) := by
+  have hacc :=
+    foldl_composePost_acc
+      (stepPost := stepPost)
+      labels
+      (stepPost label)
+      (fun states : Set State => states)
+  simpa [liftTracePost, liftTrace, List.foldl] using hacc
+
 private theorem foldl_post_eq_foldl_postHom_of_monotone
     {State : Type u}
     {Label : Type v}
