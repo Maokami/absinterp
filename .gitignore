@@ -1,3 +1,5 @@
 /.lake
 /lake-manifest.json
 /.DS_Store
+
+.vscode/
