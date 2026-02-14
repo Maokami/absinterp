@@ -26,8 +26,9 @@ theorem LTSAbstraction.soundTraceLifted
     (soundTrace_of_soundStep
       (stepPost := postStep cfg.lts)
       (gamma := cfg.gamma)
-      (postAbs := cfg.transfer)
-      cfg.soundStep)
+      (stepPostSharp := cfg.transfer)
+      cfg.soundStep
+      (hStepMono := fun label => postStep_monotone cfg.lts label))
 
 /-- Explicit-data corollary of trace soundness lifting, routed through `LTSAbstraction`. -/
 theorem LTSAbstraction.soundTraceLiftedOfExplicit
