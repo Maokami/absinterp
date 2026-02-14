@@ -1,2 +1,3 @@
 import AbsInterpLTS.Framework.Soundness.Defs
+import AbsInterpLTS.Framework.Soundness.Lemmas
 import AbsInterpLTS.Framework.Soundness.StepToTraceSoundness

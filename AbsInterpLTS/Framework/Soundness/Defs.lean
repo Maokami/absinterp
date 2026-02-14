@@ -19,19 +19,19 @@ abbrev Gamma (Abstract : Type u) (State : Type v) := Abstract -> Set State
 
 /--
 Core soundness direction:
-`post (gamma a) ⊆ gamma (postAbs a)`.
+`post (gamma a) ⊆ gamma (postSharp a)`.
 -/
 def Sound
     {State : Type u}
     {Abstract : Type v}
     (post : Post State)
     (gamma : Gamma Abstract State)
-    (postAbs : PostSharp Abstract) : Prop :=
-  forall a : Abstract, post (gamma a) ⊆ gamma (postAbs a)
+    (postSharp : PostSharp Abstract) : Prop :=
+  forall a : Abstract, post (gamma a) ⊆ gamma (postSharp a)
 
 /--
 One-step soundness for label-indexed transformers:
-`stepPost label (gamma a) ⊆ gamma (postAbs label a)`.
+`stepPost label (gamma a) ⊆ gamma (stepPostSharp label a)`.
 -/
 def SoundStep
     {State : Type u}
@@ -39,13 +39,13 @@ def SoundStep
     {Abstract : Type w}
     (stepPost : Label -> Post State)
     (gamma : Gamma Abstract State)
-    (postAbs : StepPostSharp Abstract Label) : Prop :=
+    (stepPostSharp : StepPostSharp Abstract Label) : Prop :=
   forall label : Label, forall a : Abstract,
-    stepPost label (gamma a) ⊆ gamma (postAbs label a)
+    stepPost label (gamma a) ⊆ gamma (stepPostSharp label a)
 
 /--
 Trace-level soundness for trace-indexed transformers:
-`tracePost labels (gamma a) ⊆ gamma (postAbs labels a)`.
+`tracePost labels (gamma a) ⊆ gamma (tracePostSharp labels a)`.
 -/
 def SoundTrace
     {State : Type u}
@@ -53,9 +53,9 @@ def SoundTrace
     {Abstract : Type w}
     (tracePost : List Label -> Post State)
     (gamma : Gamma Abstract State)
-    (postAbs : TracePostSharp Abstract Label) : Prop :=
+    (tracePostSharp : TracePostSharp Abstract Label) : Prop :=
   forall labels : List Label, forall a : Abstract,
-    tracePost labels (gamma a) ⊆ gamma (postAbs labels a)
+    tracePost labels (gamma a) ⊆ gamma (tracePostSharp labels a)
 
 end Framework
 end AbsInterpLTS
