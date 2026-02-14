@@ -1,12 +1,14 @@
 import Cslib.Init
 import Cslib.Foundations.Semantics.LTS.Basic
 
-import AbsInterpLTS.Core.Semantics
+import AbsInterpLTS.Framework.Semantics.Concrete
 
 namespace AbsInterpLTS
-namespace Core
+namespace Instances
+namespace LTS
 
 open Cslib
+open AbsInterpLTS.Framework
 
 universe u v
 
@@ -14,7 +16,7 @@ universe u v
 def postStep
     {State : Type u}
     {Label : Type v}
-    (lts : LTS State Label)
+    (lts : Cslib.LTS State Label)
     (label : Label) :
     Post State :=
   fun states => lts.setImage states label
@@ -23,19 +25,11 @@ def postStep
 def postTrace
     {State : Type u}
     {Label : Type v}
-    (lts : LTS State Label)
+    (lts : Cslib.LTS State Label)
     (labels : List Label) :
     Post State :=
   fun states => lts.setImageMultistep states labels
 
-/-- Label-agnostic one-step post operator induced by an LTS. -/
-def postAny
-    {State : Type u}
-    {Label : Type v}
-    (lts : LTS State Label) :
-    Post State :=
-  fun states =>
-    { s' : State | exists s : State, s ∈ states ∧ exists label : Label, lts.Tr s label s' }
-
-end Core
+end LTS
+end Instances
 end AbsInterpLTS

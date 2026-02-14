@@ -7,16 +7,20 @@
 This repository is intentionally in a staged bootstrap phase.
 
 - Repository workflow, CI, and issue tracking are set up first.
-- Core modules expose stable interfaces with minimal implementation.
+- Framework modules expose stable interfaces with minimal implementation.
 - Detailed formalization is added incrementally through issue-scoped PRs.
 
 ## Initial architecture
 
-- `AbsInterpLTS/Core`: semantics-agnostic interfaces (`Post`, soundness shape).
-- `AbsInterpLTS/Core/LTS`: direct use of `Cslib.LTS` operators.
-- `AbsInterpLTS/Iteration`: iterative approximation scaffolding.
+- `AbsInterpLTS/Framework`: language-agnostic abstract interpretation framework.
+  - `Semantics`: concrete/abstract transformer interfaces and trace lifting.
+  - `Soundness`: one-step/trace soundness predicates and lifting obligations.
+  - `Iteration`: iterative approximation scaffolding.
+- `AbsInterpLTS/Instances/LTS`: CSLib-LTS instance of the framework.
+  - `Semantics`: LTS concrete semantics and LTS-specific properties.
+  - `Instantiation`: framework-to-LTS abstraction/soundness instantiation layer.
+  - `Analyses`: domain-specific analysis instances over LTS (staged).
 - `AbsInterpLTS/Domains`: sign and interval domain interfaces.
-- `AbsInterpLTS/Examples`: placeholders for end-to-end example milestones.
 
 ## Build and test
 
