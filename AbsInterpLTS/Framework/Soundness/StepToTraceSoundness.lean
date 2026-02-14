@@ -39,29 +39,21 @@ theorem soundTrace_of_soundStep
       intro a s hs
       simpa using hs
   | cons label labels ih =>
-      have hStepSound : Sound (stepPost label) gamma (stepPostSharp label) :=
-        hStep label
-      have hTraceMono : MonotonePost (liftTracePost stepPost labels) :=
-        liftTracePost_monotone_of_pointwise
-          (stepPost := stepPost)
-          (hStepMono := hStepMono)
-          labels
-      have hConsSound :
-          Sound
-            (composePost (stepPost label) (liftTracePost stepPost labels))
-            gamma
-            (composePostSharp (stepPostSharp label) (liftTracePostSharp stepPostSharp labels)) :=
+      intro a
+      rw [liftTracePost_cons, liftTracePostSharp_cons]
+      exact
         Sound.compose
           (post1 := stepPost label)
           (post2 := liftTracePost stepPost labels)
           (gamma := gamma)
           (postSharp1 := stepPostSharp label)
           (postSharp2 := liftTracePostSharp stepPostSharp labels)
-          hStepSound
+          (hStep label)
           ih
-          hTraceMono
-      intro a
-      simpa using hConsSound a
+          (liftTracePost_monotone_of_pointwise
+            (stepPost := stepPost)
+            (hStepMono := hStepMono)
+            labels) a
 
 end Framework
 end AbsInterpLTS
