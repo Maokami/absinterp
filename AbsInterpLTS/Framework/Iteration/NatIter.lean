@@ -144,9 +144,7 @@ theorem iterateNat_chain_of_le
     | zero =>
         simp
     | succ k ih =>
-        exact Set.Subset.trans ih (by
-          simpa [Nat.add_assoc] using
-            iterateNat_chain_step (post := post) hMono hInfl (m + k) init)
+        exact Set.Subset.trans ih (iterateNat_chain_step (post := post) hMono hInfl (m + k) init)
   rcases Nat.exists_eq_add_of_le hLe with ⟨k, hk⟩
   simpa [hk] using hAdd k
 
