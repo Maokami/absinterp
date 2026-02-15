@@ -1,6 +1,7 @@
 import Cslib.Init
 
 import AbsInterpLTS.Framework.Semantics
+import AbsInterpLTS.Framework.Soundness.Defs
 
 namespace AbsInterpLTS
 namespace Framework
@@ -8,7 +9,7 @@ namespace Iteration
 
 open AbsInterpLTS.Framework
 
-universe u
+universe u v
 
 /-- Widening interface for abstract iterative solvers. -/
 abbrev Widen (Abstract : Type u) := Abstract -> Abstract -> Abstract
@@ -155,6 +156,44 @@ theorem iterateNat_chain_of_le
         exact Set.Subset.trans ih (by simpa [Nat.add_assoc] using hStep)
   rcases Nat.exists_eq_add_of_le hLe with ⟨k, hk⟩
   simpa [hk] using hAdd k
+
+/--
+Lift one-step soundness to natural-number iteration soundness.
+
+Assumptions:
+- `hSound : Sound post gamma postSharp`
+- `hMono : MonotonePost post`
+
+Conclusion:
+- `iterateNat post (gamma a) n ⊆ gamma (iterateNatSharp postSharp a n)`.
+-/
+theorem sound_iterateNat_of_sound
+    {State : Type u}
+    {Abstract : Type v}
+    {post : Post State}
+    {gamma : Gamma Abstract State}
+    {postSharp : PostSharp Abstract}
+    (hSound : Sound post gamma postSharp)
+    (hMono : MonotonePost post) :
+    ∀ (n : Nat) (a : Abstract),
+      iterateNat post (gamma a) n ⊆
+        gamma (iterateNatSharp postSharp a n)
+  | 0, a => by
+      simp
+  | n + 1, a => by
+      have hIH :
+          iterateNat post (gamma a) n ⊆
+            gamma (iterateNatSharp postSharp a n) :=
+        sound_iterateNat_of_sound
+          (hSound := hSound)
+          (hMono := hMono)
+          n
+          a
+      have hToGamma :
+          post (iterateNat post (gamma a) n) ⊆
+            post (gamma (iterateNatSharp postSharp a n)) :=
+        hMono hIH
+      exact Set.Subset.trans hToGamma (hSound (iterateNatSharp postSharp a n))
 
 end Iteration
 end Framework
