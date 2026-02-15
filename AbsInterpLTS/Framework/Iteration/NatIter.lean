@@ -9,7 +9,7 @@ namespace Iteration
 
 open AbsInterpLTS.Framework
 
-universe u v
+universe u
 
 /-- Widening interface for abstract iterative solvers. -/
 abbrev Widen (Abstract : Type u) := Abstract -> Abstract -> Abstract
@@ -144,16 +144,9 @@ theorem iterateNat_chain_of_le
     | zero =>
         simp
     | succ k ih =>
-        have hStep :
-            iterateNat post init (m + k) ⊆
-              iterateNat post init (m + k + 1) :=
-          iterateNat_chain_step
-            (post := post)
-            hMono
-            hInfl
-            (m + k)
-            init
-        exact Set.Subset.trans ih (by simpa [Nat.add_assoc] using hStep)
+        exact Set.Subset.trans ih (by
+          simpa [Nat.add_assoc] using
+            iterateNat_chain_step (post := post) hMono hInfl (m + k) init)
   rcases Nat.exists_eq_add_of_le hLe with ⟨k, hk⟩
   simpa [hk] using hAdd k
 
@@ -169,7 +162,7 @@ Conclusion:
 -/
 theorem sound_iterateNat_of_sound
     {State : Type u}
-    {Abstract : Type v}
+    {Abstract : Type _}
     {post : Post State}
     {gamma : Gamma Abstract State}
     {postSharp : PostSharp Abstract}
@@ -181,19 +174,13 @@ theorem sound_iterateNat_of_sound
   | 0, a => by
       simp
   | n + 1, a => by
-      have hIH :
-          iterateNat post (gamma a) n ⊆
-            gamma (iterateNatSharp postSharp a n) :=
-        sound_iterateNat_of_sound
-          (hSound := hSound)
-          (hMono := hMono)
-          n
-          a
-      have hToGamma :
-          post (iterateNat post (gamma a) n) ⊆
-            post (gamma (iterateNatSharp postSharp a n)) :=
-        hMono hIH
-      exact Set.Subset.trans hToGamma (hSound (iterateNatSharp postSharp a n))
+      simp only [iterateNat_succ, iterateNatSharp_succ]
+      calc
+        post (iterateNat post (gamma a) n)
+            ⊆ post (gamma (iterateNatSharp postSharp a n)) := by
+              exact hMono (sound_iterateNat_of_sound (hSound := hSound) (hMono := hMono) n a)
+        _ ⊆ gamma (postSharp (iterateNatSharp postSharp a n)) := by
+              exact hSound (iterateNatSharp postSharp a n)
 
 end Iteration
 end Framework
