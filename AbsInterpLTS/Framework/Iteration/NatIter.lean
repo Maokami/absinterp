@@ -15,24 +15,34 @@ universe u
 abbrev Widen (Abstract : Type u) := Abstract -> Abstract -> Abstract
 
 /--
-Inflationary concrete transformer predicate:
-`states ⊆ next states`.
--/
-def InflationaryPost
-    {State : Type u}
-    (next : Post State) : Prop :=
-  ∀ states : Set State, states ⊆ next states
-
-/--
 Collecting-style fixpoint operator for reachability:
-`reachF init stepPost states = init ∪ stepPost states`.
+`reachF init post states = init ∪ post states`.
 -/
 def reachF
     {State : Type u}
     (init : Set State)
-    (stepPost : Post State) :
+    (post : Post State) :
     Post State :=
-  fun states => init ∪ stepPost states
+  fun states => init ∪ post states
+
+@[simp] theorem reachF_apply
+    {State : Type u}
+    (init : Set State)
+    (post : Post State)
+    (states : Set State) :
+    reachF init post states = init ∪ post states :=
+  rfl
+
+theorem reachF_monotone_of_post_monotone
+    {State : Type u}
+    {init : Set State}
+    {post : Post State}
+    (hMono : MonotonePost post) :
+    MonotonePost (reachF init post) := by
+  intro states states' hSubset s hs
+  rcases hs with hsInit | hsPost
+  · exact Or.inl hsInit
+  · exact Or.inr (hMono hSubset hsPost)
 
 /-- Natural-number iterate scaffold for concrete next-step operators. -/
 def iterateNat
@@ -42,6 +52,17 @@ def iterateNat
     Nat -> Set State
   | 0 => init
   | n + 1 => next (iterateNat next init n)
+
+/--
+Nat-indexed Kleene iteration for collecting semantics:
+`X₀ = ∅`, `Xₙ₊₁ = init ∪ post Xₙ`.
+-/
+def kleeneNat
+    {State : Type u}
+    (init : Set State)
+    (post : Post State) :
+    Nat -> Set State :=
+  iterateNat (reachF init post) ∅
 
 /-- Natural-number iterate scaffold for abstract next-step transformers. -/
 def iterateNatSharp
@@ -83,6 +104,21 @@ def iterateNatSharp
       nextSharp (iterateNatSharp nextSharp init n) :=
   rfl
 
+@[simp] theorem kleeneNat_zero
+    {State : Type u}
+    (init : Set State)
+    (post : Post State) :
+    kleeneNat init post 0 = ∅ :=
+  rfl
+
+@[simp] theorem kleeneNat_succ
+    {State : Type u}
+    (init : Set State)
+    (post : Post State)
+    (n : Nat) :
+    kleeneNat init post (n + 1) = init ∪ post (kleeneNat init post n) := by
+  simp [kleeneNat, reachF]
+
 /--
 Monotonicity of natural-number iteration in the initial set.
 
@@ -106,58 +142,69 @@ theorem iterateNat_monotone_init
         hMono (iterateNat_monotone_init (hMono := hMono) n hInit)
 
 /--
-Successor-chain step for natural-number iteration.
+Successor-chain step for collecting Kleene iteration.
 
 Assumptions:
-- `hMono : MonotonePost next`
-- `hInfl : InflationaryPost next`
+- `hMono : MonotonePost post`
 
 Conclusion:
-- `iterateNat next init n ⊆ iterateNat next init (n + 1)`.
+- `kleeneNat init post n ⊆ kleeneNat init post (n + 1)`.
 -/
-theorem iterateNat_chain_step
+theorem kleeneNat_chain_step
     {State : Type u}
-    {next : Post State}
-    (hMono : MonotonePost next)
-    (hInfl : InflationaryPost next) :
+    {post : Post State}
+    (hMono : MonotonePost post) :
     ∀ (n : Nat) (init : Set State),
-      iterateNat next init n ⊆ iterateNat next init (n + 1)
+      kleeneNat init post n ⊆ kleeneNat init post (n + 1)
   | 0, init => by
-      simpa using hInfl init
+      simp
   | n + 1, init => by
-      simpa using
-        hMono (iterateNat_chain_step (hMono := hMono) (hInfl := hInfl) n init)
+      intro s hs
+      simp [kleeneNat_succ] at hs ⊢
+      rcases hs with hsInit | hsPost
+      · exact Or.inl hsInit
+      · exact Or.inr (hMono (kleeneNat_chain_step (hMono := hMono) n init) hsPost)
 
 /--
-Iteration chain monotonicity along natural-number indices.
+Collecting Kleene iteration chain monotonicity along natural-number indices.
 
 Assumptions:
-- `hMono : MonotonePost next`
-- `hInfl : InflationaryPost next`
+- `hMono : MonotonePost post`
 - `hLe : m ≤ n`
 
 Conclusion:
-- `iterateNat next init m ⊆ iterateNat next init n`.
+- `kleeneNat init post m ⊆ kleeneNat init post n`.
 -/
-theorem iterateNat_chain_of_le
+theorem kleeneNat_chain_of_le
     {State : Type u}
-    {next : Post State}
-    (hMono : MonotonePost next)
-    (hInfl : InflationaryPost next)
+    {post : Post State}
+    (hMono : MonotonePost post)
     {m n : Nat}
     (hLe : m ≤ n)
     (init : Set State) :
-    iterateNat next init m ⊆ iterateNat next init n := by
+    kleeneNat init post m ⊆ kleeneNat init post n := by
   have hAdd :
-      ∀ k : Nat, iterateNat next init m ⊆ iterateNat next init (m + k) := by
+      ∀ k : Nat, kleeneNat init post m ⊆ kleeneNat init post (m + k) := by
     intro k
     induction k with
     | zero =>
         simp
     | succ k ih =>
-        exact Set.Subset.trans ih (iterateNat_chain_step (next := next) hMono hInfl (m + k) init)
+        exact Set.Subset.trans ih (kleeneNat_chain_step (post := post) hMono (m + k) init)
   rcases Nat.exists_eq_add_of_le hLe with ⟨k, hk⟩
   simpa [hk] using hAdd k
+
+/--
+Every successor Kleene iterate contains the initial states.
+-/
+theorem init_subset_kleeneNat_succ
+    {State : Type u}
+    {post : Post State} :
+    ∀ (n : Nat) (init : Set State), init ⊆ kleeneNat init post (n + 1)
+  | n, init => by
+      intro s hs
+      rw [kleeneNat_succ]
+      exact Or.inl hs
 
 /--
 Lift one-step soundness to natural-number iteration soundness.

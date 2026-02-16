@@ -18,26 +18,29 @@ theorem postAddZero_monotone : MonotonePost postAddZero := by
   · exact Or.inl (hSubset hs)
   · exact Or.inr hz
 
-theorem postAddZero_inflationary : InflationaryPost postAddZero := by
-  intro states x hx
-  exact Or.inl hx
-
 example (init1 init2 : Set Nat) (hInit : init1 ⊆ init2) (n : Nat) :
     iterateNat postAddZero init1 n ⊆ iterateNat postAddZero init2 n := by
   exact iterateNat_monotone_init (next := postAddZero) postAddZero_monotone n hInit
 
+example (init : Set Nat) (n : Nat) :
+    kleeneNat init postAddZero n ⊆ kleeneNat init postAddZero (n + 1) := by
+  exact kleeneNat_chain_step (post := postAddZero) postAddZero_monotone n init
+
 example (init : Set Nat) (m n : Nat) (hLe : m ≤ n) :
-    iterateNat postAddZero init m ⊆ iterateNat postAddZero init n := by
-  exact iterateNat_chain_of_le
-    (next := postAddZero)
+    kleeneNat init postAddZero m ⊆ kleeneNat init postAddZero n := by
+  exact kleeneNat_chain_of_le
+    (post := postAddZero)
     postAddZero_monotone
-    postAddZero_inflationary
     hLe
     init
 
 example (init states : Set Nat) :
     reachF init postAddZero states = init ∪ postAddZero states := by
   rfl
+
+example (init : Set Nat) (post : Post Nat) (n : Nat) :
+    init ⊆ kleeneNat init post (n + 1) := by
+  exact init_subset_kleeneNat_succ (post := post) n init
 
 inductive OneAbs where
   | top
