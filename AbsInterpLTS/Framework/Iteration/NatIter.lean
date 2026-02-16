@@ -200,9 +200,7 @@ theorem init_subset_kleeneNat_succ
     {State : Type u}
     {post : Post State} :
     ∀ (n : Nat) (init : Set State), init ⊆ kleeneNat init post (n + 1)
-  | n, init => by
-      rw [kleeneNat_succ]
-      exact (Set.subset_union_left : init ⊆ init ∪ post (kleeneNat init post n))
+  | n, init => by simp [kleeneNat_succ]
 
 /--
 Lift one-step soundness to natural-number iteration soundness.
