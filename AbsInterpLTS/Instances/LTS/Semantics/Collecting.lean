@@ -59,14 +59,9 @@ theorem mem_postAny_iff_exists_mem_setImage
     {states : Set State}
     {s' : State} :
     s' ∈ postAny lts states ↔ ∃ label : Label, s' ∈ lts.setImage states label := by
-  constructor
-  · intro hs
-    rcases hs with ⟨s, hsMem, label, htr⟩
-    exact ⟨label, (Cslib.LTS.mem_setImage).2 ⟨s, hsMem, htr⟩⟩
-  · intro hs
-    rcases hs with ⟨label, hsMem⟩
-    rcases (Cslib.LTS.mem_setImage).1 hsMem with ⟨s, hsStates, htr⟩
-    exact ⟨s, hsStates, label, htr⟩
+  constructor <;> intro hs
+  · simpa [Cslib.LTS.mem_setImage, exists_comm, and_left_comm, and_assoc] using hs
+  · simpa [Cslib.LTS.mem_setImage, exists_comm, and_left_comm, and_assoc] using hs
 
 @[simp] theorem mem_postAny_singleton_iff
     {State : Type u}

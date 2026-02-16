@@ -40,21 +40,7 @@ example (S T : Set Nat) (hST : S ⊆ T) : postToy S ⊆ postToy T := by
 theorem kleeneNat_one_eq_initZero :
     kleeneNat initZero postToy 1 = initZero := by
   ext x
-  constructor
-  · intro hx
-    have hx' : x ∈ initZero ∪ postToy (kleeneNat initZero postToy 0) := by
-      simpa [kleeneNat_succ] using hx
-    rcases hx' with hxInit | hxPost
-    · exact hxInit
-    · rcases (mem_postAny (lts := toyLTS)
-        (states := kleeneNat initZero postToy 0)
-        (s' := x)).1 hxPost with
-        ⟨s, hs, label, _⟩
-      exfalso
-      simp [kleeneNat_zero] at hs
-  · intro hx
-    have hx' : x ∈ initZero ∪ postToy (kleeneNat initZero postToy 0) := Or.inl hx
-    simpa [kleeneNat_succ] using hx'
+  simp [kleeneNat_succ, kleeneNat_zero, postToy, postAny, initZero]
 
 theorem mem_zero_kleeneNat_one : 0 ∈ kleeneNat initZero postToy 1 := by
   exact (init_subset_kleeneNat_succ (post := postToy) 0 initZero) (by simp [initZero])
