@@ -159,11 +159,10 @@ theorem kleeneNat_chain_step
   | 0, init => by
       simp
   | n + 1, init => by
-      intro s hs
-      simp [kleeneNat_succ] at hs ⊢
-      rcases hs with hsInit | hsPost
-      · exact Or.inl hsInit
-      · exact Or.inr (hMono (kleeneNat_chain_step (hMono := hMono) n init) hsPost)
+      simpa [kleeneNat_succ] using
+        (Set.union_subset_union
+          (Set.Subset.refl init)
+          (hMono (kleeneNat_chain_step (hMono := hMono) n init)))
 
 /--
 Collecting Kleene iteration chain monotonicity along natural-number indices.
@@ -202,9 +201,8 @@ theorem init_subset_kleeneNat_succ
     {post : Post State} :
     ∀ (n : Nat) (init : Set State), init ⊆ kleeneNat init post (n + 1)
   | n, init => by
-      intro s hs
       rw [kleeneNat_succ]
-      exact Or.inl hs
+      exact (Set.subset_union_left : init ⊆ init ∪ post (kleeneNat init post n))
 
 /--
 Lift one-step soundness to natural-number iteration soundness.
