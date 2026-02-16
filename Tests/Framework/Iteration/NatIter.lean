@@ -24,16 +24,20 @@ theorem postAddZero_inflationary : InflationaryPost postAddZero := by
 
 example (init1 init2 : Set Nat) (hInit : init1 ⊆ init2) (n : Nat) :
     iterateNat postAddZero init1 n ⊆ iterateNat postAddZero init2 n := by
-  exact iterateNat_monotone_init (post := postAddZero) postAddZero_monotone n hInit
+  exact iterateNat_monotone_init (next := postAddZero) postAddZero_monotone n hInit
 
 example (init : Set Nat) (m n : Nat) (hLe : m ≤ n) :
     iterateNat postAddZero init m ⊆ iterateNat postAddZero init n := by
   exact iterateNat_chain_of_le
-    (post := postAddZero)
+    (next := postAddZero)
     postAddZero_monotone
     postAddZero_inflationary
     hLe
     init
+
+example (init states : Set Nat) :
+    reachF init postAddZero states = init ∪ postAddZero states := by
+  rfl
 
 inductive OneAbs where
   | top
@@ -61,9 +65,9 @@ example (n : Nat) :
     iterateNat postId (gammaOne OneAbs.top) n ⊆
       gammaOne (iterateNatSharp postSharpId OneAbs.top n) := by
   exact sound_iterateNat_of_sound
-    (post := postId)
+    (next := postId)
     (gamma := gammaOne)
-    (postSharp := postSharpId)
+    (nextSharp := postSharpId)
     sound_postId
     postId_monotone
     n
