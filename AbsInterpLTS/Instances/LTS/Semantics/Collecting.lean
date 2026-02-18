@@ -1,7 +1,7 @@
 import Cslib.Init
 import Cslib.Foundations.Semantics.LTS.Basic
 
-import AbsInterpLTS.Framework.Iteration
+import AbsInterpLTS.Framework.Semantics
 import AbsInterpLTS.Instances.LTS.Semantics.Concrete
 
 namespace AbsInterpLTS
@@ -10,7 +10,6 @@ namespace LTS
 
 open Cslib
 open AbsInterpLTS.Framework
-open AbsInterpLTS.Framework.Iteration
 
 universe u v
 
@@ -20,7 +19,7 @@ def postAny
     {Label : Type v}
     (lts : Cslib.LTS State Label) :
     Post State :=
-  fun states => { s' : State | ∃ s ∈ states, ∃ label : Label, lts.Tr s label s' }
+  fun states => { s' : State | ∃ label : Label, s' ∈ postStep lts label states }
 
 @[simp] theorem mem_postAny
     {State : Type u}
@@ -28,8 +27,25 @@ def postAny
     {lts : Cslib.LTS State Label}
     {states : Set State}
     {s' : State} :
-    s' ∈ postAny lts states ↔ ∃ s ∈ states, ∃ label : Label, lts.Tr s label s' :=
-  Iff.rfl
+    s' ∈ postAny lts states ↔ ∃ s ∈ states, ∃ label : Label, lts.Tr s label s' := by
+  constructor
+  · intro hs
+    rcases hs with ⟨label, hsLabel⟩
+    rcases (Cslib.LTS.mem_setImage
+      (lts := lts)
+      (S := states)
+      (μ := label)
+      (s' := s')).1 (by simpa [postStep] using hsLabel) with ⟨s, hsMem, htr⟩
+    exact ⟨s, hsMem, label, htr⟩
+  · intro hs
+    rcases hs with ⟨s, hsMem, label, htr⟩
+    refine ⟨label, ?_⟩
+    exact
+      (Cslib.LTS.mem_setImage
+        (lts := lts)
+        (S := states)
+        (μ := label)
+        (s' := s')).2 ⟨s, hsMem, htr⟩
 
 theorem tr_mem_postAny
     {State : Type u}
@@ -41,7 +57,13 @@ theorem tr_mem_postAny
     (hs : s ∈ states)
     (htr : lts.Tr s label s') :
     s' ∈ postAny lts states := by
-  exact ⟨s, hs, label, htr⟩
+  refine ⟨label, ?_⟩
+  exact
+    (Cslib.LTS.mem_setImage
+      (lts := lts)
+      (S := states)
+      (μ := label)
+      (s' := s')).2 ⟨s, hs, htr⟩
 
 theorem postAny_monotone
     {State : Type u}
@@ -49,8 +71,28 @@ theorem postAny_monotone
     (lts : Cslib.LTS State Label) :
     MonotonePost (postAny lts) := by
   intro states states' hSubset s' hs'
-  rcases hs' with ⟨s, hs, label, htr⟩
-  exact ⟨s, hSubset hs, label, htr⟩
+  rcases hs' with ⟨label, hsLabel⟩
+  rcases (Cslib.LTS.mem_setImage
+    (lts := lts)
+    (S := states)
+    (μ := label)
+    (s' := s')).1 (by simpa [postStep] using hsLabel) with ⟨s, hsMem, htr⟩
+  refine ⟨label, ?_⟩
+  exact
+    (Cslib.LTS.mem_setImage
+      (lts := lts)
+      (S := states')
+      (μ := label)
+      (s' := s')).2 ⟨s, hSubset hsMem, htr⟩
+
+/-- Pack unlabeled LTS collecting semantics as a framework `CollectingStep`. -/
+def postAny_collectingStep
+    {State : Type u}
+    {Label : Type v}
+    (lts : Cslib.LTS State Label) :
+    CollectingStep State where
+  post := postAny lts
+  monotone := postAny_monotone lts
 
 theorem mem_postAny_iff_exists_mem_setImage
     {State : Type u}
@@ -59,9 +101,7 @@ theorem mem_postAny_iff_exists_mem_setImage
     {states : Set State}
     {s' : State} :
     s' ∈ postAny lts states ↔ ∃ label : Label, s' ∈ lts.setImage states label := by
-  constructor <;> intro hs
-  · simpa [Cslib.LTS.mem_setImage, exists_comm, and_left_comm, and_assoc] using hs
-  · simpa [Cslib.LTS.mem_setImage, exists_comm, and_left_comm, and_assoc] using hs
+  simp [postAny, postStep]
 
 @[simp] theorem mem_postAny_singleton_iff
     {State : Type u}
@@ -69,7 +109,7 @@ theorem mem_postAny_iff_exists_mem_setImage
     {lts : Cslib.LTS State Label}
     {s s' : State} :
     s' ∈ postAny lts ({s} : Set State) ↔ ∃ label : Label, lts.Tr s label s' := by
-  simp [postAny]
+  simp [postAny, postStep, Cslib.LTS.mem_setImage]
 
 theorem canReach_of_mem_postAny_singleton
     {State : Type u}
@@ -82,16 +122,13 @@ theorem canReach_of_mem_postAny_singleton
     ⟨label, htr⟩
   exact ⟨[label], Cslib.LTS.MTr.single (lts := lts) htr⟩
 
-theorem reachF_postAny_monotone
+theorem postAny_reachF_monotone
     {State : Type u}
     {Label : Type v}
     (lts : Cslib.LTS State Label)
     (init : Set State) :
-    MonotonePost (reachF init (postAny lts)) :=
-  reachF_monotone_of_post_monotone
-    (init := init)
-    (post := postAny lts)
-    (postAny_monotone lts)
+    MonotonePost ((postAny_collectingStep lts).reachF init) :=
+  (postAny_collectingStep lts).reachF_monotone init
 
 end LTS
 end Instances
