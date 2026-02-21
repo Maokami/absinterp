@@ -34,13 +34,11 @@ def leSign (a b : Sign) : Prop :=
 instance : LE Sign where
   le := leSign
 
-theorem leSign_refl (a : Sign) : a ≤ a := by
-  intro n hn
-  exact hn
+theorem leSign_refl (a : Sign) : a ≤ a :=
+  fun _ hn => hn
 
-theorem leSign_trans {a b c : Sign} (hAB : a ≤ b) (hBC : b ≤ c) : a ≤ c := by
-  intro n hn
-  exact hBC (hAB hn)
+theorem leSign_trans {a b c : Sign} (hAB : a ≤ b) (hBC : b ≤ c) : a ≤ c :=
+  fun _ hn => hBC (hAB hn)
 
 theorem gammaSign_monotone_of_leSign {a b : Sign} (hAB : a ≤ b) :
     gammaSign a ⊆ gammaSign b :=
