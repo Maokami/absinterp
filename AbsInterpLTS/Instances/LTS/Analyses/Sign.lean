@@ -21,10 +21,9 @@ abbrev SignGamma (State : Type u) := (State -> Int) -> Gamma Sign State
 
 /-- Lift `gammaSign` to concrete states using a readout `State -> Int`. -/
 def gammaSignState
-    {State : Type u}
-    (read : State -> Int) :
-    Gamma Sign State :=
-  fun a => { s : State | read s ∈ gammaSign a }
+    {State : Type u} :
+    SignGamma State :=
+  fun read a => { s : State | read s ∈ gammaSign a }
 
 /-- Label-indexed sign transfer family. -/
 abbrev SignTransfer (Label : Type v) := Label -> Sign -> Sign

@@ -25,7 +25,7 @@ def gammaSign : Sign -> Set Int
   | .pos => { n : Int | 0 < n }
   | .nonpos => { n : Int | n < 0 ∨ n = 0 }
   | .nonneg => { n : Int | n = 0 ∨ 0 < n }
-  | .top => { n : Int | n < 0 ∨ n = 0 ∨ 0 < n }
+  | .top => (Set.univ : Set Int)
 
 /-- Domain order induced by concretization inclusion. -/
 def leSign (a b : Sign) : Prop :=
@@ -110,7 +110,7 @@ theorem negTransfer_sound {a : Sign} {n : Int} (hn : n ∈ gammaSign a) :
   | neg =>
       change n < 0 at hn
       change 0 < -n
-      exact (Int.neg_pos.mpr hn)
+      omega
   | zero =>
       change n = 0 at hn
       change -n = 0
@@ -122,19 +122,15 @@ theorem negTransfer_sound {a : Sign} {n : Int} (hn : n ∈ gammaSign a) :
   | nonpos =>
       change n < 0 ∨ n = 0 at hn
       change -n = 0 ∨ 0 < -n
-      rcases hn with hNeg | hZero
-      · exact Or.inr (Int.neg_pos.mpr hNeg)
-      · exact Or.inl (by omega)
+      omega
   | nonneg =>
       change n = 0 ∨ 0 < n at hn
       change -n < 0 ∨ -n = 0
-      rcases hn with hZero | hPos
-      · exact Or.inr (by omega)
-      · exact Or.inl (by omega)
-  | top =>
-      change n < 0 ∨ n = 0 ∨ 0 < n at hn
-      change -n < 0 ∨ -n = 0 ∨ 0 < -n
       omega
+  | top =>
+      change True at hn
+      change True
+      trivial
 
 end Domains
 end AbsInterpLTS
