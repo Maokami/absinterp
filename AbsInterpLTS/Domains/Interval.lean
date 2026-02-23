@@ -18,7 +18,7 @@ Public smart constructor.
 Invalid bounds (`lo > hi`) are normalized to `⊥`.
 -/
 def mk (lo hi : Int) : Interval :=
-  if lo <= hi then .range lo hi else .bot
+  if lo ≤ hi then .range lo hi else .bot
 
 /-- Normalize intervals so invalid ranges collapse to `⊥`. -/
 def normalize : Interval -> Interval
@@ -29,7 +29,7 @@ def normalize : Interval -> Interval
 /-- Concretization map from abstract intervals to sets of integers. -/
 def gammaInterval : Interval -> Set Int
   | .bot => ∅
-  | .range lo hi => { n : Int | lo <= n ∧ n <= hi }
+  | .range lo hi => { n : Int | lo ≤ n ∧ n ≤ hi }
   | .top => (Set.univ : Set Int)
 
 /-- Domain order induced by concretization inclusion. -/
@@ -39,25 +39,25 @@ def leInterval (a b : Interval) : Prop :=
 instance : LE Interval where
   le := leInterval
 
-theorem leInterval_refl (a : Interval) : a <= a :=
+theorem leInterval_refl (a : Interval) : a ≤ a :=
   fun _ hn => hn
 
-theorem leInterval_trans {a b c : Interval} (hAB : a <= b) (hBC : b <= c) : a <= c :=
+theorem leInterval_trans {a b c : Interval} (hAB : a ≤ b) (hBC : b ≤ c) : a ≤ c :=
   fun _ hn => hBC (hAB hn)
 
-theorem gammaInterval_monotone_of_leInterval {a b : Interval} (hAB : a <= b) :
+theorem gammaInterval_monotone_of_leInterval {a b : Interval} (hAB : a ≤ b) :
     gammaInterval a ⊆ gammaInterval b :=
   hAB
 
 theorem mem_gammaInterval_mk_iff (lo hi n : Int) :
-    n ∈ gammaInterval (mk lo hi) ↔ lo <= n ∧ n <= hi := by
-  by_cases h : lo <= hi
+    n ∈ gammaInterval (mk lo hi) ↔ lo ≤ n ∧ n ≤ hi := by
+  by_cases h : lo ≤ hi
   · constructor
     · intro hn
       simpa [mk, gammaInterval, h] using hn
     · intro hRange
       simpa [mk, gammaInterval, h] using hRange
-  · have hRangeFalse : ¬ (lo <= n ∧ n <= hi) := by
+  · have hRangeFalse : ¬ (lo ≤ n ∧ n ≤ hi) := by
       intro hRange
       omega
     constructor
@@ -71,7 +71,7 @@ theorem mem_gammaInterval_mk_iff (lo hi n : Int) :
       exact False.elim (hRangeFalse hRange)
 
 theorem gammaInterval_mk (lo hi : Int) :
-    gammaInterval (mk lo hi) = { n : Int | lo <= n ∧ n <= hi } := by
+    gammaInterval (mk lo hi) = { n : Int | lo ≤ n ∧ n ≤ hi } := by
   apply Set.ext
   intro n
   simpa using mem_gammaInterval_mk_iff lo hi n
@@ -113,10 +113,10 @@ theorem negIntervalTransfer_sound {a : Interval} {n : Int} (hn : n ∈ gammaInte
       trivial
   | range lo hi =>
       rcases hn with ⟨hLo, hHi⟩
-      have hNorm : lo <= hi := by omega
-      have hNegNorm : -hi <= -lo := by omega
-      have hLow : -hi <= -n := by omega
-      have hHigh : -n <= -lo := by omega
+      have hNorm : lo ≤ hi := by omega
+      have hNegNorm : -hi ≤ -lo := by omega
+      have hLow : -hi ≤ -n := by omega
+      have hHigh : -n ≤ -lo := by omega
       simp [negIntervalTransfer, normalize, mk, hNorm, hNegNorm, gammaInterval]
       exact ⟨hLow, hHigh⟩
 
