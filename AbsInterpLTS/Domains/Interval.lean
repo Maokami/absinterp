@@ -54,19 +54,21 @@ theorem mem_gammaInterval_mk_iff (lo hi n : Int) :
   by_cases h : lo <= hi
   · constructor
     · intro hn
-      simpa [mk, h, gammaInterval] using hn
+      simpa [mk, gammaInterval, h] using hn
     · intro hRange
-      simpa [mk, h, gammaInterval] using hRange
-  · constructor
+      simpa [mk, gammaInterval, h] using hRange
+  · have hRangeFalse : ¬ (lo <= n ∧ n <= hi) := by
+      intro hRange
+      omega
+    constructor
     · intro hn
       have : n ∈ (∅ : Set Int) := by
-        simpa [mk, h, gammaInterval] using hn
+        simpa [mk, gammaInterval, h] using hn
       have : False := by
         simpa using this
       exact False.elim this
     · intro hRange
-      have hLe : lo <= hi := by omega
-      exact False.elim (h hLe)
+      exact False.elim (hRangeFalse hRange)
 
 theorem gammaInterval_mk (lo hi : Int) :
     gammaInterval (mk lo hi) = { n : Int | lo <= n ∧ n <= hi } := by
@@ -110,16 +112,13 @@ theorem negIntervalTransfer_sound {a : Interval} {n : Int} (hn : n ∈ gammaInte
       change True
       trivial
   | range lo hi =>
-      by_cases hNorm : lo <= hi
-      · rcases hn with ⟨hLo, hHi⟩
-        have hNegNorm : -hi <= -lo := by omega
-        have hLow : -hi <= -n := by omega
-        have hHigh : -n <= -lo := by omega
-        simp [negIntervalTransfer, normalize, mk, hNorm, hNegNorm, gammaInterval]
-        exact ⟨hLow, hHigh⟩
-      · rcases hn with ⟨hLo, hHi⟩
-        have : False := by omega
-        exact False.elim this
+      rcases hn with ⟨hLo, hHi⟩
+      have hNorm : lo <= hi := by omega
+      have hNegNorm : -hi <= -lo := by omega
+      have hLow : -hi <= -n := by omega
+      have hHigh : -n <= -lo := by omega
+      simp [negIntervalTransfer, normalize, mk, hNorm, hNegNorm, gammaInterval]
+      exact ⟨hLow, hHigh⟩
 
 end Domains
 end AbsInterpLTS
