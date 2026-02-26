@@ -1,5 +1,4 @@
 import Cslib.Init
-import Mathlib.Data.Set.Lattice
 
 import AbsInterpLTS.Framework.Semantics.TraceLift
 
