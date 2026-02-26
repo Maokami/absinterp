@@ -28,24 +28,6 @@ theorem MonotonePost.compose
 
 end Basic
 
-section Hom
-
-/-- Any `PostHom` is monotone as a plain concrete transformer. -/
-theorem MonotonePost.ofPostHom
-    {State : Type u}
-    (post : PostHom State) :
-    MonotonePost post.toFun := by
-  intro s t hSubset
-  exact post.monotone' hSubset
-
-@[simp] theorem composePostHom_toPost
-    {State : Type u}
-    (post1 post2 : PostHom State) :
-    (composePostHom post1 post2).toPost = composePost post1.toPost post2.toPost :=
-  rfl
-
-end Hom
-
 section Trace
 
 private theorem composePost_assoc
@@ -110,73 +92,24 @@ is one concrete step followed by the lifted remainder:
       (fun states : Set State => states)
   simpa [liftTracePost, liftTrace, List.foldl] using hacc
 
-private theorem foldl_post_eq_foldl_postHom_of_monotone
-    {State : Type u}
-    {Label : Type v}
-    {stepPost : Label -> Post State}
-    (hStepMono : ∀ label : Label, MonotonePost (stepPost label)) :
-    ∀ (labels : List Label) (acc : Post State) (accHom : PostHom State),
-      acc = accHom.toPost ->
-      List.foldl (fun current label => composePost current (stepPost label)) acc labels =
-        (List.foldl
-          (fun current label => composePostHom current ((stepPost label).toHom (hStepMono label)))
-          accHom
-          labels).toPost
-  | [], acc, accHom, hAcc => by
-      simpa using hAcc
-  | label :: labels, acc, accHom, hAcc => by
-      have hAcc' :
-          composePost acc (stepPost label) =
-            (composePostHom accHom ((stepPost label).toHom (hStepMono label))).toPost := by
-        ext states
-        simp [composePost, composePostHom, PostHom.toPost, Post.toHom, hAcc, OrderHom.comp]
-      simpa [List.foldl] using
-        (foldl_post_eq_foldl_postHom_of_monotone
-          (hStepMono := hStepMono)
-          labels
-          (composePost acc (stepPost label))
-          (composePostHom accHom ((stepPost label).toHom (hStepMono label)))
-          hAcc')
-
-theorem liftTracePost_eq_liftTracePostHom_of_pointwise_monotone
-    {State : Type u}
-    {Label : Type v}
-    {stepPost : Label -> Post State}
-    (hStepMono : ∀ label : Label, MonotonePost (stepPost label)) :
-    liftTracePost stepPost =
-      fun labels =>
-        (liftTracePostHom
-          (fun label => (stepPost label).toHom (hStepMono label))
-          labels).toPost := by
-  funext labels
-  simpa [liftTracePost, liftTracePostHom] using
-    (foldl_post_eq_foldl_postHom_of_monotone
-      (hStepMono := hStepMono)
-      labels
-      (fun states => states)
-      OrderHom.id
-      rfl)
-
-theorem liftTracePost_monotone_of_postHom
-    {State : Type u}
-    {Label : Type v}
-    {stepPost : StepPostHom State Label} :
-    ∀ labels : List Label, MonotonePost (fun states => (liftTracePostHom stepPost labels).toPost states) := by
-  intro labels
-  exact MonotonePost.ofPostHom (liftTracePostHom stepPost labels)
-
 theorem liftTracePost_monotone_of_pointwise
     {State : Type u}
     {Label : Type v}
     {stepPost : Label -> Post State}
     (hStepMono : ∀ label : Label, MonotonePost (stepPost label)) :
     ∀ labels : List Label, MonotonePost (liftTracePost stepPost labels) := by
-  let stepPostHom : StepPostHom State Label :=
-    fun label => (stepPost label).toHom (hStepMono label)
-  have hEq :
-      liftTracePost stepPost = fun labels => (liftTracePostHom stepPostHom labels).toPost :=
-    liftTracePost_eq_liftTracePostHom_of_pointwise_monotone hStepMono
-  simpa [hEq] using (liftTracePost_monotone_of_postHom (stepPost := stepPostHom))
+  intro labels
+  induction labels with
+  | nil =>
+      intro s t hSubset
+      simpa [liftTracePost_nil] using hSubset
+  | cons label labels ih =>
+      intro s t hSubset
+      simpa [liftTracePost_cons] using
+        (MonotonePost.compose
+          (h1 := hStepMono label)
+          (h2 := ih)
+          hSubset)
 
 end Trace
 
