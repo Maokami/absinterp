@@ -10,12 +10,15 @@ universe u v
 /-!
 # Abstract Semantic Transformers
 
-This file mirrors concrete trace lifting at the abstract level.
+This file mirrors `Concrete/Defs` at the abstract level, but keeps the core
+interface order-agnostic.
 
 For `stepPostSharp : Label -> (Abstract -> Abstract)`,
 `liftTracePostSharp stepPostSharp` composes abstract step transformers left-to-right
 along a label list.
 -/
+
+section Basic
 
 /-- Abstract semantic transformer on abstract states. -/
 abbrev PostSharp (Abstract : Type u) := Abstract -> Abstract
@@ -33,6 +36,10 @@ def composePostSharp
     PostSharp Abstract :=
   fun a => postSharp2 (postSharp1 a)
 
+end Basic
+
+section Trace
+
 /--
 Lift one-step abstract transfers to trace transfers by left-to-right composition.
 -/
@@ -42,6 +49,8 @@ def liftTracePostSharp
     (stepPostSharp : StepPostSharp Abstract Label) :
     TracePostSharp Abstract Label :=
   liftTrace composePostSharp (fun a => a) stepPostSharp
+
+end Trace
 
 end Framework
 end AbsInterpLTS
