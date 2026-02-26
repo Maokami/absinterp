@@ -19,18 +19,16 @@ def MonotonePostSharp (postSharp : PostSharp Abstract) : Prop :=
 
 /-- The identity abstract transformer is monotone. -/
 theorem MonotonePostSharp.id :
-    MonotonePostSharp (fun a : Abstract => a) := by
-  intro a b hAB
-  exact hAB
+    MonotonePostSharp (fun a : Abstract => a) :=
+  monotone_id
 
 /-- Composition of monotone abstract transformers is monotone. -/
 theorem MonotonePostSharp.compose
     {postSharp1 postSharp2 : PostSharp Abstract}
     (h1 : MonotonePostSharp postSharp1)
     (h2 : MonotonePostSharp postSharp2) :
-    MonotonePostSharp (composePostSharp postSharp1 postSharp2) := by
-  intro a b hAB
-  exact h2 (h1 hAB)
+    MonotonePostSharp (composePostSharp postSharp1 postSharp2) :=
+  h2.comp h1
 
 end Basic
 
