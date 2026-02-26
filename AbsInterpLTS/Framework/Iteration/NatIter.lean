@@ -1,5 +1,7 @@
 import Cslib.Init
 
+import Mathlib.Data.Set.Lattice
+
 import AbsInterpLTS.Framework.Semantics
 import AbsInterpLTS.Framework.Soundness.Defs
 
