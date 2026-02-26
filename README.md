@@ -32,7 +32,7 @@ lake test
 
 ## Development workflow
 
-1. Create an issue.
+1. Create an issue from the staged work-item template.
 2. Create a branch `issue-<n>-<short-slug>`.
 3. Implement a single staged work item.
 4. Open a PR with a Conventional title.
