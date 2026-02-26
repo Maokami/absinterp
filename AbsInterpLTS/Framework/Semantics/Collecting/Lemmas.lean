@@ -9,6 +9,12 @@ universe u
 
 namespace CollectingStep
 
+/-!
+Lemmas in this namespace operate on concrete collecting transformers
+(`Set State -> Set State`), matching the concrete-only contract in
+`Collecting/Defs`.
+-/
+
 @[simp] theorem reachF_apply
     {State : Type u}
     (cfg : CollectingStep State)
