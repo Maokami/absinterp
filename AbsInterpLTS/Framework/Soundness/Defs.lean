@@ -37,7 +37,7 @@ def SoundStep
     {State : Type u}
     {Label : Type v}
     {Abstract : Type w}
-    (stepPost : Label -> Post State)
+    (stepPost : StepPost State Label)
     (gamma : Gamma Abstract State)
     (stepPostSharp : StepPostSharp Abstract Label) : Prop :=
   forall label : Label, forall a : Abstract,
@@ -51,7 +51,7 @@ def SoundTrace
     {State : Type u}
     {Label : Type v}
     {Abstract : Type w}
-    (tracePost : List Label -> Post State)
+    (tracePost : TracePost State Label)
     (gamma : Gamma Abstract State)
     (tracePostSharp : TracePostSharp Abstract Label) : Prop :=
   forall labels : List Label, forall a : Abstract,
