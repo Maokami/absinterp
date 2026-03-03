@@ -107,24 +107,12 @@ theorem joinInterval_sound (a b : Interval) :
   intro n hn
   cases a with
   | bot =>
-      cases b with
-      | bot =>
-          have : False := by
-            simp [gammaInterval] at hn
-          exact False.elim this
-      | range lo hi =>
-          by_cases h : lo ≤ hi
-          · have hRange : lo ≤ n ∧ n ≤ hi := by
-              simpa [gammaInterval] using hn
-            simpa [joinInterval, normalize, mk, h] using
-              (mem_gammaInterval_mk_iff lo hi n).2 hRange
-          · have hRange : lo ≤ n ∧ n ≤ hi := by
-              simpa [gammaInterval] using hn
-            have : False := by
-              omega
-            exact False.elim this
-      | top =>
-          simp [joinInterval, normalize, gammaInterval]
+      have hb : n ∈ gammaInterval b := by
+        simpa [gammaInterval] using hn
+      have hbNorm : n ∈ gammaInterval (normalize b) := by
+        rw [gammaInterval_normalize b]
+        exact hb
+      simpa [joinInterval, normalize] using hbNorm
   | range lo1 hi1 =>
       cases b with
       | bot =>
@@ -234,12 +222,8 @@ def intervalGammaOnlyDomain :
   gamma := gammaInterval
   le := leInterval
   le_refl := leInterval_refl
-  le_trans := by
-    intro a b c hAB hBC
-    exact leInterval_trans hAB hBC
-  gamma_monotone := by
-    intro a b hAB
-    exact gammaInterval_monotone_of_leInterval hAB
+  le_trans := leInterval_trans
+  gamma_monotone := gammaInterval_monotone_of_leInterval
   top := Interval.top
   gamma_top := gammaInterval_top
   join := joinInterval

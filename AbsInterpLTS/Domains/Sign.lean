@@ -151,12 +151,8 @@ def signGammaOnlyDomain :
   gamma := gammaSign
   le := leSign
   le_refl := leSign_refl
-  le_trans := by
-    intro a b c hAB hBC
-    exact leSign_trans hAB hBC
-  gamma_monotone := by
-    intro a b hAB
-    exact gammaSign_monotone_of_leSign hAB
+  le_trans := leSign_trans
+  gamma_monotone := gammaSign_monotone_of_leSign
   top := Sign.top
   gamma_top := gammaSign_top
   join := joinSign
