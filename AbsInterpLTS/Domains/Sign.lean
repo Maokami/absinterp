@@ -1,4 +1,6 @@
 import Cslib.Init
+import Mathlib.Data.Set.Lattice
+import AbsInterpLTS.Framework.Domains
 
 namespace AbsInterpLTS
 namespace Domains
@@ -43,6 +45,11 @@ theorem leSign_trans {a b c : Sign} (hAB : a ≤ b) (hBC : b ≤ c) : a ≤ c :=
 theorem gammaSign_monotone_of_leSign {a b : Sign} (hAB : a ≤ b) :
     gammaSign a ⊆ gammaSign b :=
   hAB
+
+/-- `top` concretizes to all integers. -/
+theorem gammaSign_top (n : Int) : n ∈ gammaSign Sign.top := by
+  change True
+  trivial
 
 private def hasNeg : Sign -> Bool
   | .bot => false
@@ -89,6 +96,14 @@ def joinSign (a b : Sign) : Sign :=
     (hasZero a || hasZero b)
     (hasPos a || hasPos b)
 
+/-- `joinSign` soundly over-approximates union concretization. -/
+theorem joinSign_sound (a b : Sign) :
+    gammaSign a ∪ gammaSign b ⊆ gammaSign (joinSign a b) := by
+  intro n hn
+  cases a <;> cases b <;>
+    simp [gammaSign, joinSign, signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
+    tauto
+
 /-- Baseline unary transfer shape: abstract negation. -/
 def negTransfer : Sign -> Sign
   | .bot => .bot
@@ -129,6 +144,23 @@ theorem negTransfer_sound {a : Sign} {n : Int} (hn : n ∈ gammaSign a) :
       change True at hn
       change True
       trivial
+
+/-- Gamma-only interface instance for the sign domain. -/
+def signGammaOnlyDomain :
+    AbsInterpLTS.Framework.Domains.GammaOnlyDomain Sign Int where
+  gamma := gammaSign
+  le := leSign
+  le_refl := leSign_refl
+  le_trans := by
+    intro a b c hAB hBC
+    exact leSign_trans hAB hBC
+  gamma_monotone := by
+    intro a b hAB
+    exact gammaSign_monotone_of_leSign hAB
+  top := Sign.top
+  gamma_top := gammaSign_top
+  join := joinSign
+  join_sound := joinSign_sound
 
 end Domains
 end AbsInterpLTS
