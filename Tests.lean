@@ -8,4 +8,5 @@ import Tests.Instances.LTS.Collecting
 import Tests.Instances.LTS.IntervalHook
 import Tests.Instances.LTS.SignHook
 import Tests.Framework.Iteration.NatIter
+import Tests.Framework.Domains.GammaOnly
 import Tests.Framework.Semantics.AbstractOrder

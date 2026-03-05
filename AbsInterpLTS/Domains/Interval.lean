@@ -1,4 +1,6 @@
 import Cslib.Init
+import Mathlib.Data.Set.Lattice
+import AbsInterpLTS.Framework.Domains
 
 namespace AbsInterpLTS
 namespace Domains
@@ -49,6 +51,11 @@ theorem gammaInterval_monotone_of_leInterval {a b : Interval} (hAB : a ≤ b) :
     gammaInterval a ⊆ gammaInterval b :=
   hAB
 
+/-- `top` concretizes to all integers. -/
+theorem gammaInterval_top (n : Int) : n ∈ gammaInterval Interval.top := by
+  change True
+  trivial
+
 theorem mem_gammaInterval_mk_iff (lo hi n : Int) :
     n ∈ gammaInterval (mk lo hi) ↔ lo ≤ n ∧ n ≤ hi := by
   by_cases h : lo ≤ hi
@@ -62,10 +69,8 @@ theorem mem_gammaInterval_mk_iff (lo hi n : Int) :
       omega
     constructor
     · intro hn
-      have : n ∈ (∅ : Set Int) := by
-        simpa [mk, gammaInterval, h] using hn
       have : False := by
-        simpa using this
+        simp [mk, gammaInterval, h] at hn
       exact False.elim this
     · intro hRange
       exact False.elim (hRangeFalse hRange)
@@ -76,6 +81,17 @@ theorem gammaInterval_mk (lo hi : Int) :
   intro n
   simpa using mem_gammaInterval_mk_iff lo hi n
 
+/-- Normalization preserves concretization. -/
+theorem gammaInterval_normalize (a : Interval) :
+    gammaInterval (normalize a) = gammaInterval a := by
+  cases a with
+  | bot =>
+      rfl
+  | top =>
+      rfl
+  | range lo hi =>
+      simpa [normalize, gammaInterval] using gammaInterval_mk lo hi
+
 /-- Join on normalized intervals. -/
 def joinInterval (a b : Interval) : Interval :=
   match normalize a, normalize b with
@@ -84,6 +100,84 @@ def joinInterval (a b : Interval) : Interval :=
   | .top, _ => .top
   | _, .top => .top
   | .range lo1 hi1, .range lo2 hi2 => mk (min lo1 lo2) (max hi1 hi2)
+
+/-- `joinInterval` soundly over-approximates union concretization. -/
+theorem joinInterval_sound (a b : Interval) :
+    gammaInterval a ∪ gammaInterval b ⊆ gammaInterval (joinInterval a b) := by
+  intro n hn
+  cases a with
+  | bot =>
+      have hb : n ∈ gammaInterval b := by
+        simpa [gammaInterval] using hn
+      have hbNorm : n ∈ gammaInterval (normalize b) := by
+        rw [gammaInterval_normalize b]
+        exact hb
+      simpa [joinInterval, normalize] using hbNorm
+  | range lo1 hi1 =>
+      cases b with
+      | bot =>
+          by_cases h1 : lo1 ≤ hi1
+          · have hRange : lo1 ≤ n ∧ n ≤ hi1 := by
+              simpa [gammaInterval] using hn
+            simpa [joinInterval, normalize, mk, h1] using
+              (mem_gammaInterval_mk_iff lo1 hi1 n).2 hRange
+          · have hRange : lo1 ≤ n ∧ n ≤ hi1 := by
+              simpa [gammaInterval] using hn
+            have : False := by
+              omega
+            exact False.elim this
+      | range lo2 hi2 =>
+          have hRange :
+              (lo1 ≤ n ∧ n ≤ hi1) ∨ (lo2 ≤ n ∧ n ≤ hi2) := by
+            simpa [gammaInterval] using hn
+          by_cases h1 : lo1 ≤ hi1
+          · by_cases h2 : lo2 ≤ hi2
+            · have hBounds : min lo1 lo2 ≤ n ∧ n ≤ max hi1 hi2 := by
+                rcases hRange with hR1 | hR2
+                · rcases hR1 with ⟨hLo1, hHi1⟩
+                  exact ⟨by omega, by omega⟩
+                · rcases hR2 with ⟨hLo2, hHi2⟩
+                  exact ⟨by omega, by omega⟩
+              simpa [joinInterval, normalize, mk, h1, h2] using
+                (mem_gammaInterval_mk_iff (min lo1 lo2) (max hi1 hi2) n).2 hBounds
+            · have hR1 : lo1 ≤ n ∧ n ≤ hi1 := by
+                rcases hRange with hR1 | hR2
+                · exact hR1
+                · exfalso
+                  rcases hR2 with ⟨hLo2, hHi2⟩
+                  omega
+              simpa [joinInterval, normalize, mk, h1, h2] using
+                (mem_gammaInterval_mk_iff lo1 hi1 n).2 hR1
+          · by_cases h2 : lo2 ≤ hi2
+            · have hR2 : lo2 ≤ n ∧ n ≤ hi2 := by
+                rcases hRange with hR1 | hR2
+                · exfalso
+                  rcases hR1 with ⟨hLo1, hHi1⟩
+                  omega
+                · exact hR2
+              simpa [joinInterval, normalize, mk, h1, h2] using
+                (mem_gammaInterval_mk_iff lo2 hi2 n).2 hR2
+            · have : False := by
+                rcases hRange with hR1 | hR2
+                · rcases hR1 with ⟨hLo1, hHi1⟩
+                  omega
+                · rcases hR2 with ⟨hLo2, hHi2⟩
+                  omega
+              exact False.elim this
+      | top =>
+          by_cases h1 : lo1 ≤ hi1
+          · simp [joinInterval, normalize, mk, gammaInterval, h1]
+          · simp [joinInterval, normalize, mk, gammaInterval, h1]
+  | top =>
+      cases b with
+      | bot =>
+          simp [joinInterval, normalize, gammaInterval]
+      | range lo hi =>
+          by_cases h : lo ≤ hi
+          · simp [joinInterval, normalize, mk, gammaInterval, h]
+          · simp [joinInterval, normalize, mk, gammaInterval, h]
+      | top =>
+          simp [joinInterval, normalize, gammaInterval]
 
 /-- Meet on normalized intervals. -/
 def meetInterval (a b : Interval) : Interval :=
@@ -114,11 +208,26 @@ theorem negIntervalTransfer_sound {a : Interval} {n : Int} (hn : n ∈ gammaInte
   | range lo hi =>
       rcases hn with ⟨hLo, hHi⟩
       have hNorm : lo ≤ hi := by omega
-      have hNegNorm : -hi ≤ -lo := by omega
       have hLow : -hi ≤ -n := by omega
       have hHigh : -n ≤ -lo := by omega
-      simp [negIntervalTransfer, normalize, mk, hNorm, hNegNorm, gammaInterval]
-      exact ⟨hLow, hHigh⟩
+      have hMem : -hi ≤ -n ∧ -n ≤ -lo := ⟨hLow, hHigh⟩
+      have hMk : mk lo hi = Interval.range lo hi := by
+        simp [mk, hNorm]
+      simpa [negIntervalTransfer, normalize, hMk] using
+        (mem_gammaInterval_mk_iff (-hi) (-lo) (-n)).2 hMem
+
+/-- Gamma-only interface instance for the interval domain. -/
+def intervalGammaOnlyDomain :
+    AbsInterpLTS.Framework.Domains.GammaOnlyDomain Interval Int where
+  gamma := gammaInterval
+  le := leInterval
+  le_refl := leInterval_refl
+  le_trans := leInterval_trans
+  gamma_monotone := gammaInterval_monotone_of_leInterval
+  top := Interval.top
+  gamma_top := gammaInterval_top
+  join := joinInterval
+  join_sound := joinInterval_sound
 
 end Domains
 end AbsInterpLTS
