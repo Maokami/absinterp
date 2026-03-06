@@ -50,6 +50,10 @@ example : meetInterval (mk 1 4) (mk 3 6) = mk 3 4 := by
 example : meetInterval (mk 1 2) (mk 4 5) = Interval.bot := by
   simp [meetInterval, normalize, mk]
 
+example (n : Int) (hn : n ∈ gammaInterval (meetInterval (mk 1 4) (mk 3 6))) :
+    n ∈ gammaInterval (mk 1 4) ∩ gammaInterval (mk 3 6) := by
+  exact meetInterval_sound (a := mk 1 4) (b := mk 3 6) hn
+
 example : negIntervalTransfer (mk 1 4) = mk (-4) (-1) := by
   simp [negIntervalTransfer, normalize, mk]
 

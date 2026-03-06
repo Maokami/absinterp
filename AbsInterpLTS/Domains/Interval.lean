@@ -188,6 +188,29 @@ def meetInterval (a b : Interval) : Interval :=
   | a', .top => a'
   | .range lo1 hi1, .range lo2 hi2 => mk (max lo1 lo2) (min hi1 hi2)
 
+/-- `meetInterval` soundly under-approximates intersection concretization. -/
+theorem meetInterval_sound (a b : Interval) :
+    gammaInterval (meetInterval a b) ⊆ gammaInterval a ∩ gammaInterval b := by
+  intro n hn
+  have hNorm :
+      n ∈ gammaInterval (normalize a) ∩ gammaInterval (normalize b) := by
+    cases hna : normalize a <;> cases hnb : normalize b <;>
+      simp [meetInterval, hna, hnb, gammaInterval] at hn ⊢
+    case range.top =>
+      exact hn
+    case top.range =>
+      exact hn
+    case range.range lo1 hi1 lo2 hi2 =>
+      have hBounds : max lo1 lo2 ≤ n ∧ n ≤ min hi1 hi2 :=
+        (mem_gammaInterval_mk_iff (max lo1 lo2) (min hi1 hi2) n).1 hn
+      have hA : lo1 ≤ n ∧ n ≤ hi1 := by omega
+      have hB : lo2 ≤ n ∧ n ≤ hi2 := by omega
+      exact
+        ⟨by simpa [hna, gammaInterval] using hA, by simpa [hnb, gammaInterval] using hB⟩
+  exact
+    ⟨by simpa [gammaInterval_normalize a] using hNorm.1,
+      by simpa [gammaInterval_normalize b] using hNorm.2⟩
+
 /-- Baseline unary transfer shape: abstract negation. -/
 def negIntervalTransfer (a : Interval) : Interval :=
   match normalize a with
