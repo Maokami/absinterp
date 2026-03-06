@@ -41,6 +41,16 @@ example :
   exact AbsInterpLTS.Instances.LTS.postStep_monotone oneAbstraction.lts () hSubset
 
 example :
+    AbsInterpLTS.Instances.LTS.postTrace emptyNatLTS =
+      AbsInterpLTS.Framework.liftTracePost (AbsInterpLTS.Instances.LTS.postStep emptyNatLTS) := by
+  exact AbsInterpLTS.Instances.LTS.postTrace_eq_liftTracePost_postStep emptyNatLTS
+
+example :
+    AbsInterpLTS.Framework.MonotonePost
+      (AbsInterpLTS.Instances.LTS.postTrace emptyNatLTS [()]) := by
+  exact AbsInterpLTS.Instances.LTS.postTrace_monotone emptyNatLTS [()]
+
+example :
     AbsInterpLTS.Framework.SoundTrace
       (AbsInterpLTS.Framework.liftTracePost
         (AbsInterpLTS.Instances.LTS.postStep oneAbstraction.lts))
