@@ -202,14 +202,12 @@ theorem meetInterval_sound (a b : Interval) :
       exact hn
     case range.range lo1 hi1 lo2 hi2 =>
       have hBounds : max lo1 lo2 ≤ n ∧ n ≤ min hi1 hi2 :=
-        (mem_gammaInterval_mk_iff (max lo1 lo2) (min hi1 hi2) n).1 hn
+        (mem_gammaInterval_mk_iff (max lo1 lo2) (min hi1 hi2) n).1 (by simpa [gammaInterval] using hn)
       have hA : lo1 ≤ n ∧ n ≤ hi1 := by omega
       have hB : lo2 ≤ n ∧ n ≤ hi2 := by omega
       exact
         ⟨by simpa [hna, gammaInterval] using hA, by simpa [hnb, gammaInterval] using hB⟩
-  exact
-    ⟨by simpa [gammaInterval_normalize a] using hNorm.1,
-      by simpa [gammaInterval_normalize b] using hNorm.2⟩
+  exact (gammaInterval_normalize a ▸ gammaInterval_normalize b ▸ hNorm)
 
 /-- Baseline unary transfer shape: abstract negation. -/
 def negIntervalTransfer (a : Interval) : Interval :=
