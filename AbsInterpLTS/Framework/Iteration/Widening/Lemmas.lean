@@ -44,8 +44,8 @@ theorem isPostFixpoint_pfp
     (bot : Abstract)
     (hBot : ∀ a : Abstract, le bot a)
     (acc : WAcc le f widen bot bot) :
-    IsPostFixpoint le f (pfp le_dec hWiden bot hBot acc) := by
-  exact isPostFixpoint_witer le_dec hWiden (hBot bot) acc
+    IsPostFixpoint le f (pfp le_dec hWiden bot hBot acc) :=
+  isPostFixpoint_witer le_dec hWiden (hBot bot) acc
 
 /--
 Gamma soundness from post-fixpoint property.

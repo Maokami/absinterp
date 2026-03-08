@@ -88,7 +88,7 @@ def flat3_acc : WAcc le f w .bot .bot := by
   -- Step 1: x=mid, y=top. f(top)=top, le top top, so done (vacuously)
   apply WAcc.intro
   intro _ h
-  exact absurd (by simp [f, le] : le (f .top) .top) h
+  exact absurd (le_refl (f .top)) h
 
 theorem hBot : ∀ a : Flat3, le .bot a := by
   intro a; cases a <;> simp [le]
