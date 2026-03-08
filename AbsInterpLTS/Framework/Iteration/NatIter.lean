@@ -13,9 +13,6 @@ open AbsInterpLTS.Framework
 
 universe u
 
-/-- Widening interface for abstract iterative solvers. -/
-abbrev Widen (Abstract : Type u) := Abstract -> Abstract -> Abstract
-
 /-- Natural-number iterate scaffold for concrete next-step operators. -/
 def iterateNat
     {State : Type u}
