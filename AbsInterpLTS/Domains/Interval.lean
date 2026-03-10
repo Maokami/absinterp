@@ -38,14 +38,17 @@ def gammaInterval : Interval -> Set Int
 def leInterval (a b : Interval) : Prop :=
   gammaInterval a ⊆ gammaInterval b
 
-instance : LE Interval where
-  le := leInterval
-
-theorem leInterval_refl (a : Interval) : a ≤ a :=
+theorem leInterval_refl (a : Interval) : leInterval a a :=
   fun _ hn => hn
 
-theorem leInterval_trans {a b c : Interval} (hAB : a ≤ b) (hBC : b ≤ c) : a ≤ c :=
+theorem leInterval_trans {a b c : Interval} (hAB : leInterval a b) (hBC : leInterval b c) :
+    leInterval a c :=
   fun _ hn => hBC (hAB hn)
+
+instance : Preorder Interval where
+  le := leInterval
+  le_refl := leInterval_refl
+  le_trans := fun {_ _ _} hAB hBC => leInterval_trans hAB hBC
 
 theorem gammaInterval_monotone_of_leInterval {a b : Interval} (hAB : a ≤ b) :
     gammaInterval a ⊆ gammaInterval b :=
