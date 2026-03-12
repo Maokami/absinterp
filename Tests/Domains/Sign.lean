@@ -53,7 +53,7 @@ example (n : Int) (hn : n ∈ gammaSign Sign.nonneg) :
 open AbsInterpLTS.Framework
 
 /-- The identity abstract transformer is monotone over Sign. -/
-example : MonotonePostSharp (fun a : Sign => a) :=
+example : MonotonePostSharp (id : Sign → Sign) :=
   MonotonePostSharp.id
 
 end DomainsSign

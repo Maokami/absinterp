@@ -42,7 +42,7 @@ theorem leSign_trans {a b c : Sign} (hAB : leSign a b) (hBC : leSign b c) : leSi
 instance : Preorder Sign where
   le := leSign
   le_refl := leSign_refl
-  le_trans := fun {_ _ _} hAB hBC => leSign_trans hAB hBC
+  le_trans := @leSign_trans
 
 theorem gammaSign_monotone_of_leSign {a b : Sign} (hAB : a ≤ b) :
     gammaSign a ⊆ gammaSign b :=

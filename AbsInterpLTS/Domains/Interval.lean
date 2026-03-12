@@ -48,7 +48,7 @@ theorem leInterval_trans {a b c : Interval} (hAB : leInterval a b) (hBC : leInte
 instance : Preorder Interval where
   le := leInterval
   le_refl := leInterval_refl
-  le_trans := fun {_ _ _} hAB hBC => leInterval_trans hAB hBC
+  le_trans := @leInterval_trans
 
 theorem gammaInterval_monotone_of_leInterval {a b : Interval} (hAB : a ≤ b) :
     gammaInterval a ⊆ gammaInterval b :=
