@@ -50,5 +50,11 @@ example (n : Int) (hn : n ∈ gammaSign Sign.nonneg) :
     -n ∈ gammaSign (negTransfer Sign.nonneg) := by
   exact negTransfer_sound hn
 
+open AbsInterpLTS.Framework
+
+/-- The identity abstract transformer is monotone over Sign. -/
+example : MonotonePostSharp (id : Sign → Sign) :=
+  MonotonePostSharp.id
+
 end DomainsSign
 end Tests

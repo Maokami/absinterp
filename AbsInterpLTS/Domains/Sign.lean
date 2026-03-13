@@ -33,14 +33,16 @@ def gammaSign : Sign -> Set Int
 def leSign (a b : Sign) : Prop :=
   gammaSign a ⊆ gammaSign b
 
-instance : LE Sign where
-  le := leSign
-
-theorem leSign_refl (a : Sign) : a ≤ a :=
+theorem leSign_refl (a : Sign) : leSign a a :=
   fun _ hn => hn
 
-theorem leSign_trans {a b c : Sign} (hAB : a ≤ b) (hBC : b ≤ c) : a ≤ c :=
+theorem leSign_trans {a b c : Sign} (hAB : leSign a b) (hBC : leSign b c) : leSign a c :=
   fun _ hn => hBC (hAB hn)
+
+instance : Preorder Sign where
+  le := leSign
+  le_refl := leSign_refl
+  le_trans := @leSign_trans
 
 theorem gammaSign_monotone_of_leSign {a b : Sign} (hAB : a ≤ b) :
     gammaSign a ⊆ gammaSign b :=
