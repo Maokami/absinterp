@@ -31,7 +31,7 @@ theorem stepSoundToy :
   · rcases hZero with ⟨hLabel, hEq⟩
     subst hLabel
     subst hEq
-    simp [gammaIntervalState, readId, transferToy, gammaInterval, mk]
+    simp [readId, transferToy, gammaInterval, mk]
 
 example :
     SoundStep (postStep toyLTS) (gammaIntervalState readId) transferToy := by
