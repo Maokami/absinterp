@@ -1,10 +1,7 @@
 import Cslib.Init
-import Cslib.Foundations.Semantics.LTS.Basic
 
 import AbsInterpLTS.Domains.Interval
-import AbsInterpLTS.Framework.Soundness
-import AbsInterpLTS.Instances.LTS.Semantics.Concrete
-import AbsInterpLTS.Instances.LTS.Instantiation.Interface
+import AbsInterpLTS.Instances.LTS.Analyses.Common
 
 namespace AbsInterpLTS
 namespace Instances
@@ -17,13 +14,13 @@ open AbsInterpLTS.Domains
 universe u v
 
 /-- State concretization for the interval domain via an integer observation function. -/
-abbrev IntervalGamma (State : Type u) := (State -> Int) -> Gamma Interval State
+abbrev IntervalGamma (State : Type u) := ReadGamma Interval Int State
 
 /-- Lift `gammaInterval` to concrete states using a readout `State -> Int`. -/
 def gammaIntervalState
     {State : Type u} :
     IntervalGamma State :=
-  fun read a => { s : State | read s ∈ gammaInterval a }
+  gammaStateOfRead gammaInterval
 
 /-- Label-indexed interval transfer family. -/
 abbrev IntervalTransfer (Label : Type v) := Label -> Interval -> Interval
@@ -40,10 +37,7 @@ def IntervalStepSound
     (lts : Cslib.LTS State Label)
     (read : State -> Int)
     (transfer : IntervalTransfer Label) : Prop :=
-  ∀ (label : Label) (a : Interval) (s s' : State),
-    s ∈ gammaIntervalState read a ->
-    lts.Tr s label s' ->
-    s' ∈ gammaIntervalState read (transfer label a)
+  StepSoundOfRead gammaInterval lts read transfer
 
 /-- Bridge from local interval-transition soundness to framework `SoundStep`. -/
 theorem soundStep_postStep_interval_of_stepSound
@@ -54,13 +48,8 @@ theorem soundStep_postStep_interval_of_stepSound
     (transfer : IntervalTransfer Label)
     (hStep : IntervalStepSound lts read transfer) :
     SoundStep (postStep lts) (gammaIntervalState read) transfer := by
-  intro label a s' hs'
-  rcases (Cslib.LTS.mem_setImage
-    (lts := lts)
-    (S := gammaIntervalState read a)
-    (μ := label)
-    (s' := s')).1 (by simpa [postStep] using hs') with ⟨s, hsMem, htr⟩
-  exact hStep label a s s' hsMem htr
+  simpa [IntervalStepSound, gammaIntervalState] using
+    (soundStep_postStep_of_stepSound (gamma := gammaInterval) lts read transfer hStep)
 
 /-- Build an LTS abstraction from local interval-step soundness obligations. -/
 def intervalAbstractionOfStepSound
@@ -70,11 +59,8 @@ def intervalAbstractionOfStepSound
     (read : State -> Int)
     (transfer : IntervalTransfer Label)
     (hStep : IntervalStepSound lts read transfer) :
-    LTSAbstraction State Label Interval where
-  lts := lts
-  gamma := gammaIntervalState read
-  transfer := transfer
-  soundStep := soundStep_postStep_interval_of_stepSound lts read transfer hStep
+    LTSAbstraction State Label Interval :=
+  abstractionOfStepSound (gamma := gammaInterval) lts read transfer hStep
 
 end Analyses
 end LTS
