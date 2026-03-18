@@ -77,18 +77,19 @@ theorem liftTracePost_subset_kleeneNat
     (n : Nat)
     (hLen : labels.length ≤ n) :
     liftTracePost (postStep lts) labels init ⊆
-      (postAny_collectingStep lts).kleeneNat init (n + 1) := by
-  have h1 : init ⊆ (postAny_collectingStep lts).kleeneNat init 1 :=
-    (postAny_collectingStep lts).init_subset_kleeneNat_succ 0 init
-  have h2 : liftTracePost (postStep lts) labels init ⊆
-      liftTracePost (postStep lts) labels ((postAny_collectingStep lts).kleeneNat init 1) :=
-    liftTracePost_monotone_of_pointwise
-      (hStepMono := fun label => postStep_monotone lts label)
-      labels h1
-  have h3 := liftTracePost_kleeneNat_subset lts labels init 1
-  have h4 : 1 + labels.length ≤ n + 1 := by omega
-  have h5 := (postAny_collectingStep lts).kleeneNat_chain_of_le h4 init
-  exact Set.Subset.trans (Set.Subset.trans h2 h3) h5
+      (postAny_collectingStep lts).kleeneNat init (n + 1) :=
+  calc
+    liftTracePost (postStep lts) labels init
+    _ ⊆ liftTracePost (postStep lts) labels
+          ((postAny_collectingStep lts).kleeneNat init 1) :=
+        liftTracePost_monotone_of_pointwise
+          (hStepMono := fun label => postStep_monotone lts label)
+          labels
+          ((postAny_collectingStep lts).init_subset_kleeneNat_succ 0 init)
+    _ ⊆ (postAny_collectingStep lts).kleeneNat init (1 + labels.length) :=
+        liftTracePost_kleeneNat_subset lts labels init 1
+    _ ⊆ (postAny_collectingStep lts).kleeneNat init (n + 1) :=
+        (postAny_collectingStep lts).kleeneNat_chain_of_le (by omega) init
 
 /--
 **Theorem 2**: Every state in `kleeneNat (n + 1)` has a witnessing labeled trace
@@ -112,10 +113,9 @@ theorem kleeneNat_subset_iUnion_liftTracePost
       simp only [CollectingStep.kleeneNat_succ] at hs
       rcases hs with hInit | hPost
       · exact ⟨[], by simp, hInit⟩
-      · have hPost' : s ∈ postAny lts ((postAny_collectingStep lts).kleeneNat init (n + 1)) :=
-          hPost
-        rw [mem_postAny] at hPost'
-        rcases hPost' with ⟨s', hs'mem, label, htr⟩
+      · change s ∈ postAny lts ((postAny_collectingStep lts).kleeneNat init (n + 1)) at hPost
+        rw [mem_postAny] at hPost
+        rcases hPost with ⟨s', hs'mem, label, htr⟩
         rcases ih s' hs'mem with ⟨labels, hlen, hTrace⟩
         refine ⟨labels ++ [label], ?_, ?_⟩
         · simp; omega
