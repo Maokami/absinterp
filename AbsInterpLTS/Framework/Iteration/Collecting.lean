@@ -1,6 +1,6 @@
 import Cslib.Init
 
-import AbsInterpLTS.Framework.Semantics.Collecting
+import AbsInterpLTS.Framework.Semantics.Concrete.Collecting
 import AbsInterpLTS.Framework.Iteration.NatIter
 
 namespace AbsInterpLTS
