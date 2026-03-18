@@ -1,4 +1,5 @@
 import Cslib.Init
+import Mathlib.Data.Set.Basic
 import AbsInterpLTS.Framework.Semantics.Concrete.Collecting.Defs
 
 /-!
@@ -33,10 +34,8 @@ theorem reachF_monotone
     (cfg : CollectingStep State)
     (init : Set State) :
     MonotonePost (cfg.reachF init) := by
-  intro states states' hSubset s hs
-  rcases hs with hsInit | hsPost
-  · exact Or.inl hsInit
-  · exact Or.inr (cfg.monotone hSubset hsPost)
+  intro _ _ hSubset
+  exact Set.union_subset_union (Set.Subset.refl _) (cfg.monotone hSubset)
 
 end CollectingStep
 
