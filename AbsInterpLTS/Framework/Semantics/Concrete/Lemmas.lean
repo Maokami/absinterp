@@ -30,7 +30,7 @@ end Basic
 
 section Trace
 
-private theorem composePost_assoc
+theorem composePost_assoc
     {State : Type u}
     (post1 post2 post3 : Post State) :
     composePost (composePost post1 post2) post3 =
@@ -110,6 +110,37 @@ theorem liftTracePost_monotone_of_pointwise
           (h1 := hStepMono label)
           (h2 := ih)
           hSubset)
+
+/--
+Trace lifting distributes over list append via `composePost`.
+-/
+theorem liftTracePost_append
+    {State : Type u}
+    {Label : Type v}
+    (stepPost : Label -> Post State)
+    (ls1 ls2 : List Label) :
+    liftTracePost stepPost (ls1 ++ ls2) =
+      composePost (liftTracePost stepPost ls1) (liftTracePost stepPost ls2) := by
+  induction ls1 with
+  | nil =>
+      ext states
+      simp [composePost]
+  | cons l ls1 ih =>
+      simp [liftTracePost_cons, ih, composePost_assoc]
+
+/--
+Trace lifting with a single label appended applies that step last.
+-/
+theorem liftTracePost_snoc_apply
+    {State : Type u}
+    {Label : Type v}
+    (stepPost : Label -> Post State)
+    (labels : List Label)
+    (l : Label)
+    (init : Set State) :
+    liftTracePost stepPost (labels ++ [l]) init =
+      stepPost l (liftTracePost stepPost labels init) := by
+  simp [liftTracePost_append, composePost]
 
 end Trace
 
