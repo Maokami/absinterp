@@ -122,6 +122,7 @@ Domains/                Concrete abstract domains
 - Title: Conventional format, under 70 characters.
 - Use the PR template (Summary, Linked issue, Scope, Validation checklist).
 - Always link to the issue with `Closes #N`.
+- **Squash merge** preferred: merge via `gh pr merge --squash` so each PR becomes a single atomic commit on `main`.
 
 ### Issues
 
