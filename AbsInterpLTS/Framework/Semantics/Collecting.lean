@@ -1,2 +1,3 @@
-import AbsInterpLTS.Framework.Semantics.Collecting.Defs
-import AbsInterpLTS.Framework.Semantics.Collecting.Lemmas
+import AbsInterpLTS.Framework.Semantics.Concrete.Collecting
+/-! Compatibility re-export. Canonical location:
+`AbsInterpLTS.Framework.Semantics.Concrete.Collecting` -/
