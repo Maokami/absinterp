@@ -65,6 +65,17 @@ theorem tr_mem_postAny
       (μ := label)
       (s' := s')).2 ⟨s, hs, htr⟩
 
+/-- Every labeled post-image is contained in the unlabeled collecting post. -/
+theorem postStep_subset_postAny
+    {State : Type u}
+    {Label : Type v}
+    (lts : Cslib.LTS State Label)
+    (label : Label)
+    (states : Set State) :
+    postStep lts label states ⊆ postAny lts states := by
+  intro s' hs'
+  exact ⟨label, hs'⟩
+
 theorem postAny_monotone
     {State : Type u}
     {Label : Type v}
