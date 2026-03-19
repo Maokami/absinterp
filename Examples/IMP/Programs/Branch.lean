@@ -88,8 +88,7 @@ theorem stepSoundBranch :
     simp [gammaStateOfRead, readX0Branch, transferBranch, gammaSign, hVal]
   | takeThen =>
     rcases htr with ⟨_, hNe, _, hVal⟩
-    simp [gammaStateOfRead, readX0Branch] at hs ⊢
-    simp [transferBranch, hVal]
+    simp [gammaStateOfRead, readX0Branch, transferBranch, hVal] at hs ⊢
     cases a with
     | bot => exact absurd hs (by simp [gammaSign])
     | neg => simp [gammaSign] at hs ⊢; omega
