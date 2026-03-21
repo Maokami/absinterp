@@ -20,6 +20,9 @@ rev = "v4.28.0-rc1"
 name = "AbsInterpLTS"
 
 [[lean_lib]]
+name = "Examples"
+
+[[lean_lib]]
 name = "Tests"
 
 [[lean_exe]]
