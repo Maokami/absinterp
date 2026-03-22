@@ -17,28 +17,32 @@ def eval (σ : Store) : Expr → Int
   | .var x => σ x
   | .add e1 e2 => eval σ e1 + eval σ e2
 
-/-- A configuration is either a running statement with a store, or a terminated store. -/
-inductive Config where
-  | running (s : Stmt) (σ : Store)
-  | done (σ : Store)
+/-- IMP configurations pair the current statement with the current store. -/
+abbrev Config := Stmt × Store
 
-/-- Small-step transition relation for IMP. -/
-inductive Step : Config → Config → Prop where
-  | skip {σ : Store} :
-      Step (.running .skip σ) (.done σ)
+/-- Labels for the canonical small-step IMP LTS. -/
+inductive StepLabel where
+  | assign
+  | seqStep (μ : StepLabel)
+  | seqDone
+  | ifTrue
+  | ifFalse
+  deriving DecidableEq, Repr
+
+/-- Labeled small-step transition relation for IMP. -/
+inductive Step : Config → StepLabel → Config → Prop where
   | assign {x : Var} {e : Expr} {σ : Store} :
-      Step (.running (.assign x e) σ) (.done (σ.update x (eval σ e)))
-  | seq_step {s1 s1' s2 : Stmt} {σ σ' : Store} :
-      Step (.running s1 σ) (.running s1' σ') →
-      Step (.running (.seq s1 s2) σ) (.running (.seq s1' s2) σ')
-  | seq_done {s1 s2 : Stmt} {σ σ' : Store} :
-      Step (.running s1 σ) (.done σ') →
-      Step (.running (.seq s1 s2) σ) (.running s2 σ')
+      Step (.assign x e, σ) .assign (.skip, σ.update x (eval σ e))
+  | seq_step {s1 s1' s2 : Stmt} {σ σ' : Store} {μ : StepLabel} :
+      Step (s1, σ) μ (s1', σ') →
+      Step (.seq s1 s2, σ) (.seqStep μ) (.seq s1' s2, σ')
+  | seq_done {s2 : Stmt} {σ : Store} :
+      Step (.seq .skip s2, σ) .seqDone (s2, σ)
   | if_true {cond : Expr} {s1 s2 : Stmt} {σ : Store} :
       eval σ cond ≠ 0 →
-      Step (.running (.ite cond s1 s2) σ) (.running s1 σ)
+      Step (.ite cond s1 s2, σ) .ifTrue (s1, σ)
   | if_false {cond : Expr} {s1 s2 : Stmt} {σ : Store} :
       eval σ cond = 0 →
-      Step (.running (.ite cond s1 s2) σ) (.running s2 σ)
+      Step (.ite cond s1 s2, σ) .ifFalse (s2, σ)
 
 end Examples.IMP
