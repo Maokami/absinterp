@@ -85,10 +85,11 @@ def storeGammaOnlyDomain
     exact cfg.gamma_top (σ x)
   join := joinStoreSharp cfg
   join_sound := by
-    intro ρ₁ ρ₂ σ hσ x
-    rcases hσ with hσ | hσ
-    · exact cfg.join_sound (ρ₁ x) (ρ₂ x) (Or.inl (hσ x))
-    · exact cfg.join_sound (ρ₁ x) (ρ₂ x) (Or.inr (hσ x))
+    intro ρ₁ ρ₂ σ hUnion x
+    apply cfg.join_sound
+    rcases hUnion with hLeft | hRight
+    · exact Or.inl (hLeft x)
+    · exact Or.inr (hRight x)
 
 /-- Pointwise order on abstract IMP configurations. -/
 def leConfigSharp
@@ -128,21 +129,18 @@ def configGammaOnlyDomain
       exact storeCfg.le_trans (h12 pc) (h23 pc)
     gamma_monotone := by
       intro κ₁ κ₂ hLe c hc
-      cases c with
-      | mk s σ =>
-          exact storeCfg.gamma_monotone (hLe s) hc
+      exact storeCfg.gamma_monotone (hLe (controlOfConfig c)) hc
     top := topConfigSharp storeCfg
     gamma_top := by
       intro c
-      cases c with
-      | mk s σ =>
-          exact storeCfg.gamma_top σ
+      exact storeCfg.gamma_top (storeOfConfig c)
     join := joinConfigSharp storeCfg
     join_sound := by
       intro κ₁ κ₂ c hc
-      cases c with
-      | mk s σ =>
-          exact storeCfg.join_sound (κ₁ s) (κ₂ s) hc
+      change
+        storeOfConfig c ∈ gammaStoreOf cfg.gamma (κ₁ (controlOfConfig c)) ∪
+          gammaStoreOf cfg.gamma (κ₂ (controlOfConfig c)) at hc
+      exact storeCfg.join_sound (κ₁ (controlOfConfig c)) (κ₂ (controlOfConfig c)) hc
   }
 
 end Examples.IMP
