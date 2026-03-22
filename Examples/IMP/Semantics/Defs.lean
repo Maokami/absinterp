@@ -22,23 +22,33 @@ inductive Config where
   | running (s : Stmt) (σ : Store)
   | done (σ : Store)
 
-/-- Small-step transition relation for IMP. -/
-inductive Step : Config → Config → Prop where
+/-- Labels for the canonical small-step IMP LTS. -/
+inductive StepLabel where
+  | skip
+  | assign
+  | seqStep (μ : StepLabel)
+  | seqDone (μ : StepLabel)
+  | ifTrue
+  | ifFalse
+  deriving DecidableEq, Repr
+
+/-- Labeled small-step transition relation for IMP. -/
+inductive Step : Config → StepLabel → Config → Prop where
   | skip {σ : Store} :
-      Step (.running .skip σ) (.done σ)
+      Step (.running .skip σ) .skip (.done σ)
   | assign {x : Var} {e : Expr} {σ : Store} :
-      Step (.running (.assign x e) σ) (.done (σ.update x (eval σ e)))
-  | seq_step {s1 s1' s2 : Stmt} {σ σ' : Store} :
-      Step (.running s1 σ) (.running s1' σ') →
-      Step (.running (.seq s1 s2) σ) (.running (.seq s1' s2) σ')
-  | seq_done {s1 s2 : Stmt} {σ σ' : Store} :
-      Step (.running s1 σ) (.done σ') →
-      Step (.running (.seq s1 s2) σ) (.running s2 σ')
+      Step (.running (.assign x e) σ) .assign (.done (σ.update x (eval σ e)))
+  | seq_step {s1 s1' s2 : Stmt} {σ σ' : Store} {μ : StepLabel} :
+      Step (.running s1 σ) μ (.running s1' σ') →
+      Step (.running (.seq s1 s2) σ) (.seqStep μ) (.running (.seq s1' s2) σ')
+  | seq_done {s1 s2 : Stmt} {σ σ' : Store} {μ : StepLabel} :
+      Step (.running s1 σ) μ (.done σ') →
+      Step (.running (.seq s1 s2) σ) (.seqDone μ) (.running s2 σ')
   | if_true {cond : Expr} {s1 s2 : Stmt} {σ : Store} :
       eval σ cond ≠ 0 →
-      Step (.running (.ite cond s1 s2) σ) (.running s1 σ)
+      Step (.running (.ite cond s1 s2) σ) .ifTrue (.running s1 σ)
   | if_false {cond : Expr} {s1 s2 : Stmt} {σ : Store} :
       eval σ cond = 0 →
-      Step (.running (.ite cond s1 s2) σ) (.running s2 σ)
+      Step (.running (.ite cond s1 s2) σ) .ifFalse (.running s2 σ)
 
 end Examples.IMP

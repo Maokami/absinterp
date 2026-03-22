@@ -13,7 +13,7 @@ inductive Expr where
   | lit (n : Int)
   | var (x : Var)
   | add (e1 e2 : Expr)
-  deriving Repr
+  deriving DecidableEq, Repr
 
 /-- Statements: the core IMP constructs (no loops in this subset). -/
 inductive Stmt where
@@ -21,6 +21,6 @@ inductive Stmt where
   | assign (x : Var) (e : Expr)
   | seq (s1 s2 : Stmt)
   | ite (cond : Expr) (s1 s2 : Stmt)
-  deriving Repr
+  deriving DecidableEq, Repr
 
 end Examples.IMP
