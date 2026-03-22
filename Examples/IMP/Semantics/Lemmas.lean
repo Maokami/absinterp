@@ -22,18 +22,17 @@ namespace Examples.IMP
     eval σ (.add e1 e2) = eval σ e1 + eval σ e2 := rfl
 
 @[simp] theorem step_skip_iff {σ : Store} {μ : StepLabel} {c' : Config} :
-    Step (.running .skip σ) μ c' ↔ μ = .skip ∧ c' = .done σ := by
+    Step (.skip, σ) μ c' ↔ False := by
   constructor
   · intro hStep
     cases hStep
-    simp
-  · rintro ⟨rfl, rfl⟩
-    exact Step.skip
+  · intro hFalse
+    exact False.elim hFalse
 
 @[simp] theorem step_assign_iff
     {x : Var} {e : Expr} {σ : Store} {μ : StepLabel} {c' : Config} :
-    Step (.running (.assign x e) σ) μ c' ↔
-      μ = .assign ∧ c' = .done (σ.update x (eval σ e)) := by
+    Step (.assign x e, σ) μ c' ↔
+      μ = .assign ∧ c' = (.skip, σ.update x (eval σ e)) := by
   constructor
   · intro hStep
     cases hStep
@@ -41,10 +40,20 @@ namespace Examples.IMP
   · rintro ⟨rfl, rfl⟩
     exact Step.assign
 
+@[simp] theorem step_seqDone_iff
+    {s2 : Stmt} {σ : Store} {c' : Config} :
+    Step (.seq .skip s2, σ) .seqDone c' ↔ c' = (s2, σ) := by
+  constructor
+  · intro hStep
+    cases hStep
+    simp
+  · rintro rfl
+    exact Step.seq_done
+
 @[simp] theorem step_ifTrue_iff
     {cond : Expr} {s1 s2 : Stmt} {σ : Store} {c' : Config} :
-    Step (.running (.ite cond s1 s2) σ) .ifTrue c' ↔
-      eval σ cond ≠ 0 ∧ c' = .running s1 σ := by
+    Step (.ite cond s1 s2, σ) .ifTrue c' ↔
+      eval σ cond ≠ 0 ∧ c' = (s1, σ) := by
   constructor
   · intro hStep
     cases hStep with
@@ -55,8 +64,8 @@ namespace Examples.IMP
 
 @[simp] theorem step_ifFalse_iff
     {cond : Expr} {s1 s2 : Stmt} {σ : Store} {c' : Config} :
-    Step (.running (.ite cond s1 s2) σ) .ifFalse c' ↔
-      eval σ cond = 0 ∧ c' = .running s2 σ := by
+    Step (.ite cond s1 s2, σ) .ifFalse c' ↔
+      eval σ cond = 0 ∧ c' = (s2, σ) := by
   constructor
   · intro hStep
     cases hStep with
@@ -67,22 +76,20 @@ namespace Examples.IMP
 
 theorem Step.seqStep_inv
     {s1 s2 : Stmt} {σ : Store} {μ : StepLabel} {c' : Config}
-    (hStep : Step (.running (.seq s1 s2) σ) (.seqStep μ) c') :
+    (hStep : Step (.seq s1 s2, σ) (.seqStep μ) c') :
     ∃ s1' σ',
-      c' = .running (.seq s1' s2) σ' ∧
-      Step (.running s1 σ) μ (.running s1' σ') := by
+      c' = (.seq s1' s2, σ') ∧
+      Step (s1, σ) μ (s1', σ') := by
   cases hStep with
   | seq_step hInner =>
       exact ⟨_, _, rfl, hInner⟩
 
 theorem Step.seqDone_inv
-    {s1 s2 : Stmt} {σ : Store} {μ : StepLabel} {c' : Config}
-    (hStep : Step (.running (.seq s1 s2) σ) (.seqDone μ) c') :
-    ∃ σ',
-      c' = .running s2 σ' ∧
-      Step (.running s1 σ) μ (.done σ') := by
+    {s2 : Stmt} {σ : Store} {c' : Config}
+    (hStep : Step (.seq .skip s2, σ) .seqDone c') :
+    c' = (s2, σ) := by
   cases hStep with
-  | seq_done hInner =>
-      exact ⟨_, rfl, hInner⟩
+  | seq_done =>
+      rfl
 
 end Examples.IMP

@@ -11,21 +11,16 @@ open AbsInterpLTS.Framework.Domains
 
 universe u
 
-/-- Control locations for IMP configurations, forgetting concrete stores. -/
-inductive Control where
-  | running (s : Stmt)
-  | done
-  deriving DecidableEq, Repr
+/-- Control locations for textbook IMP configurations are just statements. -/
+abbrev Control := Stmt
 
 /-- Forget the store component of a concrete configuration. -/
 def controlOfConfig : Config → Control
-  | .running s _ => .running s
-  | .done _ => .done
+  | (s, _) => s
 
 /-- Forget the control component of a concrete configuration. -/
 def storeOfConfig : Config → Store
-  | .running _ σ => σ
-  | .done σ => σ
+  | (_, σ) => σ
 
 /-- Pointwise abstract store over the fixed IMP variable set. -/
 abbrev StoreSharp (Abstract : Type u) := Var → Abstract
@@ -100,7 +95,7 @@ def leConfigSharp
     {Abstract : Type u}
     (cfg : GammaOnlyDomain (StoreSharp Abstract) Store) :
     ConfigSharp Abstract → ConfigSharp Abstract → Prop :=
-  fun κ₁ κ₂ => ∀ pc : Control, cfg.le (κ₁ pc) (κ₂ pc)
+  fun κ₁ κ₂ => ∀ s : Control, cfg.le (κ₁ s) (κ₂ s)
 
 /-- Pointwise top element on abstract IMP configurations. -/
 def topConfigSharp
@@ -134,26 +129,20 @@ def configGammaOnlyDomain
     gamma_monotone := by
       intro κ₁ κ₂ hLe c hc
       cases c with
-      | running s σ =>
-          exact storeCfg.gamma_monotone (hLe (.running s)) hc
-      | done σ =>
-          exact storeCfg.gamma_monotone (hLe .done) hc
+      | mk s σ =>
+          exact storeCfg.gamma_monotone (hLe s) hc
     top := topConfigSharp storeCfg
     gamma_top := by
       intro c
       cases c with
-      | running s σ =>
-          exact storeCfg.gamma_top σ
-      | done σ =>
+      | mk s σ =>
           exact storeCfg.gamma_top σ
     join := joinConfigSharp storeCfg
     join_sound := by
       intro κ₁ κ₂ c hc
       cases c with
-      | running s σ =>
-          exact storeCfg.join_sound (κ₁ (.running s)) (κ₂ (.running s)) hc
-      | done σ =>
-          exact storeCfg.join_sound (κ₁ .done) (κ₂ .done) hc
+      | mk s σ =>
+          exact storeCfg.join_sound (κ₁ s) (κ₂ s) hc
   }
 
 end Examples.IMP
