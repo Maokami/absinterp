@@ -106,6 +106,118 @@ theorem joinSign_sound (a b : Sign) :
     simp [gammaSign, joinSign, signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
     tauto
 
+@[simp] theorem joinSign_bot_left (a : Sign) :
+    joinSign .bot a = a := by
+  cases a <;> rfl
+
+@[simp] theorem joinSign_bot_right (a : Sign) :
+    joinSign a .bot = a := by
+  cases a <;> rfl
+
+/-- Exact sign for an integer literal. -/
+def constSign (n : Int) : Sign :=
+  if n < 0 then .neg else if n = 0 then .zero else .pos
+
+/-- `constSign` contains the concrete integer it abstracts. -/
+theorem constSign_sound (n : Int) :
+    n ∈ gammaSign (constSign n) := by
+  by_cases hNeg : n < 0
+  · simp [constSign, gammaSign, hNeg]
+  · by_cases hZero : n = 0
+    · simp [constSign, gammaSign, hZero]
+    · have hPos : 0 < n := by omega
+      simp [constSign, gammaSign, hNeg, hZero, hPos]
+
+/--
+Sound abstract addition on signs.
+
+This is intentionally lightweight: it aims for a useful, sound
+over-approximation rather than maximal precision.
+-/
+def addTransfer : Sign -> Sign -> Sign
+  | .bot, _ => .bot
+  | _, .bot => .bot
+  | .zero, b => b
+  | a, .zero => a
+  | .neg, .neg => .neg
+  | .neg, .nonpos => .neg
+  | .neg, .pos => .top
+  | .neg, .nonneg => .top
+  | .neg, .top => .top
+  | .pos, .neg => .top
+  | .pos, .pos => .pos
+  | .pos, .nonpos => .top
+  | .pos, .nonneg => .pos
+  | .pos, .top => .top
+  | .nonpos, .neg => .neg
+  | .nonpos, .pos => .top
+  | .nonpos, .nonpos => .nonpos
+  | .nonpos, .nonneg => .top
+  | .nonpos, .top => .top
+  | .nonneg, .neg => .top
+  | .nonneg, .pos => .pos
+  | .nonneg, .nonpos => .top
+  | .nonneg, .nonneg => .nonneg
+  | .nonneg, .top => .top
+  | .top, .neg => .top
+  | .top, .pos => .top
+  | .top, .nonpos => .top
+  | .top, .nonneg => .top
+  | .top, .top => .top
+
+/-- `addTransfer` soundly abstracts integer addition. -/
+theorem addTransfer_sound
+    {a b : Sign}
+    {m n : Int}
+    (hm : m ∈ gammaSign a)
+    (hn : n ∈ gammaSign b) :
+    m + n ∈ gammaSign (addTransfer a b) := by
+  cases a <;> cases b <;>
+    simp [gammaSign, addTransfer] at hm hn ⊢ <;>
+    omega
+
+/-- Refine a sign by assuming the concrete value is nonzero. -/
+def assumeNonzero : Sign -> Sign
+  | .bot => .bot
+  | .neg => .neg
+  | .zero => .bot
+  | .pos => .pos
+  | .nonpos => .neg
+  | .nonneg => .pos
+  | .top => .top
+
+/-- Refine a sign by assuming the concrete value is exactly zero. -/
+def assumeZero : Sign -> Sign
+  | .bot => .bot
+  | .neg => .bot
+  | .zero => .zero
+  | .pos => .bot
+  | .nonpos => .zero
+  | .nonneg => .zero
+  | .top => .zero
+
+/-- `assumeNonzero` is sound for a concrete witness known to be nonzero. -/
+theorem assumeNonzero_sound
+    {a : Sign}
+    {n : Int}
+    (hn : n ∈ gammaSign a)
+    (hNe : n ≠ 0) :
+    n ∈ gammaSign (assumeNonzero a) := by
+  cases a <;>
+    simp [gammaSign, assumeNonzero] at hn ⊢ <;>
+    omega
+
+/-- `assumeZero` is sound for a concrete witness known to be zero. -/
+theorem assumeZero_sound
+    {a : Sign}
+    {n : Int}
+    (hn : n ∈ gammaSign a)
+    (hZero : n = 0) :
+    n ∈ gammaSign (assumeZero a) := by
+  cases a <;>
+    simp [gammaSign, assumeZero] at hn ⊢ <;>
+    omega
+
 /-- Baseline unary transfer shape: abstract negation. -/
 def negTransfer : Sign -> Sign
   | .bot => .bot
