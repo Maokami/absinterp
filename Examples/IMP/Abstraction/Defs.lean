@@ -2,7 +2,7 @@ import Cslib.Init
 import Mathlib.Data.Set.Lattice
 
 import AbsInterpLTS.Framework.Domains
-import Examples.IMP.Semantics.Defs
+import Examples.IMP.Semantics
 
 namespace Examples.IMP
 
