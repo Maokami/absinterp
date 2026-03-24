@@ -4,10 +4,10 @@ def runLake (args : Array String) : IO UInt32 := do
   IO.Process.spawn { cmd := "lake", args := args } >>= (·.wait)
 
 def main (_ : List String) : IO UInt32 := do
-  IO.println "building AbsInterpLTS..."
+  IO.println "building default libraries..."
   let buildResult <- runLake #["build"]
   if buildResult != 0 then
-    IO.eprintln "build failed"
+    IO.eprintln "default library build failed"
     return buildResult
 
   IO.println "building Tests..."
@@ -16,5 +16,5 @@ def main (_ : List String) : IO UInt32 := do
     IO.eprintln "test build failed"
     return testsBuildResult
 
-  IO.println "bootstrap checks passed"
+  IO.println "all build checks passed"
   return 0

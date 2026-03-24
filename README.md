@@ -1,14 +1,19 @@
 # absinterp-lts
 
-`absinterp-lts` is an independent Lean 4 staging repository for reusable abstract interpretation constructions over CSLib semantics.
+`absinterp-lts` is an independent Lean 4 repository for reusable abstract interpretation constructions over CSLib semantics.
 
 ## Project status
 
-This repository is intentionally in a staged bootstrap phase.
+The project now has a usable core:
 
-- Repository workflow, CI, and issue tracking are set up first.
-- Framework modules expose stable interfaces with minimal implementation.
-- Detailed formalization is added incrementally through issue-scoped PRs.
+- a reusable `gamma`-only abstract interpretation framework over LTS-style semantics
+- a CSLib-LTS instantiation with soundness lifting from one-step to traces
+- collecting-semantics infrastructure and a collecting/trace bridge
+- concrete Sign and Interval domains
+- a loop-free IMP case study showing how to build a generic abstract interpreter on top of the framework
+
+The remaining staged work is mostly about broadening coverage: more domains,
+more iteration/fixpoint case studies, and richer language examples.
 
 ## Initial architecture
 
@@ -21,14 +26,20 @@ This repository is intentionally in a staged bootstrap phase.
   - `Instantiation`: framework-to-LTS abstraction/soundness instantiation layer.
   - `Analyses`: domain-specific analysis instances over LTS (staged).
 - `AbsInterpLTS/Domains`: sign and interval domain interfaces.
+- `Examples/IMP`: a loop-free IMP case study with a generic Sign analysis over
+  the canonical IMP LTS.
 
 ## Build and test
 
 ```bash
 lake build
+lake build Examples
 lake build Tests
 lake test
 ```
+
+`lake build` builds the main library and the example library. `lake test`
+checks that the default libraries and the test suite both compile.
 
 ## Development workflow
 

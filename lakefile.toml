@@ -1,6 +1,6 @@
 name = "absinterp-lts"
 version = "0.1.0"
-defaultTargets = ["AbsInterpLTS"]
+defaultTargets = ["AbsInterpLTS", "Examples"]
 testDriver = "runTests"
 
 [leanOptions]
