@@ -3,8 +3,7 @@ import Cslib.Foundations.Semantics.LTS.Basic
 
 import AbsInterpLTS
 
-import Examples.IMP.Syntax
-import Examples.IMP.Semantics.Defs
+import Examples.IMP.Semantics
 
 /-!
 # Sign Analysis of `x0 := 5; if x0 then x0 := x0 + 1 else x0 := 0`

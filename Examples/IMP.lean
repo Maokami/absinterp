@@ -1,10 +1,7 @@
 import Examples.IMP.Syntax
 import Examples.IMP.Pretty
-import Examples.IMP.Semantics.Defs
-import Examples.IMP.Semantics.Lemmas
+import Examples.IMP.Semantics
 import Examples.IMP.Abstraction
-import Examples.IMP.Analysis.Sign
+import Examples.IMP.Analysis
 import Examples.IMP.LTS
-import Examples.IMP.Programs.Assign
-import Examples.IMP.Programs.Branch
-import Examples.IMP.Programs.Showcase
+import Examples.IMP.Programs
