@@ -9,7 +9,8 @@ A reusable abstract interpretation framework built on [cslib](https://github.com
 ## Build & Test
 
 ```bash
-lake build              # Build main library (AbsInterpLTS)
+lake build              # Build default libraries (AbsInterpLTS, Examples)
+lake build Examples     # Build example library explicitly
 lake build Tests        # Build test suite
 lake test               # Run test driver (includes build)
 ```
@@ -38,6 +39,11 @@ Instances/LTS/          cslib LTS-specific instantiation
 Domains/                Concrete abstract domains
   Sign.lean             7-point sign lattice
   Interval.lean         bot/range(lo,hi)/top interval domain
+
+Examples/IMP/           Loop-free IMP case study
+  Semantics/            Syntax, small-step semantics, and labeled IMP LTS
+  Analysis/             Generic Sign analysis over IMP configurations
+  Programs/             Small case studies and end-to-end showcase traces
 ```
 
 **Core theorem chain**: `SoundStep` -> `soundTrace_of_soundStep` -> `SoundTrace`
