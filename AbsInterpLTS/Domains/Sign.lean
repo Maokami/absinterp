@@ -19,6 +19,9 @@ inductive Sign where
   | top
   deriving DecidableEq, Repr
 
+instance : Bot Sign where
+  bot := .bot
+
 /-- Concretization map from abstract signs to sets of integers. -/
 def gammaSign : Sign -> Set Int
   | .bot => ∅

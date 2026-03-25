@@ -83,28 +83,28 @@ def analyzeShowcase (labels : List StepLabel) : ConfigSharp Sign :=
   liftTracePostSharp (impSignTransfer signShowcase) labels signShowcaseInit
 
 theorem analyzeShowcase_trueTrace_skip_x0 :
-    analyzeShowcase signShowcaseTrueTrace .skip .x0 = .nonneg := by
+    analyzeShowcase signShowcaseTrueTrace .skip Var.x0 = .nonneg := by
   native_decide
 
 theorem analyzeShowcase_trueTrace_skip_x1 :
-    analyzeShowcase signShowcaseTrueTrace .skip .x1 = .nonneg := by
+    analyzeShowcase signShowcaseTrueTrace .skip Var.x1 = .nonneg := by
   native_decide
 
 theorem analyzeShowcase_outerTrue_x0 :
     analyzeShowcase signShowcaseOuterTrueTrace
-      [imp| x1 := x0 + 1 ;; if x1 then x0 := x1 + x0 else x0 := 0] .x0 = .pos := by
+      [imp| x1 := x0 + 1 ;; if x1 then x0 := x1 + x0 else x0 := 0] Var.x0 = .pos := by
   native_decide
 
 theorem analyzeShowcase_innerTrue_assign_x0 :
-    analyzeShowcase signShowcaseInnerTrueTrace [imp| x0 := x1 + x0] .x0 = .pos := by
+    analyzeShowcase signShowcaseInnerTrueTrace [imp| x0 := x1 + x0] Var.x0 = .pos := by
   native_decide
 
 theorem analyzeShowcase_innerTrue_assign_x1 :
-    analyzeShowcase signShowcaseInnerTrueTrace [imp| x0 := x1 + x0] .x1 = .pos := by
+    analyzeShowcase signShowcaseInnerTrueTrace [imp| x0 := x1 + x0] Var.x1 = .pos := by
   native_decide
 
 theorem analyzeShowcase_falseTrace_else_x0 :
-    analyzeShowcase signShowcaseFalseTrace [imp| x1 := 0] .x0 = .bot := by
+    analyzeShowcase signShowcaseFalseTrace [imp| x1 := 0] Var.x0 = .bot := by
   native_decide
 
 /--
@@ -117,13 +117,13 @@ theorem signShowcase_trueTrace_concrete_x0_nonneg
       (.skip, σ) ∈
         liftTracePost (postStep impLTS) signShowcaseTrueTrace
           (gammaProgramSign signShowcase signShowcaseInit)) :
-    σ .x0 = 0 ∨ 0 < σ .x0 := by
+    σ Var.x0 = 0 ∨ 0 < σ Var.x0 := by
   have hGamma :
       (.skip, σ) ∈ gammaProgramSign signShowcase (analyzeShowcase signShowcaseTrueTrace) :=
     (impSignAbstraction signShowcase).soundTraceLifted signShowcaseTrueTrace signShowcaseInit hTrace
   rcases (mem_gammaProgramConfigOf_mk).1 hGamma with ⟨_, hStore⟩
-  have hx : σ .x0 ∈ gammaSign (analyzeShowcase signShowcaseTrueTrace .skip .x0) := by
-    simpa [analyzeShowcase] using hStore .x0
+  have hx : σ Var.x0 ∈ gammaSign (analyzeShowcase signShowcaseTrueTrace .skip Var.x0) := by
+    simpa [analyzeShowcase] using hStore Var.x0
   rw [analyzeShowcase_trueTrace_skip_x0] at hx
   simpa [gammaSign] using hx
 
@@ -142,8 +142,8 @@ theorem signShowcase_falseTrace_unreachable
       ([imp| x1 := 0], σ) ∈ gammaProgramSign signShowcase (analyzeShowcase signShowcaseFalseTrace) :=
     (impSignAbstraction signShowcase).soundTraceLifted signShowcaseFalseTrace signShowcaseInit hTrace
   rcases (mem_gammaProgramConfigOf_mk).1 hGamma with ⟨_, hStore⟩
-  have hx : σ .x0 ∈ gammaSign (analyzeShowcase signShowcaseFalseTrace [imp| x1 := 0] .x0) := by
-    simpa [analyzeShowcase] using hStore .x0
+  have hx : σ Var.x0 ∈ gammaSign (analyzeShowcase signShowcaseFalseTrace [imp| x1 := 0] Var.x0) := by
+    simpa [analyzeShowcase] using hStore Var.x0
   rw [analyzeShowcase_falseTrace_else_x0] at hx
   simp [gammaSign] at hx
 
