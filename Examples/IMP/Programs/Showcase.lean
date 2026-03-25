@@ -1,6 +1,13 @@
 import Examples.IMP.Analysis.Sign
 import Examples.IMP.Pretty
 
+/-!
+Flagship end-to-end IMP case study for the repository.
+
+This file exercises the generic Sign analysis over the canonical labeled IMP
+LTS, rather than introducing a separate program-specific toy LTS.
+-/
+
 namespace Examples.IMP.Programs
 
 open AbsInterpLTS

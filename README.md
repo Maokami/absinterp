@@ -1,49 +1,77 @@
 # absinterp-lts
 
-`absinterp-lts` is an independent Lean 4 repository for reusable abstract interpretation constructions over CSLib semantics.
+`absinterp-lts` is a Lean 4 repository for reusable abstract interpretation
+constructions over CSLib-style LTS semantics.
 
-## Project status
+The project has two linked goals:
 
-The project now has a usable core:
+1. Build a reusable abstract interpretation framework in Lean 4, centered on
+   CSLib's labeled transition system view of semantics.
+2. Validate that framework on a small but nontrivial language by implementing a
+   generic abstract interpreter for loop-free IMP over the canonical IMP LTS.
 
-- a reusable `gamma`-only abstract interpretation framework over LTS-style semantics
-- a CSLib-LTS instantiation with soundness lifting from one-step to traces
-- collecting-semantics infrastructure and a collecting/trace bridge
-- concrete Sign and Interval domains
-- a loop-free IMP case study showing how to build a generic abstract interpreter on top of the framework
+The long-term direction is to mature the reusable pieces toward upstream CSLib
+contribution, rather than treating this repository as a one-off example dump.
 
-The remaining staged work is mostly about broadening coverage: more domains,
-more iteration/fixpoint case studies, and richer language examples.
+## What is in place
 
-## Initial architecture
+- A reusable `gamma`-only domain interface, following the soundness-first
+  approach from Leroy's N40AI notes.
+- A framework layer for concrete/abstract transformers, trace lifting, and
+  soundness from one-step transformers to traces.
+- A CSLib-LTS instantiation layer that packages those abstractions for labeled
+  transition systems.
+- Concrete Sign and Interval domains.
+- A loop-free IMP example suite whose main case study is a generic Sign
+  analysis over the canonical labeled IMP LTS.
 
-- `AbsInterpLTS/Framework`: language-agnostic abstract interpretation framework.
-  - `Semantics`: concrete/abstract transformer interfaces and trace lifting.
-  - `Soundness`: one-step/trace soundness predicates and lifting obligations.
-  - `Iteration`: iterative approximation scaffolding.
-- `AbsInterpLTS/Instances/LTS`: CSLib-LTS instance of the framework.
-  - `Semantics`: LTS concrete semantics and LTS-specific properties.
-  - `Instantiation`: framework-to-LTS abstraction/soundness instantiation layer.
-  - `Analyses`: domain-specific analysis instances over LTS (staged).
-- `AbsInterpLTS/Domains`: sign and interval domain interfaces.
-- `Examples/IMP`: a loop-free IMP case study with a generic Sign analysis over
-  the canonical IMP LTS.
+## Repository map
+
+- `AbsInterpLTS/Framework`
+  Generic reusable core: semantic transformers, soundness, and iteration
+  scaffolding.
+- `AbsInterpLTS/Instances/LTS`
+  CSLib-LTS-specific semantics and the instantiation layer that lifts local
+  step soundness to trace soundness.
+- `AbsInterpLTS/Domains`
+  Concrete abstract domains currently used in the repository.
+- `Examples/IMP`
+  IMP example suite.
+  The main path is:
+  `Syntax`/`Semantics`/`LTS` -> `Analysis/Sign` -> `Programs/Showcase`.
+  Tutorial mini-examples live under `Programs/Tutorial`.
+- `Tests`
+  Smoke tests and theorem-level regression checks across framework, domains,
+  LTS instances, and IMP examples.
+
+## Reading order
+
+- Start with `AbsInterpLTS/Framework` if you want the reusable theory.
+- Read `AbsInterpLTS/Instances/LTS` next to see how the framework is connected
+  to CSLib-style LTS semantics.
+- Read `Examples/IMP/Analysis/Sign` and `Examples/IMP/Programs/Showcase` for
+  the flagship end-to-end case study.
+- Read `Examples/IMP/Programs/Tutorial` only if you want the smaller teaching
+  examples first.
 
 ## Build and test
 
 ```bash
 lake build
-lake build Examples
 lake build Tests
 lake test
 ```
 
-`lake build` builds the main library and the example library. `lake test`
-checks that the default libraries and the test suite both compile.
+- `lake build` builds the default libraries: `AbsInterpLTS` and `Examples`.
+- `lake build Tests` compiles the theorem-style regression suite.
+- `lake test` runs the repository test driver, which checks the default
+  libraries and the test suite together.
 
 ## Development workflow
 
-1. Create an issue from the staged work-item template.
+1. Open a focused issue with Goal, Scope, Deliverables, and Acceptance
+   Criteria.
 2. Create a branch `issue-<n>-<short-slug>`.
-3. Implement a single staged work item.
-4. Open a PR with a Conventional title.
+3. Keep changes limited to one coherent work item.
+4. Open a PR with a Conventional title and the repository PR template.
+5. Validate with `lake build`, `lake build Tests`, and `lake test`.
