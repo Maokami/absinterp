@@ -1,4 +1,3 @@
 import AbsInterpLTS.Framework.Semantics.TraceLift
 import AbsInterpLTS.Framework.Semantics.Concrete
-import AbsInterpLTS.Framework.Semantics.Collecting
 import AbsInterpLTS.Framework.Semantics.Abstract
