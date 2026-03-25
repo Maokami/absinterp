@@ -15,6 +15,9 @@ inductive Interval where
   | top
   deriving DecidableEq, Repr
 
+instance : Bot Interval where
+  bot := .bot
+
 /--
 Public smart constructor.
 Invalid bounds (`lo > hi`) are normalized to `⊥`.
@@ -336,7 +339,7 @@ theorem assumeZeroInterval_sound
   subst hZero
   rw [← gammaInterval_normalize a] at hn
   cases hna : normalize a with
-  | bot => simp [assumeZeroInterval, hna, gammaInterval] at hn
+  | bot => simp [hna, gammaInterval] at hn
   | top =>
       simp [assumeZeroInterval, hna]
       exact (mem_gammaInterval_mk_iff 0 0 0).2 ⟨le_rfl, le_rfl⟩
