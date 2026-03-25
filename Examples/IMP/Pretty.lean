@@ -18,6 +18,7 @@ scoped syntax "(" imp_stmt ")" : imp_stmt
 scoped syntax ident " := " imp_expr : imp_stmt
 scoped syntax:60 imp_stmt:61 " ;; " imp_stmt:60 : imp_stmt
 scoped syntax "if " imp_expr " then " imp_stmt " else " imp_stmt : imp_stmt
+scoped syntax "while " imp_expr " do " imp_stmt : imp_stmt
 
 syntax "[imp_expr| " imp_expr "]" : term
 syntax "[imp| " imp_stmt "]" : term
@@ -48,5 +49,7 @@ macro_rules
       `(Stmt.seq [imp| $s1] [imp| $s2])
   | `([imp| if $cond:imp_expr then $s1:imp_stmt else $s2:imp_stmt]) =>
       `(Stmt.ite [imp_expr| $cond] [imp| $s1] [imp| $s2])
+  | `([imp| while $cond:imp_expr do $body:imp_stmt]) =>
+      `(Stmt.while [imp_expr| $cond] [imp| $body])
 
 end Examples.IMP

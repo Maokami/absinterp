@@ -35,6 +35,13 @@ inductive ActiveIn : Stmt → Stmt → Prop where
   | iteElse {cond : Expr} {s1 s2 t : Stmt} :
       ActiveIn s2 t →
       ActiveIn (.ite cond s1 s2) t
+  | whileRoot {cond : Expr} {body : Stmt} :
+      ActiveIn (.while cond body) (.while cond body)
+  | whileDone {cond : Expr} {body : Stmt} :
+      ActiveIn (.while cond body) .skip
+  | whileBody {cond : Expr} {body t : Stmt} :
+      ActiveIn body t →
+      ActiveIn (.while cond body) (.seq t (.while cond body))
 
 /-- Every IMP program is active at its own initial control location. -/
 theorem ActiveIn.self (program : Stmt) :
@@ -48,6 +55,8 @@ theorem ActiveIn.self (program : Stmt) :
       exact ActiveIn.seqLeft ih1
   | ite =>
       exact ActiveIn.iteRoot
+  | «while» =>
+      exact ActiveIn.whileRoot
 
 /-- Restrict abstract configurations to control states active in a fixed program. -/
 def gammaProgramConfigOf

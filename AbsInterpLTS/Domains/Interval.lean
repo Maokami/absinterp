@@ -1,6 +1,7 @@
 import Cslib.Init
 import Mathlib.Data.Set.Lattice
 import AbsInterpLTS.Framework.Domains
+import AbsInterpLTS.Framework.Iteration
 
 namespace AbsInterpLTS
 namespace Domains
@@ -352,6 +353,47 @@ theorem assumeZeroInterval_sound
       · rename_i hNot
         push_neg at hNot
         omega
+
+/--
+Widening on intervals: if the new interval `b` exceeds `a`'s bounds in
+either direction, jump to `⊤`. This aggressive strategy guarantees
+termination in at most one widening step.
+-/
+def widenInterval (a b : Interval) : Interval :=
+  match normalize a, normalize b with
+  | .bot, b' => b'
+  | a', .bot => a'
+  | .top, _ => .top
+  | _, .top => .top
+  | .range lo1 hi1, .range lo2 hi2 =>
+    if lo2 < lo1 ∨ hi1 < hi2 then .top else .range lo1 hi1
+
+/-- `widenInterval` is an upper bound: `a ≤ widen a b`. -/
+theorem widenInterval_left (a b : Interval) :
+    leInterval a (widenInterval a b) := by
+  intro n hn
+  have hn' : n ∈ gammaInterval (normalize a) := by rwa [gammaInterval_normalize]
+  cases hna : normalize a <;> cases hnb : normalize b <;>
+    simp_all [widenInterval, gammaInterval]
+  case range.range lo1 hi1 lo2 hi2 =>
+    split_ifs <;> simp_all
+
+/-- `widenInterval` is an upper bound: `b ≤ widen a b`. -/
+theorem widenInterval_right (a b : Interval) :
+    leInterval b (widenInterval a b) := by
+  intro n hn
+  have hn' : n ∈ gammaInterval (normalize b) := by rwa [gammaInterval_normalize]
+  cases hna : normalize a <;> cases hnb : normalize b <;>
+    simp_all [widenInterval, gammaInterval]
+  case range.range lo1 hi1 lo2 hi2 =>
+    split_ifs <;> simp_all
+    omega
+
+/-- `widenInterval` satisfies the framework `WidenUpperBound` contract. -/
+theorem widenInterval_upperBound :
+    AbsInterpLTS.Framework.Iteration.WidenUpperBound leInterval widenInterval where
+  left := widenInterval_left
+  right := widenInterval_right
 
 /-- Gamma-only interface instance for the interval domain. -/
 def intervalGammaOnlyDomain :

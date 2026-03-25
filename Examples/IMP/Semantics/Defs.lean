@@ -27,6 +27,8 @@ inductive StepLabel where
   | seqDone
   | ifTrue
   | ifFalse
+  | whileTrue
+  | whileFalse
   deriving DecidableEq, Repr
 
 /-- Labeled small-step transition relation for IMP. -/
@@ -44,5 +46,11 @@ inductive Step : Config → StepLabel → Config → Prop where
   | if_false {cond : Expr} {s1 s2 : Stmt} {σ : Store} :
       eval σ cond = 0 →
       Step (.ite cond s1 s2, σ) .ifFalse (s2, σ)
+  | while_true {cond : Expr} {body : Stmt} {σ : Store} :
+      eval σ cond ≠ 0 →
+      Step (.while cond body, σ) .whileTrue (.seq body (.while cond body), σ)
+  | while_false {cond : Expr} {body : Stmt} {σ : Store} :
+      eval σ cond = 0 →
+      Step (.while cond body, σ) .whileFalse (.skip, σ)
 
 end Examples.IMP

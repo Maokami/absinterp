@@ -134,6 +134,20 @@ def transferProgramSign :
       joinConfigSign
         (transferProgramSign s1 μ κ)
         (transferProgramSign s2 μ κ)
+  | .while cond body, .whileTrue, κ =>
+      singletonConfigSign
+        (.seq body (.while cond body))
+        (assumeTrueStore cond (κ (.while cond body)))
+  | .while cond body, .whileFalse, κ =>
+      singletonConfigSign .skip
+        (assumeFalseStore cond (κ (.while cond body)))
+  | .while cond body, .seqStep μ, κ =>
+      liftSeqConfig (.while cond body)
+        (transferProgramSign body μ (seqView (.while cond body) κ))
+  | .while cond body, .seqDone, κ =>
+      singletonConfigSign (.while cond body)
+        ((seqView (.while cond body) κ) .skip)
+  | .while _ _, _, _ => botConfigSign
 termination_by program _ _ => program
 
 /-- Package the generic Sign transfer as a framework step transformer. -/
