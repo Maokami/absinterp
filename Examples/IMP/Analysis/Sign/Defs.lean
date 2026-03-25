@@ -1,7 +1,9 @@
 import Cslib.Init
 import Mathlib.Data.Set.Lattice
 
-import AbsInterpLTS
+import AbsInterpLTS.Domains
+import AbsInterpLTS.Framework
+import AbsInterpLTS.Instances.LTS
 import Examples.IMP.Analysis.Common
 import Examples.IMP.LTS
 import Examples.IMP.Semantics
@@ -13,6 +15,14 @@ open AbsInterpLTS.Domains
 open AbsInterpLTS.Framework
 open AbsInterpLTS.Framework.Domains
 open AbsInterpLTS.Instances.LTS
+
+/-!
+Definitions for the generic Sign analysis over the canonical IMP LTS.
+
+This file contains the executable transfer machinery and abstract-state
+shaping helpers. Proof-oriented lemmas live in `Lemmas.lean`, and the main
+soundness induction lives in `Soundness.lean`.
+-/
 
 /-- Convenient alias for the lifted Sign config domain on IMP configurations. -/
 abbrev impConfigSignDomain : GammaOnlyDomain (ConfigSharp Sign) Config :=

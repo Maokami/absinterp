@@ -1,7 +1,9 @@
 import Cslib.Init
 import Cslib.Foundations.Semantics.LTS.Basic
 
-import AbsInterpLTS
+import AbsInterpLTS.Domains
+import AbsInterpLTS.Framework
+import AbsInterpLTS.Instances.LTS
 
 import Examples.IMP.Semantics
 
@@ -14,7 +16,7 @@ The transfer function exploits branch conditions for precision:
 - `takeElse` guard (`x0 = 0`) pins the result to `.zero`
 -/
 
-namespace Examples.IMP.Programs
+namespace Examples.IMP.Programs.Tutorial
 
 open AbsInterpLTS
 open AbsInterpLTS.Domains
@@ -112,4 +114,4 @@ example :
       (liftTracePostSharp transferBranch) :=
   branchSignAbstraction.soundTraceLifted
 
-end Examples.IMP.Programs
+end Examples.IMP.Programs.Tutorial

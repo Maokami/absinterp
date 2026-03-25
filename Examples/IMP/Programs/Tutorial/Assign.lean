@@ -1,7 +1,9 @@
 import Cslib.Init
 import Cslib.Foundations.Semantics.LTS.Basic
 
-import AbsInterpLTS
+import AbsInterpLTS.Domains
+import AbsInterpLTS.Framework
+import AbsInterpLTS.Instances.LTS
 
 import Examples.IMP.Semantics
 
@@ -15,7 +17,7 @@ End-to-end demonstration of the abstract interpretation framework:
 4. Obtain trace soundness automatically (`soundTraceLifted`)
 -/
 
-namespace Examples.IMP.Programs
+namespace Examples.IMP.Programs.Tutorial
 
 open AbsInterpLTS
 open AbsInterpLTS.Domains
@@ -61,4 +63,4 @@ example :
       (liftTracePostSharp transferAssign) :=
   assignSignAbstraction.soundTraceLifted
 
-end Examples.IMP.Programs
+end Examples.IMP.Programs.Tutorial

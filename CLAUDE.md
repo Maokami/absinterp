@@ -2,154 +2,104 @@
 
 ## Project Overview
 
-A reusable abstract interpretation framework built on [cslib](https://github.com/leanprover/cslib) LTS foundations, targeting eventual cslib contribution. Based on the **gamma-only** approach from Xavier Leroy's "Mechanizing Abstract Interpretation" (N40AI, 2024).
+`absinterp-lts` is a Lean 4 repository for reusable abstract interpretation
+infrastructure over CSLib-style LTS semantics.
 
-**Key design principle**: No `α` (abstraction function). Only `γ` (concretization). Soundness-first, no optimality guarantees required.
+The repository is not just collecting toy examples. Its intended shape is:
+
+1. A reusable framework layer that could plausibly inform upstream CSLib work.
+2. A CSLib-LTS instantiation layer that turns local step soundness obligations
+   into trace soundness results.
+3. A concrete end-to-end validation path through loop-free IMP, where a generic
+   abstract interpreter is built over the canonical IMP LTS.
+
+The core design choice is **gamma-only** abstraction: no `alpha`, no Galois
+connection requirement, soundness first.
 
 ## Build & Test
 
 ```bash
-lake build              # Build default libraries (AbsInterpLTS, Examples)
-lake build Examples     # Build example library explicitly
-lake build Tests        # Build test suite
-lake test               # Run test driver (includes build)
+lake build              # Build default libraries: AbsInterpLTS, Examples
+lake build Tests        # Build theorem/regression suite
+lake test               # Run the repository test driver
 ```
 
-All three must pass before any PR. CI runs `lake test` on every push/PR via `.github/workflows/lean_ci.yml`.
+All three should pass before opening a PR.
 
-## Dependencies
+## Repository Architecture
 
-- **mathlib** and **cslib**: pinned at `v4.28.0-rc1` in `lakefile.toml`
-- cslib provides `Cslib.LTS`, `LTS.Tr`, `LTS.setImage`, `LTS.MTr`, etc.
+### Reusable core
 
-## Architecture (3 layers)
+- `AbsInterpLTS/Framework`
+  Generic semantic transformers, trace lifting, soundness interfaces, and
+  iteration scaffolding.
+- `AbsInterpLTS/Domains`
+  Concrete abstract domains used in the repository.
 
-```
-Framework/              Generic, LTS-agnostic (the reusable core)
-  Semantics/            Concrete/Abstract transformers, TraceLift, Collecting
-  Soundness/            Sound, SoundStep, SoundTrace + composition/lifting
-  Iteration/            iterateNat, kleeneNat (Kleene chain)
-  Domains/              GammaOnlyDomain interface
+### CSLib-facing layer
 
-Instances/LTS/          cslib LTS-specific instantiation
-  Semantics/            postStep, postTrace, postAny
-  Instantiation/        LTSAbstraction structure, trace soundness lifting
-  Analyses/             Sign and Interval domain hookups
+- `AbsInterpLTS/Instances/LTS`
+  CSLib-LTS semantics, collecting/trace infrastructure, and the abstraction
+  interface that packages local step soundness into reusable trace soundness.
 
-Domains/                Concrete abstract domains
-  Sign.lean             7-point sign lattice
-  Interval.lean         bot/range(lo,hi)/top interval domain
+### Validation layer
 
-Examples/IMP/           Loop-free IMP case study
-  Semantics/            Syntax, small-step semantics, and labeled IMP LTS
-  Analysis/             Generic Sign analysis over IMP configurations
-  Programs/             Small case studies and end-to-end showcase traces
-```
+- `Examples/IMP`
+  Main case-study tree.
+  Recommended reading path:
+  `Syntax` -> `Semantics` / `LTS` -> `Abstraction` -> `Analysis/Sign` ->
+  `Programs/Showcase`.
+- `Examples/IMP/Programs/Tutorial`
+  Small teaching examples with program-specific LTSs.
+- `Examples/IMP/Programs/Showcase`
+  Flagship end-to-end case study over the canonical IMP LTS.
 
-**Core theorem chain**: `SoundStep` -> `soundTrace_of_soundStep` -> `SoundTrace`
+### Tests
 
-**User obligation**: prove `SignStepSound` (or similar local 1-step condition) -> get trace soundness for free via `LTSAbstraction.soundTraceLifted`.
+- `Tests`
+  Smoke/regression files for domains, framework, LTS instances, and IMP.
 
-## Lean 4 Coding Conventions
+## File Organization Conventions
 
-### File Organization
+- Prefer `Defs.lean`, `Lemmas.lean`, `Soundness.lean`, or similarly focused
+  splits once a file stops being easy to scan.
+- Use barrel files to expose coherent public entry points for directories.
+- Keep tutorial/example code structurally separate from reusable framework code.
+- Keep namespaces aligned with conceptual ownership, not just with temporary
+  staging convenience.
 
-- **Defs/Lemmas split**: definitions go in `Foo/Defs.lean`, lemmas/theorems in `Foo/Lemmas.lean`.
-- **Barrel imports**: each directory has an aggregator file (e.g., `Semantics.lean` imports all sub-files).
-- **One concept per file**: keep files focused. Prefer small files over large monoliths.
-- **Namespace matches path**: `AbsInterpLTS.Framework.Soundness.Defs` lives at `Framework/Soundness/Defs.lean`.
+## Import Discipline
 
-### Naming
+- Framework files must not import from `Instances/`, `Domains/`, or `Examples/`.
+- `Instances/LTS` may depend on `Framework`, but not on `Examples/`.
+- `Examples/` may depend on framework and instances freely.
+- Prefer precise imports when editing focused files; use root barrels when the
+  file is intentionally exercising the public surface.
 
-- **Types/Structures**: `PascalCase` — `Post`, `PostSharp`, `CollectingStep`, `LTSAbstraction`.
-- **Definitions/Functions**: `camelCase` — `postStep`, `liftTrace`, `gammaSign`, `composePost`.
-- **Theorems/Lemmas**: `camelCase` with descriptive structure:
-  - Pattern: `property_subject_condition` — e.g., `postStep_monotone`, `joinSign_sound`.
-  - Lifting theorems: `resultProperty_of_assumption` — e.g., `soundTrace_of_soundStep`, `sound_iterateNat_of_sound`.
-  - Simp lemmas: `subject_pattern` — e.g., `liftTracePost_nil`, `liftTracePost_cons`, `kleeneNat_succ`.
-  - Membership: `mem_subject_condition` — e.g., `mem_postAny`, `mem_postAny_singleton_iff`.
-- **Concrete vs Abstract**: concrete uses plain names (`Post`, `composePost`), abstract appends `Sharp` (`PostSharp`, `composePostSharp`).
-- **Private helpers**: mark with `private` for file-internal lemmas (e.g., `private theorem composePost_assoc`).
+## Proof and Code Style
 
-### Type Aliases and Abbreviations
-
-- Use `abbrev` for transparent type aliases that should unfold: `abbrev Post (State) := Set State -> Set State`.
-- Use `def` for opaque definitions that should not auto-unfold.
-- Universe polymorphism: use explicit `universe u v w` declarations.
-
-### Proof Style
-
-- **Tactic mode preferred** for non-trivial proofs.
-- **Term mode** acceptable for short proofs (1-2 lines) or direct applications.
-- **`calc` blocks** for chain reasoning (see `sound_iterateNat_of_sound`).
-- **Structure proofs by cases**: use `cases ... with` or `rcases` for inductive types.
-- **Induction**: prefer `induction ... with` syntax with named cases (`| nil =>`, `| cons label labels ih =>`).
-- **Avoid `sorry`**: all theorems must be fully proved. Use `sorry` only during development, never in committed code.
-- **`simp` discipline**:
-  - Mark definitional unfolding lemmas with `@[simp]` (e.g., `reachF_apply`, `kleeneNat_succ`).
-  - Use `simp [specific_lemmas]` rather than bare `simp` when possible.
-  - Use `simpa` for simplification + exact matching.
-- **`omega`** for integer/natural number arithmetic goals.
-- **Monotonicity arguments**: the pattern `hMono (h_subset)` to transport subset through monotone functions is common throughout.
-- **`change` tactic**: use to rewrite goal/hypothesis to a definitionally equal but more readable form (see `Sign.lean` proofs).
-- **Proof decomposition**: factor auxiliary steps into `have` bindings for readability.
-- **`exact`/`apply`** over `assumption`: be explicit about which lemma closes the goal.
-
-### Definitions and Structures
-
-- **Structure fields**: use descriptive names matching framework vocabulary (`lts`, `gamma`, `transfer`, `soundStep`).
-- **Constructors**: provide convenience constructors when the structure has many fields (e.g., `LTSAbstraction.ofExplicit`).
-- **Section/variable**: use `section`/`variable` to factor common parameters in related definitions.
-- **Docstrings**: use `/-- ... -/` for all public definitions and theorems. Keep them concise (1-2 sentences). Use `/-! ... -/` for module-level documentation.
-
-### Import Discipline
-
-- Import `Cslib.Init` as baseline for cslib interop.
-- Import specific Mathlib modules (e.g., `Mathlib.Data.Set.Lattice`, `Mathlib.Order.Monotone.Defs`) rather than bulk imports.
-- Framework files must NOT import from `Instances/` or `Domains/` (layering invariant).
+- Do not change theorem statements or introduce new axioms unless explicitly
+  requested.
+- Use LSP-first Lean debugging: goals, diagnostics, hover, local search, then
+  broader search.
+- Separate executable definitions from proof-support lemmas when possible.
+- Prefer direct, descriptive theorem names over short local shorthand.
+- Keep public docstrings concise and factual.
 
 ## Workflow Conventions
 
-### Branching
-
-- Branch name: `issue-<n>-<short-slug>` (e.g., `issue-29-gamma-only-core-split`).
 - One issue per branch, one branch per PR.
+- Branches follow `issue-<n>-<short-slug>`.
+- Commits use Conventional format:
+  `feat|refactor|fix|test|chore(scope): description`
+- PRs should use the repo template and include:
+  Summary, Linked issue, Scope, Validation.
+- Squash merge is the preferred default.
 
-### Commits
+## Current Quality Bar
 
-- Conventional commits: `feat|refactor|fix|test|chore(scope): description`
-- Examples from history:
-  - `feat(interval): prove meetInterval soundness`
-  - `refactor(framework): extract gamma-only domain contract and wire Sign/Interval`
-  - `test(lts): add postTrace bridge smoke checks`
-
-### Pull Requests
-
-- Title: Conventional format, under 70 characters.
-- Use the PR template (Summary, Linked issue, Scope, Validation checklist).
-- Always link to the issue with `Closes #N`.
-- **Squash merge** preferred: merge via `gh pr merge --squash` so each PR becomes a single atomic commit on `main`.
-
-### Issues
-
-- Use the staged work item template.
-- Must include: Goal, Scope, Out of Scope, Deliverables, Acceptance Criteria.
-- All acceptance criteria include `lake build`, `lake build Tests`, `lake test` passing.
-
-## Active Milestones
-
-- **M4**: Semantics Extensions (weak/tau, omega) — see #16
-- **M5**: N40AI Gamma-Only Core Alignment — see #33
-
-## Lean LSP MCP Tools
-
-When writing or debugging proofs, use MCP tools:
-
-- `lean_goal`: check proof state at a position (most frequently used)
-- `lean_diagnostic_messages`: check for compiler errors
-- `lean_hover_info`: inspect type signatures
-- `lean_multi_attempt`: test multiple tactics without editing (`["simp", "omega", "tauto"]`)
-- `lean_local_search`: find local declarations by name
-- `lean_leansearch` / `lean_loogle`: search mathlib for lemmas
-- `lean_state_search`: find lemmas that close a goal
-- `lean_build`: rebuild after adding new imports (slow, use sparingly)
+- `main` should stay readable as a Lean project, not just as a proof dump.
+- The top-level docs should always explain the repo through the CSLib/LTS ->
+  generic framework -> IMP case-study story.
+- The canonical IMP Sign analysis is the flagship validation path and should
+  remain easy to find from the root of the repository.
