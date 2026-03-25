@@ -1,7 +1,7 @@
 import Cslib.Init
 
 import AbsInterpLTS.Framework.Soundness
-import Examples.IMP.Abstraction
+import Examples.IMP.Abstraction.Defs
 
 namespace Examples.IMP
 

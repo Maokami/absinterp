@@ -4,7 +4,7 @@ import Mathlib.Data.Set.Lattice
 import AbsInterpLTS.Domains
 import AbsInterpLTS.Framework
 import AbsInterpLTS.Instances.LTS
-import Examples.IMP.Analysis.Common
+import Examples.IMP.Abstraction
 import Examples.IMP.LTS
 import Examples.IMP.Semantics
 
