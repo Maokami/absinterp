@@ -8,7 +8,12 @@ Axiom-cleanliness reference for upstream-candidate theorems.
 
 The reusable soundness path (Framework → Instances/LTS → IMP step
 soundness) must use only standard axioms: `propext`, `Quot.sound`,
-`Classical.choice`. No `Lean.ofReduceBool` or `Lean.trustCompiler`.
+`Classical.choice`. The non-standard compiler-trusting axioms
+`Lean.ofReduceBool` and `Lean.trustCompiler` (introduced by
+`native_decide`) must not appear.
+
+`Classical.choice` is expected and acceptable — it arises from
+classical reasoning in set-membership proofs, not from unsafe reduction.
 
 Run `lake build Tests` and inspect the output, or use the `lean_verify`
 MCP tool, to confirm axiom cleanliness of these theorems.
