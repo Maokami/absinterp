@@ -15,6 +15,9 @@ inductive Interval where
   | top
   deriving DecidableEq, Repr
 
+instance : Bot Interval where
+  bot := .bot
+
 /--
 Public smart constructor.
 Invalid bounds (`lo > hi`) are normalized to `⊥`.
@@ -232,6 +235,123 @@ theorem negIntervalTransfer_sound {a : Interval} {n : Int} (hn : n ∈ gammaInte
         simp [mk, hNorm]
       simpa [negIntervalTransfer, normalize, hMk] using
         (mem_gammaInterval_mk_iff (-hi) (-lo) (-n)).2 hMem
+
+/-- Exact interval for an integer literal. -/
+def constInterval (n : Int) : Interval :=
+  mk n n
+
+/-- `constInterval` contains the concrete integer it abstracts. -/
+theorem constInterval_sound (n : Int) :
+    n ∈ gammaInterval (constInterval n) := by
+  simpa [constInterval] using
+    (mem_gammaInterval_mk_iff n n n).2 ⟨le_rfl, le_rfl⟩
+
+/--
+Sound abstract addition on intervals.
+
+For bounded intervals, the result bounds are the sums of the input bounds.
+-/
+def addIntervalTransfer (a b : Interval) : Interval :=
+  match normalize a, normalize b with
+  | .bot, _ => .bot
+  | _, .bot => .bot
+  | .top, _ => .top
+  | _, .top => .top
+  | .range lo1 hi1, .range lo2 hi2 => mk (lo1 + lo2) (hi1 + hi2)
+
+/-- `addIntervalTransfer` soundly abstracts integer addition. -/
+theorem addIntervalTransfer_sound
+    {a b : Interval} {m n : Int}
+    (hm : m ∈ gammaInterval a)
+    (hn : n ∈ gammaInterval b) :
+    m + n ∈ gammaInterval (addIntervalTransfer a b) := by
+  rw [← gammaInterval_normalize a] at hm
+  rw [← gammaInterval_normalize b] at hn
+  cases hna : normalize a <;> cases hnb : normalize b <;>
+    simp [addIntervalTransfer, hna, hnb, gammaInterval] at hm hn ⊢
+  case range.range lo1 hi1 lo2 hi2 =>
+    rcases hm with ⟨hLo1, hHi1⟩
+    rcases hn with ⟨hLo2, hHi2⟩
+    exact (mem_gammaInterval_mk_iff _ _ _).2 ⟨by omega, by omega⟩
+
+/-- Refine an interval by assuming the concrete value is nonzero.
+
+For intervals straddling zero, this returns the original interval since
+intervals are convex and cannot represent the gap. Precision is lost but
+soundness is preserved.
+-/
+def assumeNonzeroInterval (a : Interval) : Interval :=
+  match normalize a with
+  | .bot => .bot
+  | .top => .top
+  | .range lo hi =>
+      if hi < 0 then .range lo hi
+      else if 0 < lo then .range lo hi
+      else if lo = 0 ∧ hi = 0 then .bot
+      else if lo = 0 then mk 1 hi
+      else if hi = 0 then mk lo (-1)
+      else .range lo hi  -- straddles 0: keep as is (sound but imprecise)
+
+/-- `assumeNonzeroInterval` is sound for a concrete witness known to be nonzero. -/
+theorem assumeNonzeroInterval_sound
+    {a : Interval} {n : Int}
+    (hn : n ∈ gammaInterval a)
+    (hNe : n ≠ 0) :
+    n ∈ gammaInterval (assumeNonzeroInterval a) := by
+  rw [← gammaInterval_normalize a] at hn
+  cases hna : normalize a with
+  | bot => simp [hna, gammaInterval] at hn
+  | top => simp [assumeNonzeroInterval, hna, gammaInterval]
+  | range lo hi =>
+      simp [hna, gammaInterval] at hn
+      rcases hn with ⟨hLo, hHi⟩
+      simp only [assumeNonzeroInterval, hna]
+      split
+      · exact ⟨hLo, hHi⟩
+      · split
+        · exact ⟨hLo, hHi⟩
+        · split
+          · rename_i _ _ hBoth
+            rcases hBoth with ⟨hlo0, hhi0⟩
+            omega
+          · split
+            · rename_i hNotNeg hNotPos hNotBoth hlo0
+              exact (mem_gammaInterval_mk_iff _ _ _).2 ⟨by omega, hHi⟩
+            · split
+              · rename_i hNotNeg hNotPos hNotBoth hNotLo hhi0
+                exact (mem_gammaInterval_mk_iff _ _ _).2 ⟨hLo, by omega⟩
+              · exact ⟨hLo, hHi⟩
+
+/-- Refine an interval by assuming the concrete value is exactly zero. -/
+def assumeZeroInterval (a : Interval) : Interval :=
+  match normalize a with
+  | .bot => .bot
+  | .top => mk 0 0
+  | .range lo hi =>
+      if lo ≤ 0 ∧ 0 ≤ hi then mk 0 0 else .bot
+
+/-- `assumeZeroInterval` is sound for a concrete witness known to be zero. -/
+theorem assumeZeroInterval_sound
+    {a : Interval} {n : Int}
+    (hn : n ∈ gammaInterval a)
+    (hZero : n = 0) :
+    n ∈ gammaInterval (assumeZeroInterval a) := by
+  subst hZero
+  rw [← gammaInterval_normalize a] at hn
+  cases hna : normalize a with
+  | bot => simp [hna, gammaInterval] at hn
+  | top =>
+      simp [assumeZeroInterval, hna]
+      exact (mem_gammaInterval_mk_iff 0 0 0).2 ⟨le_rfl, le_rfl⟩
+  | range lo hi =>
+      simp [hna, gammaInterval] at hn
+      rcases hn with ⟨hLo, hHi⟩
+      simp only [assumeZeroInterval, hna]
+      split
+      · exact (mem_gammaInterval_mk_iff 0 0 0).2 ⟨le_rfl, le_rfl⟩
+      · rename_i hNot
+        push_neg at hNot
+        omega
 
 /-- Gamma-only interface instance for the interval domain. -/
 def intervalGammaOnlyDomain :

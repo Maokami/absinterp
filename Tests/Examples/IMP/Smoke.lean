@@ -30,14 +30,12 @@ example :
 example :
     (transferProgramSign branchOnX0 .ifTrue (initAt branchOnX0 branchInitStore))
       (.assign .x1 (.lit 1)) .x0 = .pos := by
-  simp [transferProgramSign, branchOnX0, initAt, singletonConfigSign, branchInitStore,
-    assumeTrueStore, assumeNonzero, botConfigSign, botStoreSign]
+  native_decide
 
 example :
     (transferProgramSign branchOnX0 .ifFalse (initAt branchOnX0 branchInitStore))
       (.assign .x1 (.lit 0)) .x0 = .zero := by
-  simp [transferProgramSign, branchOnX0, initAt, singletonConfigSign, branchInitStore,
-    assumeFalseStore, assumeZero, botConfigSign, botStoreSign]
+  native_decide
 
 example :
     SoundTrace
