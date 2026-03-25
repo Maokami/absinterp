@@ -22,11 +22,8 @@ scoped syntax "if " imp_expr " then " imp_stmt " else " imp_stmt : imp_stmt
 syntax "[imp_expr| " imp_expr "]" : term
 syntax "[imp| " imp_stmt "]" : term
 
-private def expandImpVar (x : TSyntax `ident) : MacroM (TSyntax `term) := do
-  match x.getId with
-  | `x0 => `(Var.x0)
-  | `x1 => `(Var.x1)
-  | _ => Macro.throwErrorAt x "unknown IMP variable; expected `x0` or `x1`"
+private def expandImpVar (x : TSyntax `ident) : MacroM (TSyntax `term) :=
+  return Lean.quote (toString x.getId)
 
 macro_rules
   | `([imp_expr| $n:num]) =>

@@ -26,8 +26,8 @@ soundness induction.
     σ ∈ gammaStoreOf gammaInterval botStoreInterval ↔ False := by
   constructor
   · intro hBot
-    have hx0 : σ .x0 ∈ gammaInterval (botStoreInterval .x0) := hBot .x0
-    change σ .x0 ∈ (∅ : Set Int) at hx0
+    have hx0 : σ Var.x0 ∈ gammaInterval (botStoreInterval Var.x0) := hBot Var.x0
+    change σ Var.x0 ∈ (∅ : Set Int) at hx0
     rw [Set.mem_empty_iff_false] at hx0
     exact hx0
   · intro hFalse

@@ -13,28 +13,27 @@ open Examples.IMP
 open Examples.IMP.Programs
 
 def assignFive : Stmt :=
-  .assign .x0 (.lit 5)
+  .assign Var.x0 (.lit 5)
 
 def branchOnX0 : Stmt :=
-  .ite (.var .x0) (.assign .x1 (.lit 1)) (.assign .x1 (.lit 0))
+  .ite (.var Var.x0) (.assign Var.x1 (.lit 1)) (.assign Var.x1 (.lit 0))
 
-def branchInitStore : StoreSharp Sign
-  | .x0 => .nonneg
-  | .x1 => .top
+def branchInitStore : StoreSharp Sign := fun x =>
+  if x = Var.x0 then .nonneg else .top
 
 example :
-    (transferProgramSign assignFive .assign (initAt assignFive topStoreSign)) .skip .x0 = .pos := by
+    (transferProgramSign assignFive .assign (initAt assignFive topStoreSign)) .skip Var.x0 = .pos := by
   simp [transferProgramSign, assignFive, initAt, singletonConfigSign,
-    updateStoreSharp, evalSignExpr, constSign]
+    updateStoreSharp, evalSignExpr, constSign, Var.x0]
 
 example :
     (transferProgramSign branchOnX0 .ifTrue (initAt branchOnX0 branchInitStore))
-      (.assign .x1 (.lit 1)) .x0 = .pos := by
+      (.assign Var.x1 (.lit 1)) Var.x0 = .pos := by
   native_decide
 
 example :
     (transferProgramSign branchOnX0 .ifFalse (initAt branchOnX0 branchInitStore))
-      (.assign .x1 (.lit 0)) .x0 = .zero := by
+      (.assign Var.x1 (.lit 0)) Var.x0 = .zero := by
   native_decide
 
 example :
@@ -45,11 +44,11 @@ example :
   (impSignAbstraction branchOnX0).soundTraceLifted
 
 example :
-    analyzeShowcase signShowcaseTrueTrace .skip .x0 = .nonneg :=
+    analyzeShowcase signShowcaseTrueTrace .skip Var.x0 = .nonneg :=
   analyzeShowcase_trueTrace_skip_x0
 
 example :
-    analyzeShowcase signShowcaseFalseTrace [imp| x1 := 0] .x0 = .bot :=
+    analyzeShowcase signShowcaseFalseTrace [imp| x1 := 0] Var.x0 = .bot :=
   analyzeShowcase_falseTrace_else_x0
 
 end ExamplesIMPSmoke

@@ -2,11 +2,15 @@ import Cslib.Init
 
 namespace Examples.IMP
 
-/-- Program variables for the IMP language. Two variables suffice for examples. -/
-inductive Var where
-  | x0
-  | x1
-  deriving DecidableEq, Repr
+/-- Program variables for the IMP language, represented as strings for extensibility. -/
+abbrev Var := String
+
+namespace Var
+/-- Standard variable name used in examples. -/
+def x0 : Var := "x0"
+/-- Standard variable name used in examples. -/
+def x1 : Var := "x1"
+end Var
 
 /-- Arithmetic expressions: integer literals, variable reads, and addition. -/
 inductive Expr where

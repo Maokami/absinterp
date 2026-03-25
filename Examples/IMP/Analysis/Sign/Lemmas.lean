@@ -26,8 +26,8 @@ soundness induction.
     σ ∈ gammaStoreOf gammaSign botStoreSign ↔ False := by
   constructor
   · intro hBot
-    have hx0 : σ .x0 ∈ gammaSign (botStoreSign .x0) := hBot .x0
-    change σ .x0 ∈ (∅ : Set Int) at hx0
+    have hx0 : σ Var.x0 ∈ gammaSign (botStoreSign Var.x0) := hBot Var.x0
+    change σ Var.x0 ∈ (∅ : Set Int) at hx0
     rw [Set.mem_empty_iff_false] at hx0
     exact hx0
   · intro hFalse

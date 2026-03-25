@@ -34,11 +34,11 @@ def gammaProgramSign (program : Stmt) : AbsInterpLTS.Framework.Gamma (ConfigShar
 
 /-- Bottom abstract store for IMP Sign analysis. -/
 def botStoreSign : StoreSharp Sign :=
-  fun _ => .bot
+  botStoreSharp
 
 /-- Bottom abstract configuration for IMP Sign analysis. -/
 def botConfigSign : ConfigSharp Sign :=
-  fun _ => botStoreSign
+  botConfigSharp
 
 @[simp] theorem botStoreSign_apply (x : Var) :
     botStoreSign x = .bot := rfl
@@ -50,29 +50,6 @@ def botConfigSign : ConfigSharp Sign :=
 def topStoreSign : StoreSharp Sign :=
   fun _ => .top
 
-/-- Pointwise update of an abstract IMP store. -/
-def updateStoreSharp
-    (ρ : StoreSharp Sign)
-    (x : Var)
-    (a : Sign) :
-    StoreSharp Sign :=
-  fun y => if x = y then a else ρ y
-
-@[simp] theorem updateStoreSharp_same
-    (ρ : StoreSharp Sign)
-    (x : Var)
-    (a : Sign) :
-    updateStoreSharp ρ x a x = a := by
-  simp [updateStoreSharp]
-
-@[simp] theorem updateStoreSharp_other
-    (ρ : StoreSharp Sign)
-    (x y : Var)
-    (a : Sign)
-    (hNe : x ≠ y) :
-    updateStoreSharp ρ x a y = ρ y := by
-  simp [updateStoreSharp, hNe]
-
 /-- One-target abstract configuration contribution. -/
 def singletonConfigSign
     (target : Stmt)
@@ -80,33 +57,11 @@ def singletonConfigSign
     ConfigSharp Sign :=
   fun s => if s = target then ρ else botStoreSign
 
-/-- Initial abstract configuration focused at a program entry point. -/
-def initAt
-    (program : Stmt)
-    (ρ : StoreSharp Sign) :
-    ConfigSharp Sign :=
-  singletonConfigSign program ρ
-
-/-- View the left phase of a sequence as a standalone abstract sub-configuration. -/
-def seqView
-    (s2 : Stmt)
-    (κ : ConfigSharp Sign) :
-    ConfigSharp Sign :=
-  fun s => κ (.seq s s2)
-
-/-- Re-attach a sequence suffix to every control location in an abstract sub-configuration. -/
-def liftSeqConfig
-    (s2 : Stmt)
-    (κ : ConfigSharp Sign) :
-    ConfigSharp Sign
-  | .seq s s2' => if s2' = s2 then κ s else botStoreSign
-  | _ => botStoreSign
-
 /-- Join on IMP Sign abstract configurations. -/
-def joinConfigSign
+abbrev joinConfigSign
     (κ₁ κ₂ : ConfigSharp Sign) :
     ConfigSharp Sign :=
-  impConfigSignDomain.join κ₁ κ₂
+  joinConfig signGammaOnlyDomain κ₁ κ₂
 
 @[simp] theorem joinConfigSign_apply
     (κ₁ κ₂ : ConfigSharp Sign)

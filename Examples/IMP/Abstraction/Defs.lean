@@ -28,6 +28,32 @@ abbrev StoreSharp (Abstract : Type u) := Var → Abstract
 /-- Pointwise abstract configurations indexed by IMP control locations. -/
 abbrev ConfigSharp (Abstract : Type u) := Control → StoreSharp Abstract
 
+/-- Pointwise update of an abstract IMP store. -/
+def updateStoreSharp
+    {Abstract : Type u}
+    (ρ : StoreSharp Abstract)
+    (x : Var)
+    (a : Abstract) :
+    StoreSharp Abstract :=
+  fun y => if x = y then a else ρ y
+
+@[simp] theorem updateStoreSharp_same
+    {Abstract : Type u}
+    (ρ : StoreSharp Abstract)
+    (x : Var)
+    (a : Abstract) :
+    updateStoreSharp ρ x a x = a := by
+  simp [updateStoreSharp]
+
+@[simp] theorem updateStoreSharp_other
+    {Abstract : Type u}
+    (ρ : StoreSharp Abstract)
+    (x y : Var)
+    (a : Abstract)
+    (hNe : x ≠ y) :
+    updateStoreSharp ρ x a y = ρ y := by
+  simp [updateStoreSharp, hNe]
+
 /-- Lift a scalar concretization to IMP stores pointwise. -/
 def gammaStoreOf
     {Abstract : Type u}
@@ -55,6 +81,20 @@ def topStoreSharp
     (cfg : GammaOnlyDomain Abstract Int) :
     StoreSharp Abstract :=
   fun _ => cfg.top
+
+/-- Pointwise bottom element on abstract IMP stores. -/
+def botStoreSharp
+    {Abstract : Type u}
+    [Bot Abstract] :
+    StoreSharp Abstract :=
+  fun _ => ⊥
+
+@[simp] theorem botStoreSharp_apply
+    {Abstract : Type u}
+    [Bot Abstract]
+    (x : Var) :
+    botStoreSharp (Abstract := Abstract) x = (⊥ : Abstract) :=
+  rfl
 
 /-- Pointwise join on abstract IMP stores. -/
 def joinStoreSharp
@@ -105,12 +145,70 @@ def topConfigSharp
     ConfigSharp Abstract :=
   fun _ => cfg.top
 
+/-- Pointwise bottom element on abstract IMP configurations. -/
+def botConfigSharp
+    {Abstract : Type u}
+    [Bot Abstract] :
+    ConfigSharp Abstract :=
+  fun _ => botStoreSharp
+
+@[simp] theorem botConfigSharp_apply
+    {Abstract : Type u}
+    [Bot Abstract]
+    (s : Stmt)
+    (x : Var) :
+    botConfigSharp (Abstract := Abstract) s x = (⊥ : Abstract) :=
+  rfl
+
 /-- Pointwise join on abstract IMP configurations. -/
 def joinConfigSharp
     {Abstract : Type u}
     (cfg : GammaOnlyDomain (StoreSharp Abstract) Store) :
     ConfigSharp Abstract → ConfigSharp Abstract → ConfigSharp Abstract :=
   fun κ₁ κ₂ pc => cfg.join (κ₁ pc) (κ₂ pc)
+
+/-- One-target abstract configuration contribution. -/
+def singletonConfig
+    {Abstract : Type u}
+    [Bot Abstract]
+    (target : Stmt)
+    (ρ : StoreSharp Abstract) :
+    ConfigSharp Abstract :=
+  fun s => if s = target then ρ else botStoreSharp
+
+/-- Initial abstract configuration focused at a program entry point. -/
+def initAt
+    {Abstract : Type u}
+    [Bot Abstract]
+    (program : Stmt)
+    (ρ : StoreSharp Abstract) :
+    ConfigSharp Abstract :=
+  singletonConfig program ρ
+
+/-- View the left phase of a sequence as a standalone abstract sub-configuration. -/
+def seqView
+    {Abstract : Type u}
+    (s2 : Stmt)
+    (κ : ConfigSharp Abstract) :
+    ConfigSharp Abstract :=
+  fun s => κ (.seq s s2)
+
+/-- Re-attach a sequence suffix to every control location in an abstract sub-configuration. -/
+def liftSeqConfig
+    {Abstract : Type u}
+    [Bot Abstract]
+    (s2 : Stmt)
+    (κ : ConfigSharp Abstract) :
+    ConfigSharp Abstract
+  | .seq s s2' => if s2' = s2 then κ s else botStoreSharp
+  | _ => botStoreSharp
+
+/-- Join on IMP abstract configurations lifted from a scalar domain. -/
+def joinConfig
+    {Abstract : Type u}
+    (cfg : GammaOnlyDomain Abstract Int) :
+    ConfigSharp Abstract → ConfigSharp Abstract → ConfigSharp Abstract :=
+  joinConfigSharp (storeGammaOnlyDomain cfg)
 
 /-- Pointwise IMP-configuration domain lifted from a scalar integer domain. -/
 def configGammaOnlyDomain
