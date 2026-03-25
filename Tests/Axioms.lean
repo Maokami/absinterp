@@ -28,5 +28,11 @@ MCP tool, to confirm axiom cleanliness of these theorems.
 -- IMP: one-step soundness of the generic Sign transfer (upstream candidate)
 #print axioms Examples.IMP.soundStep_impSign
 
--- IMP: full LTS abstraction packaging (upstream candidate)
+-- IMP: full Sign LTS abstraction packaging (upstream candidate)
 #print axioms Examples.IMP.impSignAbstraction
+
+-- IMP: one-step soundness of the generic Interval transfer (upstream candidate)
+#print axioms Examples.IMP.soundStep_impInterval
+
+-- IMP: full Interval LTS abstraction packaging (upstream candidate)
+#print axioms Examples.IMP.impIntervalAbstraction
