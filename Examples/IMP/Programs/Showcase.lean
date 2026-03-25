@@ -6,6 +6,22 @@ Flagship end-to-end IMP case study for the repository.
 
 This file exercises the generic Sign analysis over the canonical labeled IMP
 LTS, rather than introducing a separate program-specific toy LTS.
+
+## Axiom note
+
+The `analyzeShowcase_*` theorems use `native_decide` to compute abstract
+results along fixed traces. This pulls in `Lean.ofReduceBool` and
+`Lean.trustCompiler`. The kernel-only `decide` tactic cannot reduce the
+recursive `transferProgramSign` computation within its limits.
+
+The semantic corollaries (`signShowcase_trueTrace_concrete_x0_nonneg`,
+`signShowcase_falseTrace_unreachable`) therefore inherit the same
+non-standard axioms.
+
+This is acceptable for validation code: the upstream-candidate soundness
+path (`soundStep_impSign`, `LTSAbstraction.soundTraceLifted`,
+`soundTrace_of_soundStep`) is axiom-clean (`propext`, `Quot.sound`,
+`Classical.choice` only).
 -/
 
 namespace Examples.IMP.Programs

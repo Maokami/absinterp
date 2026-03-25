@@ -13,3 +13,4 @@ import Tests.Instances.LTS.SignHook
 import Tests.Framework.Iteration.NatIter
 import Tests.Framework.Iteration.Widening
 import Tests.Framework.Semantics.AbstractOrder
+import Tests.Axioms
