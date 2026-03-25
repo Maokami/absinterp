@@ -54,6 +54,10 @@ theorem localStepSoundSignOfActive
           cases hStep
       | ifFalse =>
           cases hStep
+      | whileTrue =>
+          cases hStep
+      | whileFalse =>
+          cases hStep
       | seqStep μInner =>
           rcases Step.seqStep_inv hStep with ⟨innerTarget, σInner, hTarget, hStepInner⟩
           have hInnerSound :
@@ -117,6 +121,10 @@ theorem localStepSoundSignOfActive
       | ifTrue =>
           simpa [transferProgramSign] using hWrapped
       | ifFalse =>
+          simpa [transferProgramSign] using hWrapped
+      | whileTrue =>
+          simpa [transferProgramSign] using hWrapped
+      | whileFalse =>
           simpa [transferProgramSign] using hWrapped
   | iteRoot =>
       rename_i cond s1 s2
@@ -224,6 +232,20 @@ theorem localStepSoundSignOfActive
               (κ₁ := transferProgramSign s1 .seqDone κ)
               (κ₂ := transferProgramSign s2 .seqDone κ)
               hWrapped
+      | whileTrue =>
+          simpa [transferProgramSign] using
+            mem_gammaProgram_join_left
+              (program := .ite cond s1 s2)
+              (κ₁ := transferProgramSign s1 .whileTrue κ)
+              (κ₂ := transferProgramSign s2 .whileTrue κ)
+              hWrapped
+      | whileFalse =>
+          simpa [transferProgramSign] using
+            mem_gammaProgram_join_left
+              (program := .ite cond s1 s2)
+              (κ₁ := transferProgramSign s1 .whileFalse κ)
+              (κ₂ := transferProgramSign s2 .whileFalse κ)
+              hWrapped
   | iteElse hInner ih =>
       rename_i cond s1 s2 inner
       intro κ μ σ target σ' hσ hStep
@@ -286,6 +308,91 @@ theorem localStepSoundSignOfActive
               (κ₁ := transferProgramSign s1 .seqDone κ)
               (κ₂ := transferProgramSign s2 .seqDone κ)
               hWrapped
+      | whileTrue =>
+          simpa [transferProgramSign] using
+            mem_gammaProgram_join_right
+              (program := .ite cond s1 s2)
+              (κ₁ := transferProgramSign s1 .whileTrue κ)
+              (κ₂ := transferProgramSign s2 .whileTrue κ)
+              hWrapped
+      | whileFalse =>
+          simpa [transferProgramSign] using
+            mem_gammaProgram_join_right
+              (program := .ite cond s1 s2)
+              (κ₁ := transferProgramSign s1 .whileFalse κ)
+              (κ₂ := transferProgramSign s2 .whileFalse κ)
+              hWrapped
+  | whileRoot =>
+      rename_i cond body
+      intro κ μ σ target σ' hσ hStep
+      cases hStep with
+      | while_true hCond =>
+          have hStore :
+              σ ∈ gammaStoreOf gammaSign (assumeTrueStore cond (κ (.while cond body))) :=
+            mem_gammaStoreOf_assumeTrueStore hσ hCond
+          have hRoot :
+              (.seq body (.while cond body), σ) ∈
+                gammaProgramSign (.while cond body)
+                  (singletonConfigSign (.seq body (.while cond body))
+                    (assumeTrueStore cond (κ (.while cond body)))) := by
+            refine ⟨ActiveIn.whileBody (ActiveIn.self body), ?_⟩
+            simpa [singletonConfigSign] using hStore
+          simpa [transferProgramSign] using hRoot
+      | while_false hCond =>
+          have hStore :
+              σ ∈ gammaStoreOf gammaSign (assumeFalseStore cond (κ (.while cond body))) :=
+            mem_gammaStoreOf_assumeFalseStore hσ hCond
+          have hRoot :
+              (.skip, σ) ∈
+                gammaProgramSign (.while cond body)
+                  (singletonConfigSign .skip
+                    (assumeFalseStore cond (κ (.while cond body)))) := by
+            refine ⟨ActiveIn.whileDone, ?_⟩
+            simpa [singletonConfigSign] using hStore
+          simpa [transferProgramSign] using hRoot
+  | whileDone =>
+      rename_i cond body
+      intro κ μ σ target σ' hσ hStep
+      cases hStep
+  | whileBody hInner ih =>
+      rename_i cond body inner
+      intro κ μ σ target σ' hσ hStep
+      cases μ with
+      | assign =>
+          cases hStep
+      | ifTrue =>
+          cases hStep
+      | ifFalse =>
+          cases hStep
+      | whileTrue =>
+          cases hStep
+      | whileFalse =>
+          cases hStep
+      | seqStep μInner =>
+          rcases Step.seqStep_inv hStep with ⟨innerTarget, σInner, hTarget, hStepInner⟩
+          have hInnerSound :
+              (innerTarget, σInner) ∈
+                gammaProgramSign body (transferProgramSign body μInner (seqView (.while cond body) κ)) :=
+            ih (by simpa [seqView] using hσ) hStepInner
+          have hLifted :
+              (Stmt.seq innerTarget (.while cond body), σInner) ∈
+                gammaProgramSign (.while cond body)
+                  (liftSeqConfig (.while cond body) (transferProgramSign body μInner (seqView (.while cond body) κ))) := by
+            rcases hInnerSound with ⟨hActiveInner, hConfInner⟩
+            exact ⟨ActiveIn.whileBody hActiveInner, mem_gammaConfigOf_liftSeqConfig hConfInner⟩
+          cases hTarget
+          simpa [transferProgramSign] using hLifted
+      | seqDone =>
+          cases hStep
+          have hStore : σ ∈ gammaStoreOf gammaSign ((seqView (.while cond body) κ) .skip) := by
+            simpa [seqView] using hσ
+          have hProg :
+              (.while cond body, σ) ∈
+                gammaProgramSign (.while cond body)
+                  (singletonConfigSign (.while cond body) ((seqView (.while cond body) κ) .skip)) := by
+            refine ⟨ActiveIn.whileRoot, ?_⟩
+            simpa [singletonConfigSign] using hStore
+          simpa [transferProgramSign] using hProg
 
 /-- One-step soundness of the generic Sign transfer over the canonical labeled IMP LTS. -/
 theorem soundStep_impSign

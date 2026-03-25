@@ -128,6 +128,20 @@ def transferProgramInterval :
       joinConfigInterval
         (transferProgramInterval s1 μ κ)
         (transferProgramInterval s2 μ κ)
+  | .while cond body, .whileTrue, κ =>
+      singletonConfigInterval
+        (.seq body (.while cond body))
+        (assumeTrueStoreInterval cond (κ (.while cond body)))
+  | .while cond body, .whileFalse, κ =>
+      singletonConfigInterval .skip
+        (assumeFalseStoreInterval cond (κ (.while cond body)))
+  | .while cond body, .seqStep μ, κ =>
+      liftSeqConfig (.while cond body)
+        (transferProgramInterval body μ (seqView (.while cond body) κ))
+  | .while cond body, .seqDone, κ =>
+      singletonConfigInterval (.while cond body)
+        ((seqView (.while cond body) κ) .skip)
+  | .while _ _, _, _ => botConfigInterval
 termination_by program _ _ => program
 
 /-- Package the generic Interval transfer as a framework step transformer. -/

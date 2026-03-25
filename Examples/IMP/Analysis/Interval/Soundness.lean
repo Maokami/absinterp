@@ -54,6 +54,10 @@ theorem localStepSoundIntervalOfActive
           cases hStep
       | ifFalse =>
           cases hStep
+      | whileTrue =>
+          cases hStep
+      | whileFalse =>
+          cases hStep
       | seqStep μInner =>
           rcases Step.seqStep_inv hStep with ⟨innerTarget, σInner, hTarget, hStepInner⟩
           have hInnerSound :
@@ -117,6 +121,10 @@ theorem localStepSoundIntervalOfActive
       | ifTrue =>
           simpa [transferProgramInterval] using hWrapped
       | ifFalse =>
+          simpa [transferProgramInterval] using hWrapped
+      | whileTrue =>
+          simpa [transferProgramInterval] using hWrapped
+      | whileFalse =>
           simpa [transferProgramInterval] using hWrapped
   | iteRoot =>
       rename_i cond s1 s2
@@ -224,6 +232,20 @@ theorem localStepSoundIntervalOfActive
               (κ₁ := transferProgramInterval s1 .seqDone κ)
               (κ₂ := transferProgramInterval s2 .seqDone κ)
               hWrapped
+      | whileTrue =>
+          simpa [transferProgramInterval] using
+            mem_gammaProgram_join_left_interval
+              (program := .ite cond s1 s2)
+              (κ₁ := transferProgramInterval s1 .whileTrue κ)
+              (κ₂ := transferProgramInterval s2 .whileTrue κ)
+              hWrapped
+      | whileFalse =>
+          simpa [transferProgramInterval] using
+            mem_gammaProgram_join_left_interval
+              (program := .ite cond s1 s2)
+              (κ₁ := transferProgramInterval s1 .whileFalse κ)
+              (κ₂ := transferProgramInterval s2 .whileFalse κ)
+              hWrapped
   | iteElse hInner ih =>
       rename_i cond s1 s2 inner
       intro κ μ σ target σ' hσ hStep
@@ -286,6 +308,91 @@ theorem localStepSoundIntervalOfActive
               (κ₁ := transferProgramInterval s1 .seqDone κ)
               (κ₂ := transferProgramInterval s2 .seqDone κ)
               hWrapped
+      | whileTrue =>
+          simpa [transferProgramInterval] using
+            mem_gammaProgram_join_right_interval
+              (program := .ite cond s1 s2)
+              (κ₁ := transferProgramInterval s1 .whileTrue κ)
+              (κ₂ := transferProgramInterval s2 .whileTrue κ)
+              hWrapped
+      | whileFalse =>
+          simpa [transferProgramInterval] using
+            mem_gammaProgram_join_right_interval
+              (program := .ite cond s1 s2)
+              (κ₁ := transferProgramInterval s1 .whileFalse κ)
+              (κ₂ := transferProgramInterval s2 .whileFalse κ)
+              hWrapped
+  | whileRoot =>
+      rename_i cond body
+      intro κ μ σ target σ' hσ hStep
+      cases hStep with
+      | while_true hCond =>
+          have hStore :
+              σ ∈ gammaStoreOf gammaInterval (assumeTrueStoreInterval cond (κ (.while cond body))) :=
+            mem_gammaStoreOf_assumeTrueStoreInterval hσ hCond
+          have hRoot :
+              (.seq body (.while cond body), σ) ∈
+                gammaProgramInterval (.while cond body)
+                  (singletonConfigInterval (.seq body (.while cond body))
+                    (assumeTrueStoreInterval cond (κ (.while cond body)))) := by
+            refine ⟨ActiveIn.whileBody (ActiveIn.self body), ?_⟩
+            simpa [singletonConfigInterval, singletonConfig] using hStore
+          simpa [transferProgramInterval] using hRoot
+      | while_false hCond =>
+          have hStore :
+              σ ∈ gammaStoreOf gammaInterval (assumeFalseStoreInterval cond (κ (.while cond body))) :=
+            mem_gammaStoreOf_assumeFalseStoreInterval hσ hCond
+          have hRoot :
+              (.skip, σ) ∈
+                gammaProgramInterval (.while cond body)
+                  (singletonConfigInterval .skip
+                    (assumeFalseStoreInterval cond (κ (.while cond body)))) := by
+            refine ⟨ActiveIn.whileDone, ?_⟩
+            simpa [singletonConfigInterval, singletonConfig] using hStore
+          simpa [transferProgramInterval] using hRoot
+  | whileDone =>
+      rename_i cond body
+      intro κ μ σ target σ' hσ hStep
+      cases hStep
+  | whileBody hInner ih =>
+      rename_i cond body inner
+      intro κ μ σ target σ' hσ hStep
+      cases μ with
+      | assign =>
+          cases hStep
+      | ifTrue =>
+          cases hStep
+      | ifFalse =>
+          cases hStep
+      | whileTrue =>
+          cases hStep
+      | whileFalse =>
+          cases hStep
+      | seqStep μInner =>
+          rcases Step.seqStep_inv hStep with ⟨innerTarget, σInner, hTarget, hStepInner⟩
+          have hInnerSound :
+              (innerTarget, σInner) ∈
+                gammaProgramInterval body (transferProgramInterval body μInner (seqView (.while cond body) κ)) :=
+            ih (by simpa [seqView] using hσ) hStepInner
+          have hLifted :
+              (Stmt.seq innerTarget (.while cond body), σInner) ∈
+                gammaProgramInterval (.while cond body)
+                  (liftSeqConfig (.while cond body) (transferProgramInterval body μInner (seqView (.while cond body) κ))) := by
+            rcases hInnerSound with ⟨hActiveInner, hConfInner⟩
+            exact ⟨ActiveIn.whileBody hActiveInner, mem_gammaConfigOf_liftSeqConfigInterval hConfInner⟩
+          cases hTarget
+          simpa [transferProgramInterval] using hLifted
+      | seqDone =>
+          cases hStep
+          have hStore : σ ∈ gammaStoreOf gammaInterval ((seqView (.while cond body) κ) .skip) := by
+            simpa [seqView] using hσ
+          have hProg :
+              (.while cond body, σ) ∈
+                gammaProgramInterval (.while cond body)
+                  (singletonConfigInterval (.while cond body) ((seqView (.while cond body) κ) .skip)) := by
+            refine ⟨ActiveIn.whileRoot, ?_⟩
+            simpa [singletonConfigInterval, singletonConfig] using hStore
+          simpa [transferProgramInterval] using hProg
 
 /-- One-step soundness of the generic Interval transfer over the canonical labeled IMP LTS. -/
 theorem soundStep_impInterval

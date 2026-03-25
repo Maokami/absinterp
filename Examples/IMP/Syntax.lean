@@ -19,12 +19,13 @@ inductive Expr where
   | add (e1 e2 : Expr)
   deriving DecidableEq, Repr
 
-/-- Statements: the core IMP constructs (no loops in this subset). -/
+/-- Statements: the core IMP constructs including while loops. -/
 inductive Stmt where
   | skip
   | assign (x : Var) (e : Expr)
   | seq (s1 s2 : Stmt)
   | ite (cond : Expr) (s1 s2 : Stmt)
+  | while (cond : Expr) (body : Stmt)
   deriving DecidableEq, Repr
 
 end Examples.IMP
