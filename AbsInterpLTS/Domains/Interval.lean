@@ -248,7 +248,8 @@ Sound abstract addition on intervals.
 
 For bounded intervals, the result bounds are the sums of the input bounds.
 -/
-def addIntervalTransfer : Interval → Interval → Interval
+def addIntervalTransfer (a b : Interval) : Interval :=
+  match normalize a, normalize b with
   | .bot, _ => .bot
   | _, .bot => .bot
   | .top, _ => .top
@@ -261,21 +262,14 @@ theorem addIntervalTransfer_sound
     (hm : m ∈ gammaInterval a)
     (hn : n ∈ gammaInterval b) :
     m + n ∈ gammaInterval (addIntervalTransfer a b) := by
-  cases a with
-  | bot => exact absurd hm (by simp [gammaInterval])
-  | top =>
-      cases b with
-      | bot => exact absurd hn (by simp [gammaInterval])
-      | _ => simp [addIntervalTransfer, gammaInterval]
-  | range lo1 hi1 =>
-      cases b with
-      | bot => exact absurd hn (by simp [gammaInterval])
-      | top => simp [addIntervalTransfer, gammaInterval]
-      | range lo2 hi2 =>
-          rcases hm with ⟨hLo1, hHi1⟩
-          rcases hn with ⟨hLo2, hHi2⟩
-          simp [addIntervalTransfer]
-          exact (mem_gammaInterval_mk_iff _ _ _).2 ⟨by omega, by omega⟩
+  rw [← gammaInterval_normalize a] at hm
+  rw [← gammaInterval_normalize b] at hn
+  cases hna : normalize a <;> cases hnb : normalize b <;>
+    simp [addIntervalTransfer, hna, hnb, gammaInterval] at hm hn ⊢
+  case range.range lo1 hi1 lo2 hi2 =>
+    rcases hm with ⟨hLo1, hHi1⟩
+    rcases hn with ⟨hLo2, hHi2⟩
+    exact (mem_gammaInterval_mk_iff _ _ _).2 ⟨by omega, by omega⟩
 
 /-- Refine an interval by assuming the concrete value is nonzero.
 
@@ -283,7 +277,8 @@ For intervals straddling zero, this returns the original interval since
 intervals are convex and cannot represent the gap. Precision is lost but
 soundness is preserved.
 -/
-def assumeNonzeroInterval : Interval → Interval
+def assumeNonzeroInterval (a : Interval) : Interval :=
+  match normalize a with
   | .bot => .bot
   | .top => .top
   | .range lo hi =>
@@ -300,12 +295,14 @@ theorem assumeNonzeroInterval_sound
     (hn : n ∈ gammaInterval a)
     (hNe : n ≠ 0) :
     n ∈ gammaInterval (assumeNonzeroInterval a) := by
-  cases a with
-  | bot => exact absurd hn (by simp [gammaInterval])
-  | top => simp [assumeNonzeroInterval, gammaInterval]
+  rw [← gammaInterval_normalize a] at hn
+  cases hna : normalize a with
+  | bot => simp [assumeNonzeroInterval, hna, gammaInterval] at hn
+  | top => simp [assumeNonzeroInterval, hna, gammaInterval]
   | range lo hi =>
+      simp [hna, gammaInterval] at hn
       rcases hn with ⟨hLo, hHi⟩
-      simp only [assumeNonzeroInterval]
+      simp only [assumeNonzeroInterval, hna]
       split
       · exact ⟨hLo, hHi⟩
       · split
@@ -323,7 +320,8 @@ theorem assumeNonzeroInterval_sound
               · exact ⟨hLo, hHi⟩
 
 /-- Refine an interval by assuming the concrete value is exactly zero. -/
-def assumeZeroInterval : Interval → Interval
+def assumeZeroInterval (a : Interval) : Interval :=
+  match normalize a with
   | .bot => .bot
   | .top => mk 0 0
   | .range lo hi =>
@@ -336,14 +334,16 @@ theorem assumeZeroInterval_sound
     (hZero : n = 0) :
     n ∈ gammaInterval (assumeZeroInterval a) := by
   subst hZero
-  cases a with
-  | bot => exact absurd hn (by simp [gammaInterval])
+  rw [← gammaInterval_normalize a] at hn
+  cases hna : normalize a with
+  | bot => simp [assumeZeroInterval, hna, gammaInterval] at hn
   | top =>
-      simp [assumeZeroInterval]
+      simp [assumeZeroInterval, hna]
       exact (mem_gammaInterval_mk_iff 0 0 0).2 ⟨le_rfl, le_rfl⟩
   | range lo hi =>
+      simp [hna, gammaInterval] at hn
       rcases hn with ⟨hLo, hHi⟩
-      simp [assumeZeroInterval]
+      simp only [assumeZeroInterval, hna]
       split
       · exact (mem_gammaInterval_mk_iff 0 0 0).2 ⟨le_rfl, le_rfl⟩
       · rename_i hNot
