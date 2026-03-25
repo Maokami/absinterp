@@ -1,0 +1,147 @@
+name: Require Gemini Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_review:
+    types: [submitted]
+  # Re-trigger when review comments change (thread resolve workaround)
+  pull_request_review_comment:
+    types: [created, edited, deleted]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: gemini-review-${{ github.event.pull_request.number || github.event.review.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check-gemini-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Gemini Code Assist review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr_number = context.payload.pull_request?.number
+              || context.payload.review?.pull_request?.number
+              || context.payload.comment?.pull_request_url?.split('/').pop();
+
+            if (!pr_number) {
+              core.info('No PR number found, skipping.');
+              return;
+            }
+
+            // Get the current PR head SHA
+            const pr = await github.rest.pulls.get({
+              owner, repo, pull_number: pr_number
+            });
+            const headSha = pr.data.head.sha;
+
+            // Paginate through all reviews to find Gemini's review for current head
+            const allReviews = await github.paginate(
+              github.rest.pulls.listReviews,
+              { owner, repo, pull_number: pr_number }
+            );
+
+            const geminiReview = allReviews.find(
+              r => r.user.login === 'gemini-code-assist[bot]'
+                && r.commit_id === headSha
+            );
+
+            if (geminiReview) {
+              core.info(`Gemini review found for HEAD ${headSha} (state: ${geminiReview.state})`);
+              return;
+            }
+
+            // Poll for up to 10 minutes (check every 20s)
+            const maxAttempts = 30;
+            for (let i = 0; i < maxAttempts; i++) {
+              core.info(`Waiting for Gemini review on ${headSha}... (${i + 1}/${maxAttempts})`);
+              await new Promise(r => setTimeout(r, 20000));
+
+              const reviews = await github.paginate(
+                github.rest.pulls.listReviews,
+                { owner, repo, pull_number: pr_number }
+              );
+              const found = reviews.find(
+                r => r.user.login === 'gemini-code-assist[bot]'
+                  && r.commit_id === headSha
+              );
+              if (found) {
+                core.info(`Gemini review found (state: ${found.state})`);
+                return;
+              }
+            }
+            core.setFailed(
+              'Gemini Code Assist review not received within 10 minutes. ' +
+              'Ensure the gemini-code-assist GitHub App is installed and configured.'
+            );
+
+      - name: Check unresolved Gemini review threads
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr_number = context.payload.pull_request?.number
+              || context.payload.review?.pull_request?.number
+              || context.payload.comment?.pull_request_url?.split('/').pop();
+
+            if (!pr_number) {
+              core.info('No PR number found, skipping.');
+              return;
+            }
+
+            // Paginate review threads via GraphQL (100 per page)
+            let hasNextPage = true;
+            let cursor = null;
+            let unresolvedCount = 0;
+
+            while (hasNextPage) {
+              const result = await github.graphql(`
+                query($owner: String!, $repo: String!, $pr: Int!, $cursor: String) {
+                  repository(owner: $owner, name: $repo) {
+                    pullRequest(number: $pr) {
+                      reviewThreads(first: 100, after: $cursor) {
+                        pageInfo { hasNextPage, endCursor }
+                        nodes {
+                          isResolved
+                          comments(first: 10) {
+                            nodes {
+                              author { login }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              `, { owner, repo, pr: pr_number, cursor });
+
+              const page = result.repository.pullRequest.reviewThreads;
+              hasNextPage = page.pageInfo.hasNextPage;
+              cursor = page.pageInfo.endCursor;
+
+              // Check all comments in each thread for Gemini authorship
+              for (const thread of page.nodes) {
+                if (thread.isResolved) continue;
+                const hasGeminiComment = thread.comments.nodes.some(
+                  c => c.author?.login === 'gemini-code-assist[bot]'
+                );
+                if (hasGeminiComment) {
+                  unresolvedCount++;
+                }
+              }
+            }
+
+            if (unresolvedCount > 0) {
+              core.setFailed(
+                `${unresolvedCount} unresolved Gemini review thread(s). ` +
+                `Please address and resolve all Gemini inline comments before merging.`
+              );
+            } else {
+              core.info('All Gemini review threads resolved (or no inline comments).');
+            }
