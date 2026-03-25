@@ -300,7 +300,7 @@ theorem assumeNonzeroInterval_sound
     n ∈ gammaInterval (assumeNonzeroInterval a) := by
   rw [← gammaInterval_normalize a] at hn
   cases hna : normalize a with
-  | bot => simp [assumeNonzeroInterval, hna, gammaInterval] at hn
+  | bot => simp [hna, gammaInterval] at hn
   | top => simp [assumeNonzeroInterval, hna, gammaInterval]
   | range lo hi =>
       simp [hna, gammaInterval] at hn
