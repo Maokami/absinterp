@@ -86,6 +86,19 @@ All three should pass before opening a PR.
 - Prefer direct, descriptive theorem names over short local shorthand.
 - Keep public docstrings concise and factual.
 
+## Lean LSP MCP Tools
+
+When writing or debugging proofs, prefer the Lean MCP tools directly:
+
+- `lean_goal`: inspect proof states at a position
+- `lean_diagnostic_messages`: check parser/elaborator errors and warnings
+- `lean_hover_info`: inspect types and declaration docs
+- `lean_multi_attempt`: try a small set of tactics without editing the file
+- `lean_local_search`: look for local declarations by name
+- `lean_leansearch` / `lean_loogle`: search mathlib for existing lemmas
+- `lean_state_search`: search for lemmas that can close the current goal
+- `lean_build`: rebuild after import changes or when LSP state needs a reset
+
 ## Workflow Conventions
 
 - One issue per branch, one branch per PR.
