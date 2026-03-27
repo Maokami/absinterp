@@ -23,8 +23,7 @@ def branchInitStore : StoreSharp Sign := fun x =>
 
 example :
     (transferProgramSign assignFive .assign (initAt assignFive topStoreSign)) .skip Var.x0 = .pos := by
-  simp [transferProgramSign, assignFive, initAt, singletonConfigSign,
-    updateStoreSharp, evalSignExpr, constSign, Var.x0]
+  native_decide
 
 example :
     (transferProgramSign branchOnX0 .ifTrue (initAt branchOnX0 branchInitStore))
