@@ -221,6 +221,70 @@ theorem assumeZero_sound
     simp [gammaSign, assumeZero] at hn ⊢ <;>
     omega
 
+/-- Meet (greatest lower bound) on signs. -/
+def meetSign (a b : Sign) : Sign :=
+  signOfFlags
+    (hasNeg a && hasNeg b)
+    (hasZero a && hasZero b)
+    (hasPos a && hasPos b)
+
+/-- `meetSign` is sound: intersection of concretizations is contained in the meet. -/
+theorem meetSign_sound
+    {a b : Sign}
+    {n : Int}
+    (ha : n ∈ gammaSign a)
+    (hb : n ∈ gammaSign b) :
+    n ∈ gammaSign (meetSign a b) := by
+  cases a <;> cases b <;>
+    simp [gammaSign, meetSign, signOfFlags, hasNeg, hasZero, hasPos] at ha hb ⊢ <;>
+    omega
+
+/-- Backward refinement for addition under nonzero constraint. -/
+def assumeNonzeroAddSign (a₁ a₂ : Sign) : Sign × Sign :=
+  match a₂ with
+  | .zero => (assumeNonzero a₁, a₂)
+  | _ => match a₁ with
+    | .zero => (a₁, assumeNonzero a₂)
+    | _ => (a₁, a₂)
+
+/-- `assumeNonzeroAddSign` is sound. -/
+theorem assumeNonzeroAddSign_sound
+    {a₁ a₂ : Sign}
+    {v₁ v₂ : Int}
+    (h₁ : v₁ ∈ gammaSign a₁)
+    (h₂ : v₂ ∈ gammaSign a₂)
+    (hNe : v₁ + v₂ ≠ 0) :
+    v₁ ∈ gammaSign (assumeNonzeroAddSign a₁ a₂).1 ∧
+    v₂ ∈ gammaSign (assumeNonzeroAddSign a₁ a₂).2 := by
+  cases a₁ <;> cases a₂ <;>
+    simp [gammaSign, assumeNonzeroAddSign, assumeNonzero] at h₁ h₂ ⊢ <;>
+    omega
+
+/-- Backward refinement for addition under zero constraint. -/
+def assumeZeroAddSign (a₁ a₂ : Sign) : Sign × Sign :=
+  ( match a₂ with
+    | .bot => a₁ | .zero => assumeZero a₁ | .pos => meetSign a₁ .neg
+    | .neg => meetSign a₁ .pos | .nonneg => meetSign a₁ .nonpos
+    | .nonpos => meetSign a₁ .nonneg | .top => a₁
+  , match a₁ with
+    | .bot => a₂ | .zero => assumeZero a₂ | .pos => meetSign a₂ .neg
+    | .neg => meetSign a₂ .pos | .nonneg => meetSign a₂ .nonpos
+    | .nonpos => meetSign a₂ .nonneg | .top => a₂ )
+
+/-- `assumeZeroAddSign` is sound. -/
+theorem assumeZeroAddSign_sound
+    {a₁ a₂ : Sign}
+    {v₁ v₂ : Int}
+    (h₁ : v₁ ∈ gammaSign a₁)
+    (h₂ : v₂ ∈ gammaSign a₂)
+    (hZero : v₁ + v₂ = 0) :
+    v₁ ∈ gammaSign (assumeZeroAddSign a₁ a₂).1 ∧
+    v₂ ∈ gammaSign (assumeZeroAddSign a₁ a₂).2 := by
+  cases a₁ <;> cases a₂ <;>
+    simp [gammaSign, assumeZeroAddSign, assumeZero, meetSign,
+          signOfFlags, hasNeg, hasZero, hasPos] at h₁ h₂ ⊢ <;>
+    omega
+
 /-- Baseline unary transfer shape: abstract negation. -/
 def negTransfer : Sign -> Sign
   | .bot => .bot

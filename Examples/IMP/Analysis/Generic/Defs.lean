@@ -38,6 +38,10 @@ def assumeTrueStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
   match cond with
   | .lit n => if n = 0 then botStoreSharp else ρ
   | .var x => updateStoreSharp ρ x (d.assumeNonzero (ρ x))
+  | .add (.var x) e2 =>
+      updateStoreSharp ρ x (d.assumeNonzeroAdd (ρ x) (evalExpr d ρ e2)).1
+  | .add e1 (.var y) =>
+      updateStoreSharp ρ y (d.assumeNonzeroAdd (evalExpr d ρ e1) (ρ y)).2
   | _ => ρ
 
 /-- Refine an abstract store under a not-taken `if` branch. -/
@@ -46,6 +50,10 @@ def assumeFalseStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
   match cond with
   | .lit n => if n = 0 then ρ else botStoreSharp
   | .var x => updateStoreSharp ρ x (d.assumeZero (ρ x))
+  | .add (.var x) e2 =>
+      updateStoreSharp ρ x (d.assumeZeroAdd (ρ x) (evalExpr d ρ e2)).1
+  | .add e1 (.var y) =>
+      updateStoreSharp ρ y (d.assumeZeroAdd (evalExpr d ρ e1) (ρ y)).2
   | _ => ρ
 
 /--
