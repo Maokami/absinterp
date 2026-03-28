@@ -103,19 +103,14 @@ theorem addParityTransfer_sound
   cases a <;> cases b <;> simp_all [addParityTransfer, gammaParity]
   all_goals omega
 
-/-- Refine a parity value under a nonzero assumption. -/
-def assumeNonzeroParity : Parity → Parity
-  | .bot => .bot
-  | .even => .even
-  | .odd => .odd
-  | .top => .top
+/-- Refine a parity value under a nonzero assumption (identity — parity cannot refine). -/
+def assumeNonzeroParity : Parity → Parity := id
 
 theorem assumeNonzeroParity_sound
     {a : Parity} {n : Int}
     (hn : n ∈ gammaParity a)
     (_ : n ≠ 0) :
-    n ∈ gammaParity (assumeNonzeroParity a) := by
-  cases a <;> simp_all [assumeNonzeroParity, gammaParity]
+    n ∈ gammaParity (assumeNonzeroParity a) := hn
 
 /-- Refine a parity value under a zero assumption. -/
 def assumeZeroParity : Parity → Parity
