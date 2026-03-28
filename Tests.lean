@@ -4,6 +4,7 @@ import AbsInterpLTS
 import Tests.Domains.Interval
 import Tests.Domains.Sign
 import Tests.Examples.IMP.Smoke
+import Tests.Examples.IMP.ParitySmoke
 import Tests.Framework.Domains.GammaOnly
 import Tests.Instances.LTS.Smoke
 import Tests.Instances.LTS.Collecting
