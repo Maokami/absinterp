@@ -1,12 +1,12 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 
 namespace Tests
 namespace FrameworkSemanticsAbstractOrder
 
-open AbsInterpLTS
-open AbsInterpLTS.Framework
+open AbsInterp
+open AbsInterp.Framework
 
 def stepId : StepPost Nat Bool :=
   fun _ states => states

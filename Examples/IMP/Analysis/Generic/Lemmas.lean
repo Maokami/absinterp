@@ -1,16 +1,16 @@
 import Cslib.Init
 import Mathlib.Data.Set.Lattice
 
-import AbsInterpLTS.Framework
-import AbsInterpLTS.Instances.LTS
+import AbsInterp.Framework
+import AbsInterp.Instances.LTS
 import Examples.IMP.Analysis.Generic.Defs
 
 namespace Examples.IMP
 
-open AbsInterpLTS
-open AbsInterpLTS.Framework
-open AbsInterpLTS.Framework.Domains
-open AbsInterpLTS.Instances.LTS
+open AbsInterp
+open AbsInterp.Framework
+open AbsInterp.Framework.Domains
+open AbsInterp.Instances.LTS
 
 universe u
 

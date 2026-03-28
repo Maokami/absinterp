@@ -1,12 +1,12 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 
 namespace Tests
 namespace FrameworkDomainsGammaOnly
 
-open AbsInterpLTS
-open AbsInterpLTS.Domains
+open AbsInterp
+open AbsInterp.Domains
 
 example :
     (0 : Int) ∈

@@ -1,6 +1,6 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 import Examples
 
 /-!
@@ -20,10 +20,10 @@ MCP tool, to confirm axiom cleanliness of these theorems.
 -/
 
 -- Framework: step soundness lifts to trace soundness (upstream candidate)
-#print axioms AbsInterpLTS.Framework.soundTrace_of_soundStep
+#print axioms AbsInterp.Framework.soundTrace_of_soundStep
 
 -- Instances/LTS: LTSAbstraction packages the lifting (upstream candidate)
-#print axioms AbsInterpLTS.Instances.LTS.LTSAbstraction.soundTraceLifted
+#print axioms AbsInterp.Instances.LTS.LTSAbstraction.soundTraceLifted
 
 -- IMP: one-step soundness of the generic Sign transfer (upstream candidate)
 #print axioms Examples.IMP.soundStep_impSign

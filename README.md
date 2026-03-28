@@ -1,6 +1,6 @@
-# absinterp-lts
+# absinterp
 
-`absinterp-lts` is a Lean 4 repository for reusable abstract interpretation
+`absinterp` is a Lean 4 repository for reusable abstract interpretation
 constructions over CSLib-style LTS semantics.
 
 The project has two linked goals:
@@ -27,13 +27,13 @@ contribution, rather than treating this repository as a one-off example dump.
 
 ## Repository map
 
-- `AbsInterpLTS/Framework`
+- `AbsInterp/Framework`
   Generic reusable core: semantic transformers, soundness, and iteration
   scaffolding.
-- `AbsInterpLTS/Instances/LTS`
+- `AbsInterp/Instances/LTS`
   CSLib-LTS-specific semantics and the instantiation layer that lifts local
   step soundness to trace soundness.
-- `AbsInterpLTS/Domains`
+- `AbsInterp/Domains`
   Concrete abstract domains currently used in the repository.
 - `Examples/IMP`
   IMP example suite.
@@ -46,8 +46,8 @@ contribution, rather than treating this repository as a one-off example dump.
 
 ## Reading order
 
-- Start with `AbsInterpLTS/Framework` if you want the reusable theory.
-- Read `AbsInterpLTS/Instances/LTS` next to see how the framework is connected
+- Start with `AbsInterp/Framework` if you want the reusable theory.
+- Read `AbsInterp/Instances/LTS` next to see how the framework is connected
   to CSLib-style LTS semantics.
 - Read `Examples/IMP/Analysis/Sign` and `Examples/IMP/Programs/Showcase` for
   the flagship end-to-end case study.
@@ -62,7 +62,7 @@ lake build Tests
 lake test
 ```
 
-- `lake build` builds the default libraries: `AbsInterpLTS` and `Examples`.
+- `lake build` builds the default libraries: `AbsInterp` and `Examples`.
 - `lake build Tests` compiles the theorem-style regression suite.
 - `lake test` runs the repository test driver, which checks the default
   libraries and the test suite together.

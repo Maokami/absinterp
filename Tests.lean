@@ -1,6 +1,6 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 import Tests.Domains.Interval
 import Tests.Domains.Sign
 import Tests.Examples.IMP.Smoke

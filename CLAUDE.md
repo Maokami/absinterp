@@ -1,8 +1,8 @@
-# CLAUDE.md — absinterp-lts
+# CLAUDE.md — absinterp
 
 ## Project Overview
 
-`absinterp-lts` is a Lean 4 repository for reusable abstract interpretation
+`absinterp` is a Lean 4 repository for reusable abstract interpretation
 infrastructure over CSLib-style LTS semantics.
 
 The repository is not just collecting toy examples. Its intended shape is:
@@ -19,7 +19,7 @@ connection requirement, soundness first.
 ## Build & Test
 
 ```bash
-lake build              # Build default libraries: AbsInterpLTS, Examples
+lake build              # Build default libraries: AbsInterp, Examples
 lake build Tests        # Build theorem/regression suite
 lake test               # Run the repository test driver
 ```
@@ -30,15 +30,15 @@ All three should pass before opening a PR.
 
 ### Reusable core
 
-- `AbsInterpLTS/Framework`
+- `AbsInterp/Framework`
   Generic semantic transformers, trace lifting, soundness interfaces, and
   iteration scaffolding.
-- `AbsInterpLTS/Domains`
+- `AbsInterp/Domains`
   Concrete abstract domains used in the repository.
 
 ### CSLib-facing layer
 
-- `AbsInterpLTS/Instances/LTS`
+- `AbsInterp/Instances/LTS`
   CSLib-LTS semantics, collecting/trace infrastructure, and the abstraction
   interface that packages local step soundness into reusable trace soundness.
 

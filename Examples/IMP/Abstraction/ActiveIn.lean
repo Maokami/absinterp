@@ -1,11 +1,11 @@
 import Cslib.Init
 
-import AbsInterpLTS.Framework.Soundness
+import AbsInterp.Framework.Soundness
 import Examples.IMP.Abstraction.Defs
 
 namespace Examples.IMP
 
-open AbsInterpLTS.Framework
+open AbsInterp.Framework
 
 /--
 `ActiveIn program s` means that `s` can arise as a control location while

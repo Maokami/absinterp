@@ -1,12 +1,12 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 
 namespace Tests
 namespace DomainsInterval
 
-open AbsInterpLTS
-open AbsInterpLTS.Domains
+open AbsInterp
+open AbsInterp.Domains
 
 example : (2 : Int) ∈ gammaInterval (mk 1 3) := by
   simp [gammaInterval, mk]

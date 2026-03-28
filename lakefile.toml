@@ -1,6 +1,6 @@
-name = "absinterp-lts"
+name = "absinterp"
 version = "0.1.0"
-defaultTargets = ["AbsInterpLTS", "Examples"]
+defaultTargets = ["AbsInterp", "Examples"]
 testDriver = "runTests"
 
 [leanOptions]
@@ -17,7 +17,7 @@ scope = "leanprover"
 rev = "v4.28.0-rc1"
 
 [[lean_lib]]
-name = "AbsInterpLTS"
+name = "AbsInterp"
 
 [[lean_lib]]
 name = "Examples"
