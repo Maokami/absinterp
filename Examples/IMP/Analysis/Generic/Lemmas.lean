@@ -32,7 +32,7 @@ abbrev impConfigDomain (d : IMPAnalysisDomain A) : GammaOnlyDomain (ConfigSharp 
     σ ∈ gammaStoreOf d.scalarDomain.gamma botStoreSharp ↔ False := by
   constructor
   · intro hBot
-    have hx0 : σ Var.x0 ∈ d.scalarDomain.gamma (botStoreSharp (Abstract := A) Var.x0) := hBot Var.x0
+    have hx0 : σ Var.x0 ∈ d.scalarDomain.gamma (botStoreSharp Var.x0) := hBot Var.x0
     simp [botStoreSharp, d.gamma_bot] at hx0
   · exact False.elim
 
