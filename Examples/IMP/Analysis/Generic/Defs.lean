@@ -1,8 +1,8 @@
 import Cslib.Init
 import Mathlib.Data.Set.Lattice
 
-import AbsInterpLTS.Framework
-import AbsInterpLTS.Instances.LTS
+import AbsInterp.Framework
+import AbsInterp.Instances.LTS
 import Examples.IMP.Abstraction
 import Examples.IMP.LTS
 import Examples.IMP.Semantics
@@ -10,10 +10,10 @@ import Examples.IMP.Analysis.Generic.Domain
 
 namespace Examples.IMP
 
-open AbsInterpLTS
-open AbsInterpLTS.Framework
-open AbsInterpLTS.Framework.Domains
-open AbsInterpLTS.Instances.LTS
+open AbsInterp
+open AbsInterp.Framework
+open AbsInterp.Framework.Domains
+open AbsInterp.Instances.LTS
 
 universe u
 
@@ -103,7 +103,7 @@ termination_by program _ _ => program
 
 /-- The generic concretization for a fixed IMP program and domain. -/
 def gammaProgram (d : IMPAnalysisDomain A) (program : Stmt) :
-    AbsInterpLTS.Framework.Gamma (ConfigSharp A) Config :=
+    AbsInterp.Framework.Gamma (ConfigSharp A) Config :=
   gammaProgramConfigOf program d.scalarDomain.gamma
 
 /-- Package the generic transfer as a framework step transformer. -/

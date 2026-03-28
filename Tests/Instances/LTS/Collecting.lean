@@ -1,14 +1,14 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 
 namespace Tests
 namespace InstancesLTSCollecting
 
-open AbsInterpLTS
-open AbsInterpLTS.Framework
-open AbsInterpLTS.Framework.Iteration
-open AbsInterpLTS.Instances.LTS
+open AbsInterp
+open AbsInterp.Framework
+open AbsInterp.Framework.Iteration
+open AbsInterp.Instances.LTS
 
 def toyLTS : Cslib.LTS Nat Bool where
   Tr s label s' :=

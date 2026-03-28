@@ -1,15 +1,15 @@
-import AbsInterpLTS.Domains
-import AbsInterpLTS.Framework
-import AbsInterpLTS.Instances.LTS
+import AbsInterp.Domains
+import AbsInterp.Framework
+import AbsInterp.Instances.LTS
 import Examples.IMP.Analysis.Generic
 
 namespace Examples.IMP
 
-open AbsInterpLTS
-open AbsInterpLTS.Domains
-open AbsInterpLTS.Framework
-open AbsInterpLTS.Framework.Domains
-open AbsInterpLTS.Instances.LTS
+open AbsInterp
+open AbsInterp.Domains
+open AbsInterp.Framework
+open AbsInterp.Framework.Domains
+open AbsInterp.Instances.LTS
 
 /-!
 # Interval Analysis — Domain Instance

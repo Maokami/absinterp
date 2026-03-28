@@ -1,12 +1,12 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 
 namespace Tests
 namespace DomainsSign
 
-open AbsInterpLTS
-open AbsInterpLTS.Domains
+open AbsInterp
+open AbsInterp.Domains
 
 example : (-3 : Int) ∈ gammaSign Sign.neg := by
   simp [gammaSign]
@@ -50,7 +50,7 @@ example (n : Int) (hn : n ∈ gammaSign Sign.nonneg) :
     -n ∈ gammaSign (negTransfer Sign.nonneg) := by
   exact negTransfer_sound hn
 
-open AbsInterpLTS.Framework
+open AbsInterp.Framework
 
 /-- The identity abstract transformer is monotone over Sign. -/
 example : MonotonePostSharp (id : Sign → Sign) :=

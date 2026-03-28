@@ -1,12 +1,12 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 
 namespace Tests
 namespace FrameworkIterationWidening
 
-open AbsInterpLTS.Framework
-open AbsInterpLTS.Framework.Iteration
+open AbsInterp.Framework
+open AbsInterp.Framework.Iteration
 
 /-! # Flat3 smoke test for widening/narrowing interfaces
 

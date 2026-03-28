@@ -1,13 +1,13 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 
 namespace Tests
 namespace InstancesLTSCollectingTrace
 
-open AbsInterpLTS
-open AbsInterpLTS.Framework
-open AbsInterpLTS.Instances.LTS
+open AbsInterp
+open AbsInterp.Framework
+open AbsInterp.Instances.LTS
 
 /-- Reuse the toyLTS from Collecting tests: 0 →false→ 1, 0 →true→ 2, 2 →false→ 3. -/
 def toyLTS : Cslib.LTS Nat Bool where

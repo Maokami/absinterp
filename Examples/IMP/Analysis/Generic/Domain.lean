@@ -1,12 +1,12 @@
 import Cslib.Init
 import Mathlib.Data.Set.Lattice
 
-import AbsInterpLTS.Framework.Domains
+import AbsInterp.Framework.Domains
 import Examples.IMP.Semantics
 
 namespace Examples.IMP
 
-open AbsInterpLTS.Framework.Domains
+open AbsInterp.Framework.Domains
 
 universe u
 

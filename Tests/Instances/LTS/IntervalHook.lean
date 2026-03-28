@@ -1,15 +1,15 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 
 namespace Tests
 namespace InstancesLTSIntervalHook
 
-open AbsInterpLTS
-open AbsInterpLTS.Domains
-open AbsInterpLTS.Framework
-open AbsInterpLTS.Instances.LTS
-open AbsInterpLTS.Instances.LTS.Analyses
+open AbsInterp
+open AbsInterp.Domains
+open AbsInterp.Framework
+open AbsInterp.Instances.LTS
+open AbsInterp.Instances.LTS.Analyses
 
 def toyLTS : Cslib.LTS Int Bool where
   Tr s label s' := (label = false ∧ s' = s) ∨ (label = true ∧ s' = 0)

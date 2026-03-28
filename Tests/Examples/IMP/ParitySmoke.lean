@@ -5,10 +5,10 @@ import Examples
 namespace Tests
 namespace ExamplesIMPParitySmoke
 
-open AbsInterpLTS
-open AbsInterpLTS.Domains
-open AbsInterpLTS.Framework
-open AbsInterpLTS.Instances.LTS
+open AbsInterp
+open AbsInterp.Domains
+open AbsInterp.Framework
+open AbsInterp.Instances.LTS
 open Examples.IMP
 
 /-!

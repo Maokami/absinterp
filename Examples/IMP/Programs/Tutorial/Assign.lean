@@ -1,9 +1,9 @@
 import Cslib.Init
 import Cslib.Foundations.Semantics.LTS.Basic
 
-import AbsInterpLTS.Domains
-import AbsInterpLTS.Framework
-import AbsInterpLTS.Instances.LTS
+import AbsInterp.Domains
+import AbsInterp.Framework
+import AbsInterp.Instances.LTS
 
 import Examples.IMP.Semantics
 
@@ -19,11 +19,11 @@ End-to-end demonstration of the abstract interpretation framework:
 
 namespace Examples.IMP.Programs.Tutorial
 
-open AbsInterpLTS
-open AbsInterpLTS.Domains
-open AbsInterpLTS.Framework
-open AbsInterpLTS.Instances.LTS
-open AbsInterpLTS.Instances.LTS.Analyses
+open AbsInterp
+open AbsInterp.Domains
+open AbsInterp.Framework
+open AbsInterp.Instances.LTS
+open AbsInterp.Instances.LTS.Analyses
 
 /-! ## Program-specific LTS for `x0 := 5`
 

@@ -1,13 +1,13 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 
 namespace Tests
 namespace FrameworkIterationNatIter
 
-open AbsInterpLTS
-open AbsInterpLTS.Framework
-open AbsInterpLTS.Framework.Iteration
+open AbsInterp
+open AbsInterp.Framework
+open AbsInterp.Framework.Iteration
 
 def postAddZero : Post Nat :=
   fun states => states ∪ {0}

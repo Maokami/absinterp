@@ -1,6 +1,6 @@
 import Cslib.Init
 
-import AbsInterpLTS
+import AbsInterp
 
 namespace Tests
 namespace InstancesLTSSmoke
@@ -18,7 +18,7 @@ def gammaOne : OneAbs -> Set Nat
 def transferOne : Unit -> OneAbs -> OneAbs :=
   fun _ a => a
 
-def oneAbstraction : AbsInterpLTS.Instances.LTS.LTSAbstraction Nat Unit OneAbs where
+def oneAbstraction : AbsInterp.Instances.LTS.LTSAbstraction Nat Unit OneAbs where
   lts := emptyNatLTS
   gamma := gammaOne
   transfer := transferOne
@@ -27,44 +27,44 @@ def oneAbstraction : AbsInterpLTS.Instances.LTS.LTSAbstraction Nat Unit OneAbs w
     simp [gammaOne]
 
 theorem oneSoundStepExplicit :
-    AbsInterpLTS.Framework.SoundStep
-      (AbsInterpLTS.Instances.LTS.postStep emptyNatLTS)
+    AbsInterp.Framework.SoundStep
+      (AbsInterp.Instances.LTS.postStep emptyNatLTS)
       gammaOne
       transferOne := by
   intro _ _ s _
   simp [gammaOne]
 
 example :
-    AbsInterpLTS.Framework.MonotonePost
-      (AbsInterpLTS.Instances.LTS.postStep oneAbstraction.lts ()) := by
+    AbsInterp.Framework.MonotonePost
+      (AbsInterp.Instances.LTS.postStep oneAbstraction.lts ()) := by
   intro s t hSubset
-  exact AbsInterpLTS.Instances.LTS.postStep_monotone oneAbstraction.lts () hSubset
+  exact AbsInterp.Instances.LTS.postStep_monotone oneAbstraction.lts () hSubset
 
 example :
-    AbsInterpLTS.Instances.LTS.postTrace emptyNatLTS =
-      AbsInterpLTS.Framework.liftTracePost (AbsInterpLTS.Instances.LTS.postStep emptyNatLTS) := by
-  exact AbsInterpLTS.Instances.LTS.postTrace_eq_liftTracePost_postStep emptyNatLTS
+    AbsInterp.Instances.LTS.postTrace emptyNatLTS =
+      AbsInterp.Framework.liftTracePost (AbsInterp.Instances.LTS.postStep emptyNatLTS) := by
+  exact AbsInterp.Instances.LTS.postTrace_eq_liftTracePost_postStep emptyNatLTS
 
 example :
-    AbsInterpLTS.Framework.MonotonePost
-      (AbsInterpLTS.Instances.LTS.postTrace emptyNatLTS [()]) := by
-  exact AbsInterpLTS.Instances.LTS.postTrace_monotone emptyNatLTS [()]
+    AbsInterp.Framework.MonotonePost
+      (AbsInterp.Instances.LTS.postTrace emptyNatLTS [()]) := by
+  exact AbsInterp.Instances.LTS.postTrace_monotone emptyNatLTS [()]
 
 example :
-    AbsInterpLTS.Framework.SoundTrace
-      (AbsInterpLTS.Framework.liftTracePost
-        (AbsInterpLTS.Instances.LTS.postStep oneAbstraction.lts))
+    AbsInterp.Framework.SoundTrace
+      (AbsInterp.Framework.liftTracePost
+        (AbsInterp.Instances.LTS.postStep oneAbstraction.lts))
       oneAbstraction.gamma
-      (AbsInterpLTS.Framework.liftTracePostSharp oneAbstraction.transfer) := by
+      (AbsInterp.Framework.liftTracePostSharp oneAbstraction.transfer) := by
   exact oneAbstraction.soundTraceLifted
 
 example :
-    AbsInterpLTS.Framework.SoundTrace
-      (AbsInterpLTS.Framework.liftTracePost
-        (AbsInterpLTS.Instances.LTS.postStep emptyNatLTS))
+    AbsInterp.Framework.SoundTrace
+      (AbsInterp.Framework.liftTracePost
+        (AbsInterp.Instances.LTS.postStep emptyNatLTS))
       gammaOne
-      (AbsInterpLTS.Framework.liftTracePostSharp transferOne) := by
-  exact AbsInterpLTS.Instances.LTS.LTSAbstraction.soundTraceLiftedOfExplicit
+      (AbsInterp.Framework.liftTracePostSharp transferOne) := by
+  exact AbsInterp.Instances.LTS.LTSAbstraction.soundTraceLiftedOfExplicit
       (State := Nat)
       (Label := Unit)
       (Abstract := OneAbs)

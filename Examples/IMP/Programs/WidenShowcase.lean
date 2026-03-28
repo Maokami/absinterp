@@ -30,8 +30,8 @@ and `isPostFixpoint_pfp` certifies the result.
 
 namespace Examples.IMP.Programs
 
-open AbsInterpLTS.Domains
-open AbsInterpLTS.Framework.Iteration
+open AbsInterp.Domains
+open AbsInterp.Framework.Iteration
 
 /-! ## The IMP program -/
 
@@ -60,8 +60,8 @@ namespace LoopAbs
 /-- Map to the Interval domain. -/
 def toInterval : LoopAbs → Interval
   | .bot => .bot
-  | .zero => AbsInterpLTS.Domains.mk 0 0
-  | .zeroOne => AbsInterpLTS.Domains.mk 0 1
+  | .zero => AbsInterp.Domains.mk 0 0
+  | .zeroOne => AbsInterp.Domains.mk 0 1
   | .top => .top
 
 /-- Concretization via Interval. -/
@@ -87,7 +87,7 @@ theorem le_refl : ∀ a : LoopAbs, le a a := by
 /-- Gamma monotonicity. -/
 theorem gamma_mono : ∀ {a b : LoopAbs}, le a b → gamma a ⊆ gamma b := by
   intro a b hab
-  cases a <;> cases b <;> simp_all [le, gamma, toInterval, gammaInterval, AbsInterpLTS.Domains.mk]
+  cases a <;> cases b <;> simp_all [le, gamma, toInterval, gammaInterval, AbsInterp.Domains.mk]
 
 /--
 Abstract loop body transfer: models `x0 := x0 + 1`.
@@ -108,7 +108,7 @@ def f : LoopAbs → LoopAbs
 theorem f_sound (a : LoopAbs) :
     ∀ n ∈ gamma a, (n + 1) ∈ gamma (f a) ∧ (0 : Int) ∈ gamma (f a) := by
   intro n hn
-  cases a <;> simp_all [f, gamma, toInterval, gammaInterval, AbsInterpLTS.Domains.mk]
+  cases a <;> simp_all [f, gamma, toInterval, gammaInterval, AbsInterp.Domains.mk]
   all_goals omega
 
 /-- Widening: jump to ⊤ unless equal. -/
