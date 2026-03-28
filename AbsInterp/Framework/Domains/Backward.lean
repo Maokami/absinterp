@@ -64,6 +64,16 @@ theorem soundBackwardRefine_id
     SoundBackwardRefine gamma rel (fun a₁ a₂ => (a₁, a₂)) :=
   fun _ _ _ _ h₁ h₂ _ => ⟨h₁, h₂⟩
 
+/-!
+## Usage note
+
+These predicates are framework-level abstractions intended for reuse across
+different language instantiations. The current IMP layer
+(`Examples/IMP/Analysis/Generic/Domain.lean`) restates equivalent contracts
+inline as `IMPAnalysisDomain` structure fields. A future refactor may wire
+the IMP fields through these predicates directly.
+-/
+
 end Domains
 end Framework
 end AbsInterp

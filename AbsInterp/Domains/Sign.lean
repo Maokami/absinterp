@@ -241,7 +241,8 @@ theorem meetSign_sound
 
 /-- Backward refinement for addition under nonzero constraint. -/
 def assumeNonzeroAddSign (a₁ a₂ : Sign) : Sign × Sign :=
-  match a₂ with
+  if a₁ = .bot ∨ a₂ = .bot then (.bot, .bot)
+  else match a₂ with
   | .zero => (assumeNonzero a₁, a₂)
   | _ => match a₁ with
     | .zero => (a₁, assumeNonzero a₂)
@@ -263,11 +264,11 @@ theorem assumeNonzeroAddSign_sound
 /-- Backward refinement for addition under zero constraint. -/
 def assumeZeroAddSign (a₁ a₂ : Sign) : Sign × Sign :=
   ( match a₂ with
-    | .bot => a₁ | .zero => assumeZero a₁ | .pos => meetSign a₁ .neg
+    | .bot => .bot | .zero => assumeZero a₁ | .pos => meetSign a₁ .neg
     | .neg => meetSign a₁ .pos | .nonneg => meetSign a₁ .nonpos
     | .nonpos => meetSign a₁ .nonneg | .top => a₁
   , match a₁ with
-    | .bot => a₂ | .zero => assumeZero a₂ | .pos => meetSign a₂ .neg
+    | .bot => .bot | .zero => assumeZero a₂ | .pos => meetSign a₂ .neg
     | .neg => meetSign a₂ .pos | .nonneg => meetSign a₂ .nonpos
     | .nonpos => meetSign a₂ .nonneg | .top => a₂ )
 
