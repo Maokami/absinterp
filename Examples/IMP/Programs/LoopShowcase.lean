@@ -66,10 +66,8 @@ theorem loopTransferSign_top : loopTransferSign .top = .top := rfl
 
 /-- `top` is a post-fixpoint of `loopTransferSign`: `f(top) ≤ top`. -/
 theorem loopPfp_isPostFixpoint :
-    IsPostFixpoint leSign loopTransferSign loopPfp := by
-  show leSign (loopTransferSign .top) .top
-  rw [loopTransferSign_top]
-  exact leSign_refl _
+    IsPostFixpoint leSign loopTransferSign loopPfp :=
+  leSign_refl _
 
 /-! ## Soundness of abstract loop body -/
 
