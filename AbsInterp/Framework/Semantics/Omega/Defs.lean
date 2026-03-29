@@ -77,11 +77,8 @@ theorem omegaReachable_subset_iUnion_kleeneNat
     (cfg : CollectingStep State)
     (init : Set State) :
     omegaReachable cfg init ⊆ ⋃ n, cfg.kleeneNat init n := by
-  intro s hs
-  simp only [omegaReachable, Set.mem_setOf_eq] at hs
-  obtain ⟨exec, hInit, hExec, n, rfl⟩ := hs
-  simp only [Set.mem_iUnion]
-  exact ⟨n + 1, omegaExec_mem_kleeneNat cfg init exec hInit hExec n⟩
+  rintro s ⟨exec, hInit, hExec, n, rfl⟩
+  exact Set.mem_iUnion.mpr ⟨n + 1, omegaExec_mem_kleeneNat cfg init exec hInit hExec n⟩
 
 end Framework
 end AbsInterp
