@@ -31,16 +31,18 @@ All three should pass before opening a PR.
 ### Reusable core
 
 - `AbsInterp/Framework`
-  Generic semantic transformers, trace lifting, soundness interfaces, and
-  iteration scaffolding.
+  Generic semantic transformers, trace lifting, soundness interfaces,
+  iteration scaffolding, closure-based weak semantics, and ω-trace
+  interfaces.
 - `AbsInterp/Domains`
   Concrete abstract domains used in the repository.
 
 ### CSLib-facing layer
 
 - `AbsInterp/Instances/LTS`
-  CSLib-LTS semantics, collecting/trace infrastructure, and the abstraction
-  interface that packages local step soundness into reusable trace soundness.
+  CSLib-LTS semantics, collecting/trace infrastructure, the abstraction
+  interface that packages local step soundness into reusable trace soundness,
+  and weak/τ-closure and ω-trace wrappers over CSLib constructs.
 
 ### Validation layer
 
@@ -108,6 +110,23 @@ When writing or debugging proofs, prefer the Lean MCP tools directly:
 - PRs should use the repo template and include:
   Summary, Linked issue, Scope, Validation.
 - Squash merge is the preferred default.
+
+### Merge Requirements
+
+Branch protection on `main` requires two status checks:
+
+1. **`test` (Lean CI)**: `lake build && lake build Tests && lake test` must pass.
+2. **`check-gemini-review`**: Gemini Code Assist must review the PR head SHA,
+   and all Gemini review threads must be resolved.
+
+Normal merge flow:
+1. Push → Gemini posts review comments.
+2. Address feedback: fix code or resolve threads on GitHub.
+3. All Gemini threads resolved → `check-gemini-review` passes.
+4. Both checks green → merge without `--admin`.
+
+Use `gh pr merge --squash --admin` only when bypassing is justified
+(e.g., CI flake, Gemini unavailable).
 
 ## Current Quality Bar
 
