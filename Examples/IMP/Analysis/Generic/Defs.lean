@@ -32,13 +32,21 @@ def evalExpr (d : IMPAnalysisDomain A) (ρ : StoreSharp A) : Expr → A
   | .var x => ρ x
   | .add e1 e2 => d.addTransfer (evalExpr d ρ e1) (evalExpr d ρ e2)
 
+/-- Refine variables in an abstract store using a backward-refined pair.
+    Each sub-expression that is a variable gets its store entry updated. -/
+def refineAddStore
+    (ρ : StoreSharp A) (e1 e2 : Expr) (pair : A × A) : StoreSharp A :=
+  let ρ' := match e1 with | .var x => updateStoreSharp ρ x pair.1 | _ => ρ
+  match e2 with | .var y => updateStoreSharp ρ' y pair.2 | _ => ρ'
+
 /-- Refine an abstract store under a taken `if` branch. -/
 def assumeTrueStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
     (ρ : StoreSharp A) : StoreSharp A :=
   match cond with
   | .lit n => if n = 0 then botStoreSharp else ρ
   | .var x => updateStoreSharp ρ x (d.assumeNonzero (ρ x))
-  | _ => ρ
+  | .add e1 e2 =>
+      refineAddStore ρ e1 e2 (d.assumeNonzeroAdd (evalExpr d ρ e1) (evalExpr d ρ e2))
 
 /-- Refine an abstract store under a not-taken `if` branch. -/
 def assumeFalseStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
@@ -46,7 +54,8 @@ def assumeFalseStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
   match cond with
   | .lit n => if n = 0 then ρ else botStoreSharp
   | .var x => updateStoreSharp ρ x (d.assumeZero (ρ x))
-  | _ => ρ
+  | .add e1 e2 =>
+      refineAddStore ρ e1 e2 (d.assumeZeroAdd (evalExpr d ρ e1) (evalExpr d ρ e2))
 
 /--
 Generic transfer for the labeled IMP LTS, parameterized by an IMP analysis

@@ -30,6 +30,10 @@ def signAnalysisDomain : IMPAnalysisDomain Sign where
   assumeNonzero_sound := assumeNonzero_sound
   assumeZero := assumeZero
   assumeZero_sound := assumeZero_sound
+  assumeNonzeroAdd := assumeNonzeroAddSign
+  assumeNonzeroAdd_sound := assumeNonzeroAddSign_sound
+  assumeZeroAdd := assumeZeroAddSign
+  assumeZeroAdd_sound := assumeZeroAddSign_sound
 
 -- Public API wrappers preserving backward-compatible names.
 

@@ -50,6 +50,34 @@ example (n : Int) (hn : n ∈ gammaSign Sign.nonneg) :
     -n ∈ gammaSign (negTransfer Sign.nonneg) := by
   exact negTransfer_sound hn
 
+-- meetSign tests
+example : meetSign Sign.neg Sign.nonneg = Sign.bot := by rfl
+example : meetSign Sign.top Sign.pos = Sign.pos := by rfl
+example : meetSign Sign.nonpos Sign.nonneg = Sign.zero := by rfl
+example : meetSign Sign.neg Sign.nonpos = Sign.neg := by rfl
+
+-- assumeNonzeroAddSign tests
+/-- nonneg + zero ≠ 0 refines nonneg to pos. -/
+example : (assumeNonzeroAddSign Sign.nonneg Sign.zero).1 = Sign.pos := by rfl
+/-- zero + top ≠ 0 refines top to top (already covers all nonzero). -/
+example : (assumeNonzeroAddSign Sign.zero Sign.top).2 = Sign.top := by rfl
+/-- bot propagation: if either operand is bot, both become bot. -/
+example : (assumeNonzeroAddSign Sign.top Sign.bot) = (.bot, .bot) := by rfl
+example : (assumeNonzeroAddSign Sign.bot Sign.pos) = (.bot, .bot) := by rfl
+
+-- assumeZeroAddSign tests
+/-- bot propagation: if either operand is bot, both become bot. -/
+example : (assumeZeroAddSign Sign.top Sign.bot).1 = Sign.bot := by rfl
+example : (assumeZeroAddSign Sign.bot Sign.pos).2 = Sign.bot := by rfl
+/-- top + pos = 0 refines top to neg. -/
+example : (assumeZeroAddSign Sign.top Sign.pos).1 = Sign.neg := by rfl
+/-- pos + top = 0 refines top to neg. -/
+example : (assumeZeroAddSign Sign.pos Sign.top).2 = Sign.neg := by rfl
+/-- nonneg + zero = 0 refines nonneg to zero. -/
+example : (assumeZeroAddSign Sign.nonneg Sign.zero).1 = Sign.zero := by rfl
+/-- top + nonneg = 0 refines top to nonpos. -/
+example : (assumeZeroAddSign Sign.top Sign.nonneg).1 = Sign.nonpos := by rfl
+
 open AbsInterp.Framework
 
 /-- The identity abstract transformer is monotone over Sign. -/

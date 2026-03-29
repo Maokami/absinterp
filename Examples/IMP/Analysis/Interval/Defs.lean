@@ -30,6 +30,8 @@ def intervalAnalysisDomain : IMPAnalysisDomain Interval where
   assumeNonzero_sound := assumeNonzeroInterval_sound
   assumeZero := assumeZeroInterval
   assumeZero_sound := assumeZeroInterval_sound
+  assumeNonzeroAdd_sound := fun h₁ h₂ _ => ⟨h₁, h₂⟩
+  assumeZeroAdd_sound := fun h₁ h₂ _ => ⟨h₁, h₂⟩
 
 -- Public API wrappers preserving backward-compatible names.
 

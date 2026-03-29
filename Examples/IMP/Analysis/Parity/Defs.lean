@@ -30,6 +30,8 @@ def parityAnalysisDomain : IMPAnalysisDomain Parity where
   assumeNonzero_sound := assumeNonzeroParity_sound
   assumeZero := assumeZeroParity
   assumeZero_sound := assumeZeroParity_sound
+  assumeNonzeroAdd_sound := fun h₁ h₂ _ => ⟨h₁, h₂⟩
+  assumeZeroAdd_sound := fun h₁ h₂ _ => ⟨h₁, h₂⟩
 
 /-- The generic Parity concretization for a fixed IMP program. -/
 def gammaProgramParity (program : Stmt) : Framework.Gamma (ConfigSharp Parity) Config :=
