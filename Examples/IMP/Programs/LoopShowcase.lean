@@ -1,5 +1,4 @@
 import Examples.IMP.Analysis.Sign
-import Examples.IMP.Pretty
 
 /-!
 # Loop Analysis Showcase
@@ -35,9 +34,7 @@ All theorems in this file are axiom-clean (`propext`, `Quot.sound`,
 
 namespace Examples.IMP.Programs
 
-open AbsInterp
 open AbsInterp.Domains
-open AbsInterp.Framework
 open AbsInterp.Framework.Iteration
 
 /-! ## The IMP program -/
@@ -99,26 +96,6 @@ theorem loopTransferSign_sound_body
     n + (-1) ∈ gammaSign (loopTransferSign a) :=
   joinSign_sound _ _ (Or.inr (loopBodySign_sound hn hNz))
 
-/-! ## Loop invariant from post-fixpoint
-
-The post-fixpoint `top` is trivially an invariant (`γ(top) = Set.univ`).
-This is expected for Sign: the domain cannot track decreasing values
-precisely. The payoff comes at loop exit. -/
-
-/-- The loop body preserves the invariant: concrete execution stays
-    within `γ(loopPfp)`. -/
-theorem loopPfp_invariant_body
-    {n : Int}
-    (_hn : n ∈ gammaSign loopPfp)
-    (_hNz : n ≠ 0) :
-    n + (-1) ∈ gammaSign loopPfp :=
-  gammaSign_top _
-
-/-- The initial value is in the invariant. -/
-theorem loopPfp_invariant_init :
-    (5 : Int) ∈ gammaSign loopPfp :=
-  gammaSign_top _
-
 /-! ## Concrete exit property
 
 The key end-to-end result: the Sign analysis determines that `x0 = 0`
@@ -137,14 +114,5 @@ theorem loopShowcase_exit_x0_zero
     (hExit : n = 0) :
     n ∈ gammaSign .zero :=
   assumeZero_sound hInv hExit
-
-/-- Concrete corollary: the exit condition fully determines x0. -/
-theorem loopShowcase_exit_concrete
-    {n : Int}
-    (hInv : n ∈ gammaSign loopPfp)
-    (hExit : n = 0) :
-    n = 0 := by
-  have hMem := loopShowcase_exit_x0_zero hInv hExit
-  simpa [gammaSign] using hMem
 
 end Examples.IMP.Programs
