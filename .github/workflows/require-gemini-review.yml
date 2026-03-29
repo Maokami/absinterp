@@ -35,13 +35,11 @@ jobs:
               return;
             }
 
-            // Get the current PR head SHA
-            const pr = await github.rest.pulls.get({
-              owner, repo, pull_number: pr_number
-            });
-            const headSha = pr.data.head.sha;
-
-            // Paginate through all reviews to find Gemini's review for current head
+            // Check if Gemini has reviewed any commit on this PR.
+            // We intentionally do NOT require the review to match the HEAD SHA:
+            // after a review-feedback commit, Gemini may skip re-reviewing,
+            // and the thread-resolution check below already ensures all
+            // feedback has been addressed.
             const allReviews = await github.paginate(
               github.rest.pulls.listReviews,
               { owner, repo, pull_number: pr_number }
@@ -49,18 +47,18 @@ jobs:
 
             const geminiReview = allReviews.find(
               r => r.user.login === 'gemini-code-assist[bot]'
-                && r.commit_id === headSha
             );
 
             if (geminiReview) {
-              core.info(`Gemini review found for HEAD ${headSha} (state: ${geminiReview.state})`);
+              core.info(`Gemini review found (commit: ${geminiReview.commit_id}, state: ${geminiReview.state})`);
               return;
             }
 
-            // Poll for up to 10 minutes (check every 20s)
+            // Poll for up to 10 minutes (check every 20s) — needed for
+            // the initial review on a newly opened PR.
             const maxAttempts = 30;
             for (let i = 0; i < maxAttempts; i++) {
-              core.info(`Waiting for Gemini review on ${headSha}... (${i + 1}/${maxAttempts})`);
+              core.info(`Waiting for Gemini review... (${i + 1}/${maxAttempts})`);
               await new Promise(r => setTimeout(r, 20000));
 
               const reviews = await github.paginate(
@@ -69,10 +67,9 @@ jobs:
               );
               const found = reviews.find(
                 r => r.user.login === 'gemini-code-assist[bot]'
-                  && r.commit_id === headSha
               );
               if (found) {
-                core.info(`Gemini review found (state: ${found.state})`);
+                core.info(`Gemini review found (commit: ${found.commit_id}, state: ${found.state})`);
                 return;
               }
             }
