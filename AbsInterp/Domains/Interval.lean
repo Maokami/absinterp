@@ -54,6 +54,10 @@ instance : Preorder Interval where
   le_refl := leInterval_refl
   le_trans := @leInterval_trans
 
+instance : OrderTop Interval where
+  top := .top
+  le_top _ := Set.subset_univ _
+
 theorem gammaInterval_monotone_of_leInterval {a b : Interval} (hAB : a ≤ b) :
     gammaInterval a ⊆ gammaInterval b :=
   hAB
@@ -107,6 +111,8 @@ def joinInterval (a b : Interval) : Interval :=
   | .top, _ => .top
   | _, .top => .top
   | .range lo1 hi1, .range lo2 hi2 => mk (min lo1 lo2) (max hi1 hi2)
+
+instance : Max Interval := ⟨joinInterval⟩
 
 /-- `joinInterval` soundly over-approximates union concretization. -/
 theorem joinInterval_sound (a b : Interval) :
@@ -399,13 +405,8 @@ theorem widenInterval_upperBound :
 def intervalGammaOnlyDomain :
     AbsInterp.Framework.Domains.GammaOnlyDomain Interval Int where
   gamma := gammaInterval
-  le := leInterval
-  le_refl := leInterval_refl
-  le_trans := leInterval_trans
   gamma_monotone := gammaInterval_monotone_of_leInterval
-  top := Interval.top
   gamma_top := gammaInterval_top
-  join := joinInterval
   join_sound := joinInterval_sound
 
 end Domains

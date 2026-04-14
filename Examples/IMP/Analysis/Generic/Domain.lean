@@ -33,7 +33,8 @@ An instance packages a scalar `GammaOnlyDomain` together with the transfer
 primitives and soundness contracts needed by the generic IMP transfer function
 and its soundness proof.
 -/
-structure IMPAnalysisDomain (A : Type u) [Bot A] where
+structure IMPAnalysisDomain
+    (A : Type u) [Bot A] [Preorder A] [OrderTop A] [Max A] where
   /-- The underlying scalar gamma-only domain over integers. -/
   scalarDomain : GammaOnlyDomain A Int
   /-- The bottom element has empty concretization. -/
@@ -79,16 +80,17 @@ structure IMPAnalysisDomain (A : Type u) [Bot A] where
 
 namespace IMPAnalysisDomain
 
-variable {A : Type u} [Bot A] (d : IMPAnalysisDomain A)
+variable {A : Type u} [Bot A] [Preorder A] [OrderTop A] [Max A]
+variable (d : IMPAnalysisDomain A)
 
 /-- Convenience accessor for the scalar concretization function. -/
 abbrev gamma : A → Set Int := d.scalarDomain.gamma
 
-/-- Convenience accessor for the scalar join. -/
-abbrev join : A → A → A := d.scalarDomain.join
+/-- Convenience accessor for the scalar join (`⊔` from the `Max A` instance). -/
+abbrev join : A → A → A := (· ⊔ ·)
 
-/-- Convenience accessor for the scalar top element. -/
-abbrev top : A := d.scalarDomain.top
+/-- Convenience accessor for the scalar top element (from `OrderTop A`). -/
+abbrev top : A := ⊤
 
 end IMPAnalysisDomain
 

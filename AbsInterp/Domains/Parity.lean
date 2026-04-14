@@ -49,6 +49,15 @@ theorem leParity_refl : ∀ a : Parity, leParity a a := by
 theorem leParity_trans : ∀ {a b c : Parity}, leParity a b → leParity b c → leParity a c := by
   intro a b c hab hbc; cases a <;> cases b <;> cases c <;> simp_all [leParity]
 
+instance : Preorder Parity where
+  le := leParity
+  le_refl := leParity_refl
+  le_trans := @leParity_trans
+
+instance : OrderTop Parity where
+  top := .top
+  le_top a := by cases a <;> simp [leParity, LE.le]
+
 theorem gammaParity_monotone : ∀ {a b : Parity}, leParity a b → gammaParity a ⊆ gammaParity b := by
   intro a b hab; cases a <;> cases b <;> simp_all [leParity, gammaParity, Set.subset_univ]
 
@@ -60,6 +69,8 @@ def joinParity : Parity → Parity → Parity
   | .odd, .odd => .odd
   | _, _ => .top
 
+instance : Max Parity := ⟨joinParity⟩
+
 theorem joinParity_sound : ∀ a b : Parity, gammaParity a ∪ gammaParity b ⊆ gammaParity (joinParity a b) := by
   intro a b n hn
   cases a <;> cases b <;> simp_all [joinParity, gammaParity, Set.mem_union, Set.mem_empty_iff_false]
@@ -67,13 +78,8 @@ theorem joinParity_sound : ∀ a b : Parity, gammaParity a ∪ gammaParity b ⊆
 /-- The complete gamma-only domain instance for Parity. -/
 def parityGammaOnlyDomain : GammaOnlyDomain Parity Int where
   gamma := gammaParity
-  le := leParity
-  le_refl := leParity_refl
-  le_trans := leParity_trans
   gamma_monotone := gammaParity_monotone
-  top := .top
   gamma_top := fun _ => Set.mem_univ _
-  join := joinParity
   join_sound := joinParity_sound
 
 /-- Abstract a concrete integer constant by its parity. -/
