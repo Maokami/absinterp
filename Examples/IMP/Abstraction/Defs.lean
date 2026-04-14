@@ -1,5 +1,8 @@
 import Cslib.Init
 import Mathlib.Data.Set.Lattice
+import Mathlib.Order.Basic
+import Mathlib.Order.Lattice
+import Mathlib.Order.BoundedOrder.Basic
 
 import AbsInterp.Framework.Domains
 import Examples.IMP.Semantics
@@ -68,21 +71,13 @@ def gammaConfigOf
     Gamma (ConfigSharp Abstract) Config :=
   fun κ => { c : Config | storeOfConfig c ∈ gammaStoreOf gamma (κ (controlOfConfig c)) }
 
-/-- Pointwise order on abstract IMP stores. -/
-def leStoreSharp
-    {Abstract : Type u}
-    (cfg : GammaOnlyDomain Abstract Int) :
-    StoreSharp Abstract → StoreSharp Abstract → Prop :=
-  fun ρ₁ ρ₂ => ∀ x : Var, cfg.le (ρ₁ x) (ρ₂ x)
+/--
+Pointwise bottom element on abstract IMP stores.
 
-/-- Pointwise top element on abstract IMP stores. -/
-def topStoreSharp
-    {Abstract : Type u}
-    (cfg : GammaOnlyDomain Abstract Int) :
-    StoreSharp Abstract :=
-  fun _ => cfg.top
-
-/-- Pointwise bottom element on abstract IMP stores. -/
+Bottom is an opt-in requirement (`[Bot Abstract]`); it is not carried by
+`GammaOnlyDomain` itself but is needed for "unreachable control location"
+configurations like `singletonConfig`.
+-/
 def botStoreSharp
     {Abstract : Type u}
     [Bot Abstract] :
@@ -95,55 +90,6 @@ def botStoreSharp
     (x : Var) :
     botStoreSharp (Abstract := Abstract) x = (⊥ : Abstract) :=
   rfl
-
-/-- Pointwise join on abstract IMP stores. -/
-def joinStoreSharp
-    {Abstract : Type u}
-    (cfg : GammaOnlyDomain Abstract Int) :
-    StoreSharp Abstract → StoreSharp Abstract → StoreSharp Abstract :=
-  fun ρ₁ ρ₂ x => cfg.join (ρ₁ x) (ρ₂ x)
-
-/-- Pointwise IMP-store domain lifted from a scalar integer domain. -/
-def storeGammaOnlyDomain
-    {Abstract : Type u}
-    (cfg : GammaOnlyDomain Abstract Int) :
-    GammaOnlyDomain (StoreSharp Abstract) Store where
-  gamma := gammaStoreOf cfg.gamma
-  le := leStoreSharp cfg
-  le_refl := by
-    intro ρ x
-    exact cfg.le_refl (ρ x)
-  le_trans := by
-    intro ρ₁ ρ₂ ρ₃ h12 h23 x
-    exact cfg.le_trans (h12 x) (h23 x)
-  gamma_monotone := by
-    intro ρ₁ ρ₂ hLe σ hσ x
-    exact cfg.gamma_monotone (hLe x) (hσ x)
-  top := topStoreSharp cfg
-  gamma_top := by
-    intro σ x
-    exact cfg.gamma_top (σ x)
-  join := joinStoreSharp cfg
-  join_sound := by
-    intro ρ₁ ρ₂ σ hUnion x
-    apply cfg.join_sound
-    rcases hUnion with hLeft | hRight
-    · exact Or.inl (hLeft x)
-    · exact Or.inr (hRight x)
-
-/-- Pointwise order on abstract IMP configurations. -/
-def leConfigSharp
-    {Abstract : Type u}
-    (cfg : GammaOnlyDomain (StoreSharp Abstract) Store) :
-    ConfigSharp Abstract → ConfigSharp Abstract → Prop :=
-  fun κ₁ κ₂ => ∀ s : Control, cfg.le (κ₁ s) (κ₂ s)
-
-/-- Pointwise top element on abstract IMP configurations. -/
-def topConfigSharp
-    {Abstract : Type u}
-    (cfg : GammaOnlyDomain (StoreSharp Abstract) Store) :
-    ConfigSharp Abstract :=
-  fun _ => cfg.top
 
 /-- Pointwise bottom element on abstract IMP configurations. -/
 def botConfigSharp
@@ -160,12 +106,70 @@ def botConfigSharp
     botConfigSharp (Abstract := Abstract) s x = (⊥ : Abstract) :=
   rfl
 
-/-- Pointwise join on abstract IMP configurations. -/
-def joinConfigSharp
+/-!
+## Pointwise lifts of `GammaOnlyDomain`
+
+The Mathlib `Pi` instances (`Pi.preorder`, `Pi.instOrderTop`, `Pi.instMax`)
+give us `≤`, `⊤`, and `⊔` on `Var → Abstract` and `Stmt → Var → Abstract`
+automatically, so the lifted domain only has to supply the γ-level
+soundness obligations.
+-/
+
+/-- Pointwise IMP-store domain lifted from a scalar integer domain. -/
+def storeGammaOnlyDomain
     {Abstract : Type u}
-    (cfg : GammaOnlyDomain (StoreSharp Abstract) Store) :
+    [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
+    (cfg : GammaOnlyDomain Abstract Int) :
+    GammaOnlyDomain (StoreSharp Abstract) Store where
+  gamma := gammaStoreOf cfg.gamma
+  gamma_monotone := by
+    intro ρ₁ ρ₂ hLe σ hσ x
+    exact cfg.gamma_monotone (hLe x) (hσ x)
+  gamma_top := by
+    intro σ x
+    exact cfg.gamma_top (σ x)
+  join_sound := by
+    intro ρ₁ ρ₂ σ hUnion x
+    apply cfg.join_sound
+    rcases hUnion with hLeft | hRight
+    · exact Or.inl (hLeft x)
+    · exact Or.inr (hRight x)
+
+/-- Pointwise IMP-configuration domain lifted from a scalar integer domain. -/
+def configGammaOnlyDomain
+    {Abstract : Type u}
+    [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
+    (cfg : GammaOnlyDomain Abstract Int) :
+    GammaOnlyDomain (ConfigSharp Abstract) Config where
+  gamma := gammaConfigOf cfg.gamma
+  gamma_monotone := by
+    intro κ₁ κ₂ hLe c hc
+    exact (storeGammaOnlyDomain cfg).gamma_monotone (hLe (controlOfConfig c)) hc
+  gamma_top := by
+    intro c
+    exact (storeGammaOnlyDomain cfg).gamma_top (storeOfConfig c)
+  join_sound := by
+    intro κ₁ κ₂ c hc
+    change
+      storeOfConfig c ∈ gammaStoreOf cfg.gamma (κ₁ (controlOfConfig c)) ∪
+        gammaStoreOf cfg.gamma (κ₂ (controlOfConfig c)) at hc
+    exact (storeGammaOnlyDomain cfg).join_sound
+      (κ₁ (controlOfConfig c)) (κ₂ (controlOfConfig c)) hc
+
+/--
+Pointwise join on abstract IMP configurations.
+
+Retained as a named alias so that `Generic/Defs.lean` and
+`Generic/Soundness.lean` can refer to `joinConfig d.scalarDomain` without
+caring about the underlying `Pi`-instance `⊔`. The `cfg` argument is
+intentionally unused beyond helping type inference.
+-/
+def joinConfig
+    {Abstract : Type u}
+    [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
+    (_cfg : GammaOnlyDomain Abstract Int) :
     ConfigSharp Abstract → ConfigSharp Abstract → ConfigSharp Abstract :=
-  fun κ₁ κ₂ pc => cfg.join (κ₁ pc) (κ₂ pc)
+  fun κ₁ κ₂ pc x => κ₁ pc x ⊔ κ₂ pc x
 
 /-- One-target abstract configuration contribution. -/
 def singletonConfig
@@ -202,43 +206,5 @@ def liftSeqConfig
     ConfigSharp Abstract
   | .seq s s2' => if s2' = s2 then κ s else botStoreSharp
   | _ => botStoreSharp
-
-/-- Join on IMP abstract configurations lifted from a scalar domain. -/
-def joinConfig
-    {Abstract : Type u}
-    (cfg : GammaOnlyDomain Abstract Int) :
-    ConfigSharp Abstract → ConfigSharp Abstract → ConfigSharp Abstract :=
-  joinConfigSharp (storeGammaOnlyDomain cfg)
-
-/-- Pointwise IMP-configuration domain lifted from a scalar integer domain. -/
-def configGammaOnlyDomain
-    {Abstract : Type u}
-    (cfg : GammaOnlyDomain Abstract Int) :
-    GammaOnlyDomain (ConfigSharp Abstract) Config :=
-  let storeCfg := storeGammaOnlyDomain cfg
-  {
-    gamma := gammaConfigOf cfg.gamma
-    le := leConfigSharp storeCfg
-    le_refl := by
-      intro κ pc
-      exact storeCfg.le_refl (κ pc)
-    le_trans := by
-      intro κ₁ κ₂ κ₃ h12 h23 pc
-      exact storeCfg.le_trans (h12 pc) (h23 pc)
-    gamma_monotone := by
-      intro κ₁ κ₂ hLe c hc
-      exact storeCfg.gamma_monotone (hLe (controlOfConfig c)) hc
-    top := topConfigSharp storeCfg
-    gamma_top := by
-      intro c
-      exact storeCfg.gamma_top (storeOfConfig c)
-    join := joinConfigSharp storeCfg
-    join_sound := by
-      intro κ₁ κ₂ c hc
-      change
-        storeOfConfig c ∈ gammaStoreOf cfg.gamma (κ₁ (controlOfConfig c)) ∪
-          gammaStoreOf cfg.gamma (κ₂ (controlOfConfig c)) at hc
-      exact storeCfg.join_sound (κ₁ (controlOfConfig c)) (κ₂ (controlOfConfig c)) hc
-  }
 
 end Examples.IMP

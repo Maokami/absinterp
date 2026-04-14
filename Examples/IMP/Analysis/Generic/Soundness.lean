@@ -14,7 +14,7 @@ open AbsInterp.Instances.LTS
 
 universe u
 
-variable {A : Type u} [Bot A] (d : IMPAnalysisDomain A)
+variable {A : Type u} [Bot A] [Preorder A] [OrderTop A] [Max A] (d : IMPAnalysisDomain A)
 
 /-!
 # Generic IMP Soundness Proof

@@ -17,7 +17,7 @@ open AbsInterp.Instances.LTS
 
 universe u
 
-variable {A : Type u} [Bot A]
+variable {A : Type u} [Bot A] [Preorder A] [OrderTop A] [Max A]
 
 /-!
 # Generic IMP Transfer Functions

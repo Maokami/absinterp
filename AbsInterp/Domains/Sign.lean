@@ -47,6 +47,10 @@ instance : Preorder Sign where
   le_refl := leSign_refl
   le_trans := @leSign_trans
 
+instance : OrderTop Sign where
+  top := .top
+  le_top _ := Set.subset_univ _
+
 theorem gammaSign_monotone_of_leSign {a b : Sign} (hAB : a ≤ b) :
     gammaSign a ⊆ gammaSign b :=
   hAB
@@ -100,6 +104,8 @@ def joinSign (a b : Sign) : Sign :=
     (hasNeg a || hasNeg b)
     (hasZero a || hasZero b)
     (hasPos a || hasPos b)
+
+instance : Max Sign := ⟨joinSign⟩
 
 /-- `joinSign` soundly over-approximates union concretization. -/
 theorem joinSign_sound (a b : Sign) :
@@ -331,13 +337,8 @@ theorem negTransfer_sound {a : Sign} {n : Int} (hn : n ∈ gammaSign a) :
 def signGammaOnlyDomain :
     AbsInterp.Framework.Domains.GammaOnlyDomain Sign Int where
   gamma := gammaSign
-  le := leSign
-  le_refl := leSign_refl
-  le_trans := leSign_trans
   gamma_monotone := gammaSign_monotone_of_leSign
-  top := Sign.top
   gamma_top := gammaSign_top
-  join := joinSign
   join_sound := joinSign_sound
 
 end Domains
