@@ -1,4 +1,5 @@
 import Cslib.Init
+import Cslib.Foundations.Semantics.LTS.HasTau
 
 import AbsInterp
 

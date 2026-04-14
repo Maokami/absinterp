@@ -1,4 +1,6 @@
 import Cslib.Init
+import Cslib.Foundations.Semantics.LTS.OmegaExecution
+import Cslib.Foundations.Data.OmegaSequence.Defs
 
 import AbsInterp
 
@@ -28,8 +30,8 @@ private def altStates : Cslib.ωSequence Nat where
 private def constLabels : Cslib.ωSequence Unit where
   get _ := ()
 
--- altStates is a valid ωTr of loopLTS
-private theorem altStates_ωTr : loopLTS.ωTr altStates constLabels := by
+-- altStates is a valid ω-execution of loopLTS
+private theorem altStates_omegaExecution : loopLTS.OmegaExecution altStates constLabels := by
   intro i
   simp only [loopLTS, altStates, constLabels]
   by_cases h : i % 2 = 0
@@ -47,12 +49,12 @@ private theorem altStates_ωTr : loopLTS.ωTr altStates constLabels := by
 -- 0 is ω-reachable from {0}
 example : (0 : Nat) ∈ omegaReachableLTS loopLTS {0} := by
   simp only [omegaReachableLTS, Set.mem_setOf_eq]
-  exact ⟨altStates, constLabels, altStates_ωTr, rfl, 0, rfl⟩
+  exact ⟨altStates, constLabels, altStates_omegaExecution, rfl, 0, rfl⟩
 
 -- 1 is ω-reachable from {0}
 example : (1 : Nat) ∈ omegaReachableLTS loopLTS {0} := by
   simp only [omegaReachableLTS, Set.mem_setOf_eq]
-  exact ⟨altStates, constLabels, altStates_ωTr, rfl, 1, rfl⟩
+  exact ⟨altStates, constLabels, altStates_omegaExecution, rfl, 1, rfl⟩
 
 -- Bridge: ω-reachable ⊆ framework omegaReachable
 example :

@@ -1,5 +1,9 @@
 import Cslib.Init
 import Cslib.Foundations.Semantics.LTS.Basic
+import Cslib.Foundations.Semantics.LTS.HasTau
+import Cslib.Foundations.Semantics.LTS.OmegaExecution
+import Cslib.Foundations.Semantics.LTS.Divergence
+import Cslib.Foundations.Data.OmegaSequence.Defs
 import Mathlib.Data.Set.Lattice
 
 import AbsInterp.Framework.Semantics.Omega
@@ -35,7 +39,7 @@ def omegaReachableLTS
     (lts : Cslib.LTS State Label)
     (init : Set State) : Set State :=
   { s | ∃ (ss : Cslib.ωSequence State) (μs : Cslib.ωSequence Label),
-        lts.ωTr ss μs ∧ ss 0 ∈ init ∧ ∃ n, ss n = s }
+        lts.OmegaExecution ss μs ∧ ss 0 ∈ init ∧ ∃ n, ss n = s }
 
 /--
 Bridge: CSLib `ωTr`-reachability implies framework `omegaReachable`
