@@ -1,4 +1,6 @@
 import Cslib.Init
+import Cslib.Foundations.Semantics.LTS.OmegaExecution
+import Cslib.Foundations.Data.OmegaSequence.Defs
 
 import AbsInterp
 
@@ -28,8 +30,8 @@ private def altStates : Cslib.ωSequence Nat where
 private def constLabels : Cslib.ωSequence Unit where
   get _ := ()
 
--- altStates is a valid ωTr of loopLTS
-private theorem altStates_ωTr : loopLTS.ωTr altStates constLabels := by
+-- altStates is a valid ω-execution of loopLTS
+private theorem altStates_ωTr : loopLTS.OmegaExecution altStates constLabels := by
   intro i
   simp only [loopLTS, altStates, constLabels]
   by_cases h : i % 2 = 0

@@ -1,5 +1,6 @@
 import Cslib.Init
 import Cslib.Foundations.Semantics.LTS.Basic
+import Cslib.Foundations.Semantics.LTS.HasTau
 
 import AbsInterp.Framework.Semantics.Weak
 import AbsInterp.Instances.LTS.Semantics.Concrete
