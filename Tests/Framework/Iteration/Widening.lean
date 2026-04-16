@@ -12,6 +12,10 @@ open AbsInterp.Framework.Iteration
 
 A toy 3-element flat lattice `{bot, mid, top}` exercising
 `WAcc`, `witer`, `pfp`, `IsPostFixpoint`, and `sound_of_isPostFixpoint`.
+
+The `pfp_eq_top` theorem uses `native_decide` to compute the widening
+result. This is test-only code; the upstream soundness path is
+axiom-clean (see `Tests/Axioms.lean`).
 -/
 
 /-- Three-element flat lattice. -/

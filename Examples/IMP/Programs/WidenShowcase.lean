@@ -8,6 +8,16 @@ Demonstrates the framework widening interfaces (`pfp`, `WAcc`,
 `WidenUpperBound`) on a simple while-loop IMP program analyzed with
 the Interval domain.
 
+## Axiom note
+
+The `loopPfp_eq_top` theorem uses `native_decide` to compute the
+widening post-fixpoint result. This pulls in `Lean.ofReduceBool` and
+`Lean.trustCompiler`. The kernel-only `decide` tactic cannot reduce
+the `pfp` computation within its heartbeat limits.
+
+This is acceptable for validation code: the upstream-candidate
+soundness path is axiom-clean (see `Tests/Axioms.lean`).
+
 ## Program
 
 ```

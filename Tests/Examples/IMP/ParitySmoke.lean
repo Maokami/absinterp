@@ -14,7 +14,10 @@ open Examples.IMP
 /-!
 # Parity Analysis Smoke Tests
 
-Validates the Parity domain instantiation of the generic IMP analysis framework.
+Validates the Parity domain instantiation of the generic IMP analysis
+framework. Uses `native_decide` to evaluate abstract transfer results;
+this is test-only code and the upstream soundness path is axiom-clean
+(see `Tests/Axioms.lean`).
 -/
 
 /-- `x0 := 5` assigns an odd value. -/
