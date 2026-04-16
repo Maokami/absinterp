@@ -62,11 +62,15 @@ the generic IMP analysis) uses only standard axioms (`propext`,
 `Tests/Axioms.lean`, which uses `#guard_msgs in #print axioms` to pin
 the exact axiom set of 13 key declarations.
 
-Some demonstration and test modules (`Programs/Showcase`,
-`Programs/WidenShowcase`, `Tests/Examples/IMP/Smoke`, etc.)
+Some demonstration and test modules
+(`Examples/IMP/Programs/Showcase.lean`,
+`Examples/IMP/Programs/WidenShowcase.lean`,
+`Tests/Examples/IMP/Smoke.lean`,
+`Tests/Examples/IMP/ParitySmoke.lean`,
+`Tests/Framework/Iteration/Widening.lean`)
 intentionally use `native_decide` for computed validation of abstract
-analysis output. These modules are clearly marked with "Axiom note"
-headers and are not part of the upstream-candidate path.
+analysis output. These modules are clearly marked with axiom-note
+documentation and are not part of the upstream-candidate path.
 
 ## Build and test
 
