@@ -30,8 +30,12 @@ def intervalAnalysisDomain : IMPAnalysisDomain Interval where
   assumeNonzero_sound := assumeNonzeroInterval_sound
   assumeZero := assumeZeroInterval
   assumeZero_sound := assumeZeroInterval_sound
-  assumeNonzeroAdd_sound := fun h₁ h₂ _ => ⟨h₁, h₂⟩
-  assumeZeroAdd_sound := fun h₁ h₂ _ => ⟨h₁, h₂⟩
+  assumeNonzeroAdd_sound :=
+    SoundBackwardRefine.id (gamma := intervalGammaOnlyDomain.gamma)
+      (rel := fun v₁ v₂ => v₁ + v₂ ≠ 0)
+  assumeZeroAdd_sound :=
+    SoundBackwardRefine.id (gamma := intervalGammaOnlyDomain.gamma)
+      (rel := fun v₁ v₂ => v₁ + v₂ = 0)
 
 -- Public API wrappers preserving backward-compatible names.
 
