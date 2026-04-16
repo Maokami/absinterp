@@ -4,7 +4,7 @@ import AbsInterp
 import Examples
 
 /-!
-Axiom-cleanliness reference for upstream-candidate theorems.
+# Axiom-cleanliness guard for upstream-candidate theorems
 
 The reusable soundness path (Framework → Instances/LTS → IMP step
 soundness) must use only standard axioms: `propext`, `Quot.sound`,
@@ -15,24 +15,60 @@ soundness) must use only standard axioms: `propext`, `Quot.sound`,
 `Classical.choice` is expected and acceptable — it arises from
 classical reasoning in set-membership proofs, not from unsafe reduction.
 
-Run `lake build Tests` and inspect the output, or use the `lean_verify`
-MCP tool, to confirm axiom cleanliness of these theorems.
+Each `#guard_msgs` block below pins the exact axiom set. If a future
+change introduces a new axiom dependency (e.g., via `native_decide`),
+the mismatch will cause a compile-time error and fail CI.
 -/
 
--- Framework: step soundness lifts to trace soundness (upstream candidate)
-#print axioms AbsInterp.Framework.soundTrace_of_soundStep
+/-! ## Framework -/
 
--- Instances/LTS: LTSAbstraction packages the lifting (upstream candidate)
-#print axioms AbsInterp.Instances.LTS.LTSAbstraction.soundTraceLifted
+/-- info: 'AbsInterp.Framework.soundTrace_of_soundStep' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms AbsInterp.Framework.soundTrace_of_soundStep
 
--- IMP: one-step soundness of the generic Sign transfer (upstream candidate)
-#print axioms Examples.IMP.soundStep_impSign
+/-- info: 'AbsInterp.Framework.sound_weak_of_sound_closure' does not depend on any axioms -/
+#guard_msgs in #print axioms AbsInterp.Framework.sound_weak_of_sound_closure
 
--- IMP: full Sign LTS abstraction packaging (upstream candidate)
-#print axioms Examples.IMP.impSignAbstraction
+/-- info: 'AbsInterp.Framework.soundStep_weak_of_soundStep_closure' does not depend on any axioms -/
+#guard_msgs in #print axioms AbsInterp.Framework.soundStep_weak_of_soundStep_closure
 
--- IMP: one-step soundness of the generic Interval transfer (upstream candidate)
-#print axioms Examples.IMP.soundStep_impInterval
+/-- info: 'AbsInterp.Framework.omegaReachable_subset_iUnion_kleeneNat' depends on axioms: [propext] -/
+#guard_msgs in #print axioms AbsInterp.Framework.omegaReachable_subset_iUnion_kleeneNat
 
--- IMP: full Interval LTS abstraction packaging (upstream candidate)
-#print axioms Examples.IMP.impIntervalAbstraction
+/-! ## Instances/LTS -/
+
+/-- info: 'AbsInterp.Instances.LTS.LTSAbstraction.soundTraceLifted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms AbsInterp.Instances.LTS.LTSAbstraction.soundTraceLifted
+
+/-- info: 'AbsInterp.Instances.LTS.tauClosureOp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms AbsInterp.Instances.LTS.tauClosureOp
+
+/--
+info: 'AbsInterp.Instances.LTS.omegaReachableLTS_subset_iUnion_kleeneNat' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms AbsInterp.Instances.LTS.omegaReachableLTS_subset_iUnion_kleeneNat
+
+/-! ## Examples/IMP — Sign -/
+
+/-- info: 'Examples.IMP.soundStep_impSign' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Examples.IMP.soundStep_impSign
+
+/-- info: 'Examples.IMP.impSignAbstraction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Examples.IMP.impSignAbstraction
+
+/-! ## Examples/IMP — Interval -/
+
+/-- info: 'Examples.IMP.soundStep_impInterval' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Examples.IMP.soundStep_impInterval
+
+/-- info: 'Examples.IMP.impIntervalAbstraction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Examples.IMP.impIntervalAbstraction
+
+/-! ## Examples/IMP — Parity -/
+
+/-- info: 'Examples.IMP.soundStep_impParity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Examples.IMP.soundStep_impParity
+
+/-- info: 'Examples.IMP.impParityAbstraction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Examples.IMP.impParityAbstraction
