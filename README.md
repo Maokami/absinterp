@@ -54,6 +54,24 @@ contribution, rather than treating this repository as a one-off example dump.
 - Read `Examples/IMP/Programs/Tutorial` only if you want the smaller teaching
   examples first.
 
+## Axiom boundary
+
+The upstream-candidate soundness path (Framework, Instances/LTS, and
+the generic IMP analysis) uses only standard axioms (`propext`,
+`Quot.sound`, `Classical.choice`). This is enforced at compile time by
+`Tests/Axioms.lean`, which uses `#guard_msgs in #print axioms` to pin
+the exact axiom set of 13 key declarations.
+
+Some demonstration and test modules
+(`Examples/IMP/Programs/Showcase.lean`,
+`Examples/IMP/Programs/WidenShowcase.lean`,
+`Tests/Examples/IMP/Smoke.lean`,
+`Tests/Examples/IMP/ParitySmoke.lean`,
+`Tests/Framework/Iteration/Widening.lean`)
+intentionally use `native_decide` for computed validation of abstract
+analysis output. These modules are clearly marked with axiom-note
+documentation and are not part of the upstream-candidate path.
+
 ## Build and test
 
 ```bash

@@ -5,6 +5,15 @@ import Examples
 namespace Tests
 namespace ExamplesIMPSmoke
 
+/-!
+# Sign Analysis Smoke Tests
+
+Computed validation of Sign analysis output on small IMP programs.
+Uses `native_decide` to evaluate abstract transfer results; this is
+test-only code and the upstream soundness path is axiom-clean
+(see `Tests/Axioms.lean`).
+-/
+
 open AbsInterp
 open AbsInterp.Domains
 open AbsInterp.Framework
