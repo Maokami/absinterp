@@ -51,32 +51,30 @@ structure IMPAnalysisDomain
     v₁ + v₂ ∈ scalarDomain.gamma (addTransfer a₁ a₂)
   /-- Refine an abstract value under a nonzero assumption. -/
   assumeNonzero : A → A
-  /-- Nonzero refinement is sound. -/
-  assumeNonzero_sound : ∀ {a : A} {v : Int},
-    v ∈ scalarDomain.gamma a → v ≠ 0 → v ∈ scalarDomain.gamma (assumeNonzero a)
+  /-- Nonzero refinement is sound (`SoundAssume` with `P := (· ≠ 0)`). -/
+  assumeNonzero_sound :
+    SoundAssume scalarDomain.gamma (· ≠ 0) assumeNonzero
   /-- Refine an abstract value under a zero assumption. -/
   assumeZero : A → A
-  /-- Zero refinement is sound. -/
-  assumeZero_sound : ∀ {a : A} {v : Int},
-    v ∈ scalarDomain.gamma a → v = 0 → v ∈ scalarDomain.gamma (assumeZero a)
+  /-- Zero refinement is sound (`SoundAssume` with `P := (· = 0)`). -/
+  assumeZero_sound :
+    SoundAssume scalarDomain.gamma (· = 0) assumeZero
   /-- Backward refinement for addition under nonzero constraint.
       Given `v₁ ∈ γ(a₁)`, `v₂ ∈ γ(a₂)`, and `v₁ + v₂ ≠ 0`, refine both. -/
   assumeNonzeroAdd : A → A → A × A := fun a₁ a₂ => (a₁, a₂)
-  /-- Nonzero-add backward refinement is sound. -/
-  assumeNonzeroAdd_sound : ∀ {a₁ a₂ : A} {v₁ v₂ : Int},
-    v₁ ∈ scalarDomain.gamma a₁ → v₂ ∈ scalarDomain.gamma a₂ →
-    v₁ + v₂ ≠ 0 →
-    v₁ ∈ scalarDomain.gamma (assumeNonzeroAdd a₁ a₂).1 ∧
-    v₂ ∈ scalarDomain.gamma (assumeNonzeroAdd a₁ a₂).2
+  /-- Nonzero-add backward refinement is sound (`SoundBackwardRefine` with
+      `rel := fun v₁ v₂ => v₁ + v₂ ≠ 0`). -/
+  assumeNonzeroAdd_sound :
+    SoundBackwardRefine scalarDomain.gamma
+      (fun v₁ v₂ => v₁ + v₂ ≠ 0) assumeNonzeroAdd
   /-- Backward refinement for addition under zero constraint.
       Given `v₁ ∈ γ(a₁)`, `v₂ ∈ γ(a₂)`, and `v₁ + v₂ = 0`, refine both. -/
   assumeZeroAdd : A → A → A × A := fun a₁ a₂ => (a₁, a₂)
-  /-- Zero-add backward refinement is sound. -/
-  assumeZeroAdd_sound : ∀ {a₁ a₂ : A} {v₁ v₂ : Int},
-    v₁ ∈ scalarDomain.gamma a₁ → v₂ ∈ scalarDomain.gamma a₂ →
-    v₁ + v₂ = 0 →
-    v₁ ∈ scalarDomain.gamma (assumeZeroAdd a₁ a₂).1 ∧
-    v₂ ∈ scalarDomain.gamma (assumeZeroAdd a₁ a₂).2
+  /-- Zero-add backward refinement is sound (`SoundBackwardRefine` with
+      `rel := fun v₁ v₂ => v₁ + v₂ = 0`). -/
+  assumeZeroAdd_sound :
+    SoundBackwardRefine scalarDomain.gamma
+      (fun v₁ v₂ => v₁ + v₂ = 0) assumeZeroAdd
 
 namespace IMPAnalysisDomain
 
