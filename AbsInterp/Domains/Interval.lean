@@ -16,36 +16,10 @@ inductive Interval where
   | bot
   | range (lo hi : Int) (h : lo ≤ hi)
   | top
+  deriving DecidableEq
 
 instance : Bot Interval where
   bot := .bot
-
-/-- Two `range` values with the same bounds are equal; the proof field is irrelevant. -/
-instance : DecidableEq Interval
-  | .bot, .bot => isTrue rfl
-  | .top, .top => isTrue rfl
-  | .bot, .range _ _ _ => isFalse (by intro h; cases h)
-  | .range _ _ _, .bot => isFalse (by intro h; cases h)
-  | .bot, .top => isFalse (by intro h; cases h)
-  | .top, .bot => isFalse (by intro h; cases h)
-  | .top, .range _ _ _ => isFalse (by intro h; cases h)
-  | .range _ _ _, .top => isFalse (by intro h; cases h)
-  | .range lo1 hi1 _, .range lo2 hi2 _ =>
-      if hlo : lo1 = lo2 then
-        if hhi : hi1 = hi2 then
-          isTrue (by subst hlo; subst hhi; congr 1)
-        else
-          isFalse (by
-            intro heq
-            apply hhi
-            have := congrArg (fun x : Interval => match x with | .range _ hi _ => hi | _ => 0) heq
-            simpa using this)
-      else
-        isFalse (by
-          intro heq
-          apply hlo
-          have := congrArg (fun x : Interval => match x with | .range lo _ _ => lo | _ => 0) heq
-          simpa using this)
 
 instance : Repr Interval where
   reprPrec a _ := match a with
