@@ -1,0 +1,2 @@
+-- Manual exceptions for the text-based style linters.
+-- Keep this file empty unless a reviewed false positive needs to be pinned.
