@@ -1,4 +1,4 @@
-import Cslib.Init
+import Init.Prelude
 
 namespace AbsInterp
 namespace Framework
@@ -13,6 +13,12 @@ by left-to-right composition over a label list.
 
 For `compose : T -> T -> T`, identity `id : T`, and `step : Label -> T`:
 `liftTrace compose id step labels = List.foldl (fun acc label => compose acc (step label)) id labels`.
+
+## References
+
+* X. Leroy, *Semantics and Verification of Computer Programs*,
+  MPRI lecture notes (N40AI), 2023–2024.
+  (trace semantics as sequential composition of step semantics)
 -/
 
 /--

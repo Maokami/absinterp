@@ -1,7 +1,22 @@
 import Cslib.Init
 
-import AbsInterp.Framework.Soundness
+import AbsInterp.Framework.Soundness.Defs
 import AbsInterp.Instances.LTS.Semantics.Concrete
+
+/-!
+# LTS Abstraction Interface
+
+`LTSAbstraction` is a reusable bundle that packages a CSLib LTS together with
+an abstract domain and a step-sound transfer function, enabling uniform
+trace-soundness proofs via `soundTrace_of_soundStep`.
+
+## References
+
+* X. Leroy, *Semantics and Verification of Computer Programs*,
+  MPRI lecture notes (N40AI), 2023–2024.
+* R. Montesi et al., *CSLib: A Lean 4 Library for Computer Science Foundations*,
+  leanprover/cslib, 2024–2025. https://github.com/leanprover/cslib
+-/
 
 namespace AbsInterp
 namespace Instances
