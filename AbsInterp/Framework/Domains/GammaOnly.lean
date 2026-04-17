@@ -55,6 +55,7 @@ satisfy `SemilatticeSup` are welcome to provide it as an opt-in instance.
 structure GammaOnlyDomain
     (Abstract : Type u) [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
     (Concrete : Type v) where
+  /-- The concretization function mapping abstract elements to concrete sets. -/
   gamma : Gamma Abstract Concrete
   gamma_monotone : ∀ {a b : Abstract}, a ≤ b → gamma a ⊆ gamma b
   gamma_top : ∀ c : Concrete, c ∈ gamma ⊤
