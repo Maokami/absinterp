@@ -61,4 +61,3 @@ def LTSAbstraction.ofExplicit
 end LTS
 end Instances
 end AbsInterp
-#lint

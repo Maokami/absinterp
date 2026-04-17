@@ -125,4 +125,3 @@ def GammaOnlyDomain.ofGaloisConnection
 end Domains
 end Framework
 end AbsInterp
-#lint
