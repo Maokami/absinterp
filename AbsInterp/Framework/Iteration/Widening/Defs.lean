@@ -1,4 +1,4 @@
-import Cslib.Init
+import Init.SizeOf
 
 namespace AbsInterp
 namespace Framework

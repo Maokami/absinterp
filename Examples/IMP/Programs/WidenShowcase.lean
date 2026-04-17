@@ -47,7 +47,7 @@ open AbsInterp.Framework.Iteration
 
 /-- The IMP program analyzed with widening. -/
 def widenShowcase : Stmt := [imp|
-  x0 := 0 ;;
+  x0 := 0;;
   while x1 do
     x0 := x0 + 1
 ]

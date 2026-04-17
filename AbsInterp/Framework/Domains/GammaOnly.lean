@@ -1,7 +1,30 @@
-import Cslib.Init
 import Mathlib.Order.GaloisConnection.Defs
 import Mathlib.Order.GaloisConnection.Basic
+import Mathlib.Order.BooleanAlgebra.Set
 import Mathlib.Order.Lattice
+
+/-!
+# Gamma-Only Abstract Domain Interface
+
+`GammaOnlyDomain` packages the γ-only soundness contract for abstract domains:
+a concretization function `gamma` together with monotonicity, top-coverage, and
+join-soundness obligations. No abstraction function `α` or Galois-connection
+obligation is required.
+
+The abstract carrier is required to carry `[Preorder] [OrderTop] [Max]` Mathlib
+instances. Domains that additionally satisfy `[SemilatticeSup]` may provide it
+as an opt-in instance. `GammaOnlyDomain.ofGaloisConnection` bridges the γ-only
+interface with the standard Mathlib `GaloisConnection` for domains that do have
+an `α`.
+
+## References
+
+* P. Cousot, R. Cousot, *Abstract Interpretation: A Unified Lattice Model for
+  Static Analysis of Programs by Construction or Approximation of Fixpoints*,
+  POPL 1977. doi:10.1145/512950.512973
+* X. Leroy, *Semantics and Verification of Computer Programs*,
+  MPRI lecture notes (N40AI), 2023–2024.
+-/
 
 namespace AbsInterp
 namespace Framework

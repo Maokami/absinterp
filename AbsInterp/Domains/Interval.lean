@@ -1,7 +1,6 @@
 import Cslib.Init
-import Mathlib.Data.Set.Lattice
-import AbsInterp.Framework.Domains
-import AbsInterp.Framework.Iteration
+import AbsInterp.Framework.Domains.GammaOnly
+import AbsInterp.Framework.Iteration.Widening.Defs
 
 namespace AbsInterp
 namespace Domains
@@ -357,7 +356,7 @@ theorem assumeZeroInterval_sound
       split
       · exact (mem_gammaInterval_mk_iff 0 0 0).2 ⟨le_rfl, le_rfl⟩
       · rename_i hNot
-        push_neg at hNot
+        push Not at hNot
         omega
 
 /--

@@ -43,12 +43,10 @@ example : (2 : Nat) ∈ weakPostStep toyLTS .a {0} := by
   show 2 ∈ toyLTS.saturate.setImage {0} .a
   apply (Cslib.LTS.mem_setImage).mpr
   refine ⟨0, rfl, ?_⟩
-  apply Cslib.LTS.STr.tr
-  · apply Cslib.LTS.STr.tr Cslib.LTS.STr.refl
-    · exact Or.inl ⟨rfl, rfl, rfl⟩
-    · exact Cslib.LTS.STr.refl
+  refine Cslib.LTS.STr.tr (s2 := 1) (s3 := 2) ?_ ?_ ?_
+  · exact Relation.ReflTransGen.single (Or.inl ⟨rfl, rfl, rfl⟩)
   · exact Or.inr (Or.inl ⟨rfl, rfl, rfl⟩)
-  · exact Cslib.LTS.STr.refl
+  · exact Relation.ReflTransGen.refl
 
 -- 2 is NOT reachable via strong step from {0} with label .a
 example : (2 : Nat) ∉ postStep toyLTS .a {0} := by
@@ -66,9 +64,7 @@ example : postStep toyLTS .a {0} ⊆ weakPostStep toyLTS .a {0} :=
 example : (1 : Nat) ∈ toyLTS.τClosure {0} := by
   rw [mem_tauClosure]
   refine ⟨0, rfl, ?_⟩
-  apply Cslib.LTS.STr.tr Cslib.LTS.STr.refl
-  · exact Or.inl ⟨rfl, rfl, rfl⟩
-  · exact Cslib.LTS.STr.refl
+  exact Cslib.LTS.STr.single toyLTS (Or.inl ⟨rfl, rfl, rfl⟩)
 
 -- τ-closure: 0 is in τ-closure of {0} (reflexivity)
 example : (0 : Nat) ∈ toyLTS.τClosure {0} := by

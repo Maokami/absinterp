@@ -1,7 +1,7 @@
 import Cslib.Init
 import Cslib.Foundations.Semantics.LTS.Basic
 
-import AbsInterp.Framework.Semantics.Concrete
+import AbsInterp.Framework.Semantics.Concrete.Defs
 
 namespace AbsInterp
 namespace Instances

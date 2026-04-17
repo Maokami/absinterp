@@ -1,4 +1,4 @@
-import Cslib.Init
+import Mathlib.Data.Set.Defs
 
 namespace AbsInterp
 namespace Framework
@@ -18,6 +18,14 @@ their concretizations:
 - **Unary assume**: refine `a` given a property `P` of the concrete value.
 - **Binary backward refinement**: refine a pair `(a₁, a₂)` given a relational
   constraint between their concrete values (N40AI slide 6 style).
+
+## References
+
+* P. Cousot, R. Cousot, *Abstract Interpretation: A Unified Lattice Model for
+  Static Analysis of Programs by Construction or Approximation of Fixpoints*,
+  POPL 1977. doi:10.1145/512950.512973
+* X. Leroy, *Semantics and Verification of Computer Programs*,
+  MPRI lecture notes (N40AI), 2023–2024, slides 6–8 (backward operators).
 -/
 
 /--

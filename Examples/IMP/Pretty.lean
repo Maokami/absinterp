@@ -16,7 +16,7 @@ declare_syntax_cat imp_stmt
 scoped syntax "skip" : imp_stmt
 scoped syntax "(" imp_stmt ")" : imp_stmt
 scoped syntax ident " := " imp_expr : imp_stmt
-scoped syntax:60 imp_stmt:61 " ;; " imp_stmt:60 : imp_stmt
+scoped syntax:60 imp_stmt:61 ";; " imp_stmt:60 : imp_stmt
 scoped syntax "if " imp_expr " then " imp_stmt " else " imp_stmt : imp_stmt
 scoped syntax "while " imp_expr " do " imp_stmt : imp_stmt
 
@@ -45,7 +45,7 @@ macro_rules
   | `([imp| $x:ident := $e:imp_expr]) => do
       let x' ← expandImpVar x
       `(Stmt.assign $x' [imp_expr| $e])
-  | `([imp| $s1:imp_stmt ;; $s2:imp_stmt]) =>
+  | `([imp| $s1:imp_stmt;; $s2:imp_stmt]) =>
       `(Stmt.seq [imp| $s1] [imp| $s2])
   | `([imp| if $cond:imp_expr then $s1:imp_stmt else $s2:imp_stmt]) =>
       `(Stmt.ite [imp_expr| $cond] [imp| $s1] [imp| $s2])

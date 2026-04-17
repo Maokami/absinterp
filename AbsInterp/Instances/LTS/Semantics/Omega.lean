@@ -6,7 +6,7 @@ import Cslib.Foundations.Semantics.LTS.Divergence
 import Cslib.Foundations.Data.OmegaSequence.Defs
 import Mathlib.Data.Set.Lattice
 
-import AbsInterp.Framework.Semantics.Omega
+import AbsInterp.Framework.Semantics.Omega.Defs
 import AbsInterp.Instances.LTS.Semantics.Collecting
 
 namespace AbsInterp

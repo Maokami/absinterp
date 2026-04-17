@@ -1,7 +1,8 @@
 import Cslib.Init
 import Cslib.Foundations.Semantics.LTS.Basic
 
-import AbsInterp.Framework.Semantics
+import AbsInterp.Framework.Semantics.Concrete.Collecting.Defs
+import AbsInterp.Framework.Iteration.Collecting
 import AbsInterp.Instances.LTS.Semantics.Concrete
 
 namespace AbsInterp

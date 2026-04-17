@@ -1,6 +1,5 @@
 import Cslib.Init
-import Mathlib.Data.Set.Lattice
-import AbsInterp.Framework.Domains
+import AbsInterp.Framework.Domains.GammaOnly
 
 namespace AbsInterp
 namespace Domains

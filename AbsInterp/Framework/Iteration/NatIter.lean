@@ -1,8 +1,7 @@
 import Cslib.Init
 
-import Mathlib.Data.Set.Lattice
+import Mathlib.Data.Set.Basic
 
-import AbsInterp.Framework.Semantics
 import AbsInterp.Framework.Soundness.Defs
 
 namespace AbsInterp

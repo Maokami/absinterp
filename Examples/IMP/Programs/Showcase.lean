@@ -42,9 +42,9 @@ It exercises:
 - branch-sensitive Sign refinement on variable tests
 -/
 def signShowcase : Stmt := [imp|
-  x0 := 5 ;;
+  x0 := 5;;
   if x0 then
-    (x1 := x0 + 1 ;;
+    (x1 := x0 + 1;;
       if x1 then
         x0 := x1 + x0
       else
@@ -92,7 +92,7 @@ theorem analyzeShowcase_trueTrace_skip_x1 :
 
 theorem analyzeShowcase_outerTrue_x0 :
     analyzeShowcase signShowcaseOuterTrueTrace
-      [imp| x1 := x0 + 1 ;; if x1 then x0 := x1 + x0 else x0 := 0] Var.x0 = .pos := by
+      [imp| x1 := x0 + 1;; if x1 then x0 := x1 + x0 else x0 := 0] Var.x0 = .pos := by
   native_decide
 
 theorem analyzeShowcase_innerTrue_assign_x0 :
