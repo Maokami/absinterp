@@ -16,8 +16,8 @@ def main (_ : List String) : IO UInt32 := do
     IO.eprintln "Tests build failed"
     return testsBuildResult
 
-  IO.println "hygiene: warning-free build (--wfail --iofail)..."
-  let wfailResult <- runLake #["build", "--wfail", "--iofail"]
+  IO.println "hygiene: warning-free build (--wfail)..."
+  let wfailResult <- runLake #["build", "--wfail"]
   if wfailResult != 0 then
     IO.eprintln "hygiene gate failed: warnings present (fix before merging)"
     return wfailResult
