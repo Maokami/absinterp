@@ -2,6 +2,7 @@ name = "absinterp"
 version = "0.1.0"
 defaultTargets = ["AbsInterp"]
 testDriver = "runTests"
+lintDriver = "lintDriver"
 
 [leanOptions]
 pp.unicode.fun = true
@@ -29,3 +30,8 @@ name = "Tests"
 name = "runTests"
 srcDir = "scripts"
 root = "RunTests"
+
+[[lean_exe]]
+name = "lintDriver"
+srcDir = "scripts"
+root = "LintDriver"
