@@ -48,10 +48,14 @@ theorem leParity_refl : ∀ a : Parity, leParity a a := by
 theorem leParity_trans : ∀ {a b c : Parity}, leParity a b → leParity b c → leParity a c := by
   intro a b c hab hbc; cases a <;> cases b <;> cases c <;> simp_all [leParity]
 
-instance : Preorder Parity where
+theorem leParity_antisymm : ∀ {a b : Parity}, leParity a b → leParity b a → a = b := by
+  intro a b hab hba; cases a <;> cases b <;> simp_all [leParity]
+
+instance : PartialOrder Parity where
   le := leParity
   le_refl := leParity_refl
   le_trans := @leParity_trans
+  le_antisymm _ _ := leParity_antisymm
 
 instance : OrderTop Parity where
   top := .top
@@ -70,9 +74,26 @@ def joinParity : Parity → Parity → Parity
 
 instance : Max Parity := ⟨joinParity⟩
 
-theorem joinParity_sound : ∀ a b : Parity, gammaParity a ∪ gammaParity b ⊆ gammaParity (joinParity a b) := by
+theorem joinParity_sound : ∀ a b : Parity, gammaParity a ∪ gammaParity b ⊆ gammaParity (a ⊔ b) := by
   intro a b n hn
-  cases a <;> cases b <;> simp_all [joinParity, gammaParity, Set.mem_union, Set.mem_empty_iff_false]
+  show n ∈ gammaParity (joinParity a b)
+  cases a <;> cases b <;> simp [joinParity, gammaParity] at hn ⊢ <;> tauto
+
+theorem joinParity_le_left (a b : Parity) : a ≤ joinParity a b := by
+  cases a <;> cases b <;> simp [LE.le, leParity, joinParity]
+
+theorem joinParity_le_right (a b : Parity) : b ≤ joinParity a b := by
+  cases a <;> cases b <;> simp [LE.le, leParity, joinParity]
+
+theorem joinParity_le_of_le {a b c : Parity} (ha : a ≤ c) (hb : b ≤ c) :
+    joinParity a b ≤ c := by
+  cases a <;> cases b <;> cases c <;> simp_all [LE.le, leParity, joinParity]
+
+instance : SemilatticeSup Parity where
+  sup := joinParity
+  le_sup_left := joinParity_le_left
+  le_sup_right := joinParity_le_right
+  sup_le _ _ _ ha hb := joinParity_le_of_le ha hb
 
 /-- The complete gamma-only domain instance for Parity. -/
 def parityGammaOnlyDomain : GammaOnlyDomain Parity Int where

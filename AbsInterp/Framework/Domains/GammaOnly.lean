@@ -11,11 +11,11 @@ a concretization function `gamma` together with monotonicity, top-coverage, and
 join-soundness obligations. No abstraction function `α` or Galois-connection
 obligation is required.
 
-The abstract carrier is required to carry `[Preorder] [OrderTop] [Max]` Mathlib
-instances. Domains that additionally satisfy `[SemilatticeSup]` may provide it
-as an opt-in instance. `GammaOnlyDomain.ofGaloisConnection` bridges the γ-only
-interface with the standard Mathlib `GaloisConnection` for domains that do have
-an `α`.
+The abstract carrier is required to carry `[Preorder] [OrderTop] [SemilatticeSup]`
+Mathlib instances. `[SemilatticeSup]` subsumes `[Max]` via `SemilatticeSup.toMax`,
+so the join `⊔` is available uniformly. `GammaOnlyDomain.ofGaloisConnection`
+bridges the γ-only interface with the standard Mathlib `GaloisConnection` for
+domains that do have an `α`.
 
 ## References
 
@@ -38,8 +38,8 @@ abbrev Gamma (Abstract : Type u) (Concrete : Type v) := Abstract -> Set Concrete
 /--
 `gamma`-only abstract-domain contract.
 
-The abstract carrier is a Mathlib-style ordered type with a top element and a
-binary `⊔` operation (`Preorder + OrderTop + Max`). The contract pins down the
+The abstract carrier is a Mathlib-style ordered join-semilattice with a top
+element (`Preorder + OrderTop + SemilatticeSup`). The contract pins down the
 γ-only obligations:
 
 - `gamma` : the concretization function,
@@ -47,13 +47,14 @@ binary `⊔` operation (`Preorder + OrderTop + Max`). The contract pins down the
 - `gamma_top` : `⊤` over-approximates every concrete element,
 - `join_sound` : `⊔` soundly over-approximates concrete unions.
 
-This deliberately omits `α` / Galois-connection / abstract-level LUB
-obligations. The `Max` typeclass carries no laws on its own; the only join
-law required here is the γ-level `join_sound`. Domains that additionally
-satisfy `SemilatticeSup` are welcome to provide it as an opt-in instance.
+This deliberately omits `α` / Galois-connection obligations. While
+`SemilatticeSup` already provides the abstract-level LUB laws
+(`le_sup_left`, `le_sup_right`, `sup_le`), the γ-level `join_sound` is a
+separate semantic soundness statement that the framework explicitly
+requires.
 -/
 structure GammaOnlyDomain
-    (Abstract : Type u) [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
+    (Abstract : Type u) [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
     (Concrete : Type v) where
   /-- The concretization function mapping abstract elements to concrete sets. -/
   gamma : Gamma Abstract Concrete
@@ -63,7 +64,7 @@ structure GammaOnlyDomain
 
 namespace GammaOnlyDomain
 
-variable {Abstract : Type u} [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
+variable {Abstract : Type u} [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
 variable {Concrete : Type v}
 variable (cfg : GammaOnlyDomain Abstract Concrete)
 

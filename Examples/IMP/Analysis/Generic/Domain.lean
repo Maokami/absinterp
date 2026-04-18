@@ -34,7 +34,7 @@ primitives and soundness contracts needed by the generic IMP transfer function
 and its soundness proof.
 -/
 structure IMPAnalysisDomain
-    (A : Type u) [Bot A] [Preorder A] [OrderTop A] [Max A] where
+    (A : Type u) [Bot A] [Preorder A] [OrderTop A] [SemilatticeSup A] where
   /-- The underlying scalar gamma-only domain over integers. -/
   scalarDomain : GammaOnlyDomain A Int
   /-- The bottom element has empty concretization. -/
@@ -78,13 +78,13 @@ structure IMPAnalysisDomain
 
 namespace IMPAnalysisDomain
 
-variable {A : Type u} [Bot A] [Preorder A] [OrderTop A] [Max A]
+variable {A : Type u} [Bot A] [Preorder A] [OrderTop A] [SemilatticeSup A]
 variable (d : IMPAnalysisDomain A)
 
 /-- Convenience accessor for the scalar concretization function. -/
 abbrev gamma : A → Set Int := d.scalarDomain.gamma
 
-/-- Convenience accessor for the scalar join (`⊔` from the `Max A` instance). -/
+/-- Convenience accessor for the scalar join (`⊔` from the `SemilatticeSup A` instance). -/
 abbrev join : A → A → A := (· ⊔ ·)
 
 /-- Convenience accessor for the scalar top element (from `OrderTop A`). -/
