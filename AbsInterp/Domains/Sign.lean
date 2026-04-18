@@ -108,8 +108,9 @@ instance : Max Sign := ⟨joinSign⟩
 
 /-- `joinSign` soundly over-approximates union concretization. -/
 theorem joinSign_sound (a b : Sign) :
-    gammaSign a ∪ gammaSign b ⊆ gammaSign (joinSign a b) := by
+    gammaSign a ∪ gammaSign b ⊆ gammaSign (a ⊔ b) := by
   intro n hn
+  show n ∈ gammaSign (joinSign a b)
   cases a <;> cases b <;>
     simp [gammaSign, joinSign, signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
     tauto

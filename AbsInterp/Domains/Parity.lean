@@ -70,8 +70,9 @@ def joinParity : Parity → Parity → Parity
 
 instance : Max Parity := ⟨joinParity⟩
 
-theorem joinParity_sound : ∀ a b : Parity, gammaParity a ∪ gammaParity b ⊆ gammaParity (joinParity a b) := by
+theorem joinParity_sound : ∀ a b : Parity, gammaParity a ∪ gammaParity b ⊆ gammaParity (a ⊔ b) := by
   intro a b n hn
+  show n ∈ gammaParity (joinParity a b)
   cases a <;> cases b <;> simp_all [joinParity, gammaParity, Set.mem_union, Set.mem_empty_iff_false]
 
 /-- The complete gamma-only domain instance for Parity. -/
