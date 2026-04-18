@@ -41,24 +41,6 @@ theorem leSign_refl (a : Sign) : leSign a a :=
 theorem leSign_trans {a b c : Sign} (hAB : leSign a b) (hBC : leSign b c) : leSign a c :=
   fun _ hn => hBC (hAB hn)
 
-instance : Preorder Sign where
-  le := leSign
-  le_refl := leSign_refl
-  le_trans := @leSign_trans
-
-instance : OrderTop Sign where
-  top := .top
-  le_top _ := Set.subset_univ _
-
-theorem gammaSign_monotone_of_leSign {a b : Sign} (hAB : a ≤ b) :
-    gammaSign a ⊆ gammaSign b :=
-  hAB
-
-/-- `top` concretizes to all integers. -/
-theorem gammaSign_top (n : Int) : n ∈ gammaSign Sign.top := by
-  change True
-  trivial
-
 private def hasNeg : Sign -> Bool
   | .bot => false
   | .neg => true
@@ -85,6 +67,61 @@ private def hasPos : Sign -> Bool
   | .nonpos => false
   | .nonneg => true
   | .top => true
+
+/-- If `γ(a) ⊆ γ(b)` and `a` has a negative witness, so does `b`. -/
+private theorem hasNeg_of_leSign {a b : Sign} (h : leSign a b) (hN : hasNeg a = true) :
+    hasNeg b = true := by
+  have hMem : (-1 : Int) ∈ gammaSign a := by
+    cases a <;> simp_all [hasNeg, gammaSign]
+  have hMemB := h hMem
+  cases b <;> simp_all [hasNeg, gammaSign]
+
+/-- If `γ(a) ⊆ γ(b)` and `a` has a zero witness, so does `b`. -/
+private theorem hasZero_of_leSign {a b : Sign} (h : leSign a b) (hZ : hasZero a = true) :
+    hasZero b = true := by
+  have hMem : (0 : Int) ∈ gammaSign a := by
+    cases a <;> simp_all [hasZero, gammaSign]
+  have hMemB := h hMem
+  cases b <;> simp_all [hasZero, gammaSign]
+
+/-- If `γ(a) ⊆ γ(b)` and `a` has a positive witness, so does `b`. -/
+private theorem hasPos_of_leSign {a b : Sign} (h : leSign a b) (hP : hasPos a = true) :
+    hasPos b = true := by
+  have hMem : (1 : Int) ∈ gammaSign a := by
+    cases a <;> simp_all [hasPos, gammaSign]
+  have hMemB := h hMem
+  cases b <;> simp_all [hasPos, gammaSign]
+
+theorem leSign_antisymm {a b : Sign} (hab : leSign a b) (hba : leSign b a) : a = b := by
+  have hN1 := hasNeg_of_leSign hab
+  have hN2 := hasNeg_of_leSign hba
+  have hZ1 := hasZero_of_leSign hab
+  have hZ2 := hasZero_of_leSign hba
+  have hP1 := hasPos_of_leSign hab
+  have hP2 := hasPos_of_leSign hba
+  cases a <;> cases b <;>
+    first
+    | rfl
+    | (exfalso; simp_all [hasNeg, hasZero, hasPos])
+
+instance : PartialOrder Sign where
+  le := leSign
+  le_refl := leSign_refl
+  le_trans := @leSign_trans
+  le_antisymm := fun _ _ => leSign_antisymm
+
+instance : OrderTop Sign where
+  top := .top
+  le_top _ := Set.subset_univ _
+
+theorem gammaSign_monotone_of_leSign {a b : Sign} (hAB : a ≤ b) :
+    gammaSign a ⊆ gammaSign b :=
+  hAB
+
+/-- `top` concretizes to all integers. -/
+theorem gammaSign_top (n : Int) : n ∈ gammaSign Sign.top := by
+  change True
+  trivial
 
 private def signOfFlags (neg zero pos : Bool) : Sign :=
   match neg, zero, pos with
@@ -124,16 +161,22 @@ theorem joinSign_sound (a b : Sign) :
   cases a <;> rfl
 
 theorem joinSign_le_left (a b : Sign) : a ≤ joinSign a b :=
-  fun n hn => joinSign_sound a b (Or.inl hn)
+  fun _ hn => joinSign_sound a b (Or.inl hn)
 
 theorem joinSign_le_right (a b : Sign) : b ≤ joinSign a b :=
-  fun n hn => joinSign_sound a b (Or.inr hn)
+  fun _ hn => joinSign_sound a b (Or.inr hn)
 
 theorem joinSign_le_of_le {a b c : Sign} (ha : a ≤ c) (hb : b ≤ c) :
     joinSign a b ≤ c := by
+  have hN_ac := hasNeg_of_leSign ha
+  have hN_bc := hasNeg_of_leSign hb
+  have hZ_ac := hasZero_of_leSign ha
+  have hZ_bc := hasZero_of_leSign hb
+  have hP_ac := hasPos_of_leSign ha
+  have hP_bc := hasPos_of_leSign hb
+  intro n hn
   cases a <;> cases b <;> cases c <;>
-    simp_all [leSign, gammaSign, joinSign, signOfFlags, hasNeg, hasZero, hasPos] <;>
-    tauto
+    simp_all [gammaSign, joinSign, signOfFlags, hasNeg, hasZero, hasPos]
 
 instance : SemilatticeSup Sign where
   sup := joinSign
