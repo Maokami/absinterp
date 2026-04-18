@@ -84,7 +84,7 @@ variable (d : IMPAnalysisDomain A)
 /-- Convenience accessor for the scalar concretization function. -/
 abbrev gamma : A → Set Int := d.scalarDomain.gamma
 
-/-- Convenience accessor for the scalar join (`⊔` from the `Max A` instance). -/
+/-- Convenience accessor for the scalar join (`⊔` from the `SemilatticeSup A` instance). -/
 abbrev join : A → A → A := (· ⊔ ·)
 
 /-- Convenience accessor for the scalar top element (from `OrderTop A`). -/

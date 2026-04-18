@@ -80,19 +80,14 @@ theorem joinParity_sound : ∀ a b : Parity, gammaParity a ∪ gammaParity b ⊆
   cases a <;> cases b <;> simp_all [joinParity, gammaParity, Set.mem_union, Set.mem_empty_iff_false]
 
 theorem joinParity_le_left (a b : Parity) : a ≤ joinParity a b := by
-  show leParity a (joinParity a b)
-  cases a <;> cases b <;> simp [leParity, joinParity]
+  cases a <;> cases b <;> simp [LE.le, leParity, joinParity]
 
 theorem joinParity_le_right (a b : Parity) : b ≤ joinParity a b := by
-  show leParity b (joinParity a b)
-  cases a <;> cases b <;> simp [leParity, joinParity]
+  cases a <;> cases b <;> simp [LE.le, leParity, joinParity]
 
 theorem joinParity_le_of_le {a b c : Parity} (ha : a ≤ c) (hb : b ≤ c) :
     joinParity a b ≤ c := by
-  show leParity (joinParity a b) c
-  have ha' : leParity a c := ha
-  have hb' : leParity b c := hb
-  cases a <;> cases b <;> cases c <;> simp_all [leParity, joinParity]
+  cases a <;> cases b <;> cases c <;> simp_all [LE.le, leParity, joinParity]
 
 instance : SemilatticeSup Parity where
   sup := joinParity

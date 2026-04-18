@@ -10,8 +10,8 @@ open AbsInterp.Domains
 
 /-! ## Smoke tests: the γ-only domain contract
 
-After the alignment with Mathlib `[Preorder] [OrderTop] [Max]`, `≤`, `⊤`,
-and `⊔` come from typeclass instances rather than domain fields.
+After the alignment with Mathlib `[Preorder] [OrderTop] [SemilatticeSup]`,
+`≤`, `⊤`, and `⊔` come from typeclass instances rather than domain fields.
 -/
 
 example :
