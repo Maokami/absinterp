@@ -123,6 +123,24 @@ theorem joinSign_sound (a b : Sign) :
     joinSign a .bot = a := by
   cases a <;> rfl
 
+theorem joinSign_le_left (a b : Sign) : a ≤ joinSign a b :=
+  fun n hn => joinSign_sound a b (Or.inl hn)
+
+theorem joinSign_le_right (a b : Sign) : b ≤ joinSign a b :=
+  fun n hn => joinSign_sound a b (Or.inr hn)
+
+theorem joinSign_le_of_le {a b c : Sign} (ha : a ≤ c) (hb : b ≤ c) :
+    joinSign a b ≤ c := by
+  cases a <;> cases b <;> cases c <;>
+    simp_all [leSign, gammaSign, joinSign, signOfFlags, hasNeg, hasZero, hasPos] <;>
+    tauto
+
+instance : SemilatticeSup Sign where
+  sup := joinSign
+  le_sup_left := joinSign_le_left
+  le_sup_right := joinSign_le_right
+  sup_le _ _ _ ha hb := joinSign_le_of_le ha hb
+
 /-- Exact sign for an integer literal. -/
 def constSign (n : Int) : Sign :=
   if n < 0 then .neg else if n = 0 then .zero else .pos

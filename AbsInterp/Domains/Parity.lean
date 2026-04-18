@@ -82,6 +82,22 @@ def parityGammaOnlyDomain : GammaOnlyDomain Parity Int where
   gamma_top := fun _ => Set.mem_univ _
   join_sound := joinParity_sound
 
+theorem joinParity_le_left (a b : Parity) : a ≤ joinParity a b := by
+  cases a <;> cases b <;> simp [leParity, joinParity]
+
+theorem joinParity_le_right (a b : Parity) : b ≤ joinParity a b := by
+  cases a <;> cases b <;> simp [leParity, joinParity]
+
+theorem joinParity_le_of_le {a b c : Parity} (ha : a ≤ c) (hb : b ≤ c) :
+    joinParity a b ≤ c := by
+  cases a <;> cases b <;> cases c <;> simp_all [leParity, joinParity]
+
+instance : SemilatticeSup Parity where
+  sup := joinParity
+  le_sup_left := joinParity_le_left
+  le_sup_right := joinParity_le_right
+  sup_le _ _ _ ha hb := joinParity_le_of_le ha hb
+
 /-- Abstract a concrete integer constant by its parity. -/
 def constParity (n : Int) : Parity :=
   if n % 2 = 0 then .even else .odd
