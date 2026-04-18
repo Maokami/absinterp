@@ -53,7 +53,7 @@ law required here is the γ-level `join_sound`. Domains that additionally
 satisfy `SemilatticeSup` are welcome to provide it as an opt-in instance.
 -/
 structure GammaOnlyDomain
-    (Abstract : Type u) [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
+    (Abstract : Type u) [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
     (Concrete : Type v) where
   /-- The concretization function mapping abstract elements to concrete sets. -/
   gamma : Gamma Abstract Concrete
@@ -63,7 +63,7 @@ structure GammaOnlyDomain
 
 namespace GammaOnlyDomain
 
-variable {Abstract : Type u} [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
+variable {Abstract : Type u} [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
 variable {Concrete : Type v}
 variable (cfg : GammaOnlyDomain Abstract Concrete)
 

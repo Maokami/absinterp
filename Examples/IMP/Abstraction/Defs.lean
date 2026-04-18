@@ -109,7 +109,7 @@ def botConfigSharp
 /-!
 ## Pointwise lifts of `GammaOnlyDomain`
 
-The Mathlib `Pi` instances (`Pi.preorder`, `Pi.instOrderTop`, `Pi.instMax`)
+The Mathlib `Pi` instances (`Pi.preorder`, `Pi.instOrderTop`, `Pi.instSemilatticeSup`)
 give us `≤`, `⊤`, and `⊔` on `Var → Abstract` and `Stmt → Var → Abstract`
 automatically, so the lifted domain only has to supply the γ-level
 soundness obligations.
@@ -118,7 +118,7 @@ soundness obligations.
 /-- Pointwise IMP-store domain lifted from a scalar integer domain. -/
 def storeGammaOnlyDomain
     {Abstract : Type u}
-    [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
+    [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
     (cfg : GammaOnlyDomain Abstract Int) :
     GammaOnlyDomain (StoreSharp Abstract) Store where
   gamma := gammaStoreOf cfg.gamma
@@ -138,7 +138,7 @@ def storeGammaOnlyDomain
 /-- Pointwise IMP-configuration domain lifted from a scalar integer domain. -/
 def configGammaOnlyDomain
     {Abstract : Type u}
-    [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
+    [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
     (cfg : GammaOnlyDomain Abstract Int) :
     GammaOnlyDomain (ConfigSharp Abstract) Config where
   gamma := gammaConfigOf cfg.gamma
@@ -166,7 +166,7 @@ intentionally unused beyond helping type inference.
 -/
 def joinConfig
     {Abstract : Type u}
-    [Preorder Abstract] [OrderTop Abstract] [Max Abstract]
+    [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
     (_cfg : GammaOnlyDomain Abstract Int) :
     ConfigSharp Abstract → ConfigSharp Abstract → ConfigSharp Abstract :=
   fun κ₁ κ₂ pc x => κ₁ pc x ⊔ κ₂ pc x
