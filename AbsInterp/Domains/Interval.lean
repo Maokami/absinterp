@@ -113,7 +113,7 @@ instance : OrderTop Interval where
   top := .top
   le_top _ := Set.subset_univ _
 
-theorem gammaInterval_monotone_of_leInterval {a b : Interval} (hAB : a ≤ b) :
+theorem gammaInterval_monotone_of_leInterval ⦃a b : Interval⦄ (hAB : a ≤ b) :
     gammaInterval a ⊆ gammaInterval b :=
   hAB
 

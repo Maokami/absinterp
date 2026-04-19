@@ -61,7 +61,7 @@ instance : OrderTop Parity where
   top := .top
   le_top a := by cases a <;> simp [leParity, LE.le]
 
-theorem gammaParity_monotone : ∀ {a b : Parity}, leParity a b → gammaParity a ⊆ gammaParity b := by
+theorem gammaParity_monotone : ∀ ⦃a b : Parity⦄, leParity a b → gammaParity a ⊆ gammaParity b := by
   intro a b hab; cases a <;> cases b <;> simp_all [leParity, gammaParity, Set.subset_univ]
 
 /-- Join on the parity lattice. -/

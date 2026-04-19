@@ -57,7 +57,7 @@ structure GammaDomain
     (Concrete : Type v) where
   /-- The concretization function mapping abstract elements to concrete sets. -/
   gamma : Gamma Abstract Concrete
-  gamma_monotone : ∀ {a b : Abstract}, a ≤ b → gamma a ⊆ gamma b
+  gamma_monotone : ∀ ⦃a b : Abstract⦄, a ≤ b → gamma a ⊆ gamma b
   gamma_top : ∀ c : Concrete, c ∈ gamma ⊤
   join_sound : ∀ a b : Abstract, gamma a ∪ gamma b ⊆ gamma (a ⊔ b)
 

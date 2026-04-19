@@ -41,7 +41,7 @@ def GammaDomain.ofGaloisConnection
     (gc : GaloisConnection alpha gamma) :
     GammaDomain Abstract Concrete where
   gamma := gamma
-  gamma_monotone := @(gc.monotone_u)
+  gamma_monotone := gc.monotone_u
   gamma_top := by
     intro c
     have hLeTop : alpha Set.univ ≤ (⊤ : Abstract) := le_top

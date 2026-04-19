@@ -114,7 +114,7 @@ instance : OrderTop Sign where
   top := .top
   le_top _ := Set.subset_univ _
 
-theorem gammaSign_monotone_of_leSign {a b : Sign} (hAB : a ≤ b) :
+theorem gammaSign_monotone_of_leSign ⦃a b : Sign⦄ (hAB : a ≤ b) :
     gammaSign a ⊆ gammaSign b :=
   hAB
 
