@@ -63,7 +63,7 @@ def gammaProgramConfigOf
     {Abstract : Type _}
     (program : Stmt)
     (gamma : Abstract → Set Int) :
-    Gamma (ConfigSharp Abstract) Config :=
+    Concretization (ConfigSharp Abstract) Config :=
   fun κ => { c : Config |
     ActiveIn program (controlOfConfig c) ∧
       c ∈ gammaConfigOf gamma κ }

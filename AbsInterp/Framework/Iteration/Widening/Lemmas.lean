@@ -56,7 +56,7 @@ then `∀ n, iterateNat post (gamma a) n ⊆ gamma a`.
 theorem sound_of_isPostFixpoint
     {State : Type u} {Abstract : Type v}
     {post : Post State}
-    {gamma : Gamma Abstract State}
+    {gamma : Concretization Abstract State}
     {postSharp : PostSharp Abstract}
     {le : Abstract -> Abstract -> Prop}
     (hSound : Sound post gamma postSharp)

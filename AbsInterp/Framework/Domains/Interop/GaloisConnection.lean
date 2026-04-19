@@ -2,6 +2,7 @@ import Mathlib.Order.GaloisConnection.Defs
 import Mathlib.Order.GaloisConnection.Basic
 import Mathlib.Order.BooleanAlgebra.Set
 import Mathlib.Order.Lattice
+
 import AbsInterp.Framework.Domains.Gamma
 
 /-!

@@ -26,25 +26,29 @@ def intervalAnalysisDomain : IMPAnalysisDomain Interval where
   const_sound := constInterval_sound
   addTransfer := addIntervalTransfer
   addTransfer_sound := addIntervalTransfer_sound
-  assumeNonzero := assumeNonzeroInterval
-  assumeNonzero_sound := assumeNonzeroInterval_sound
-  assumeZero := assumeZeroInterval
-  assumeZero_sound := assumeZeroInterval_sound
-  assumeNonzeroAdd_sound :=
-    SoundBackwardRefine.id (gamma := intervalGammaDomain.gamma)
+  filterNonzero := filterNonzeroInterval
+  filterNonzero_sound := filterNonzeroInterval_sound
+  filterNonzero_reductive := filterNonzeroInterval_reductive
+  filterZero := filterZeroInterval
+  filterZero_sound := filterZeroInterval_sound
+  filterZero_reductive := filterZeroInterval_reductive
+  backwardAddNonzero_sound :=
+    SoundBackwardOperator.id (gamma := intervalGammaDomain.gamma)
       (rel := fun v₁ v₂ => v₁ + v₂ ≠ 0)
-  assumeZeroAdd_sound :=
-    SoundBackwardRefine.id (gamma := intervalGammaDomain.gamma)
+  backwardAddNonzero_reductive := ReductiveBackwardOperator.id
+  backwardAddZero_sound :=
+    SoundBackwardOperator.id (gamma := intervalGammaDomain.gamma)
       (rel := fun v₁ v₂ => v₁ + v₂ = 0)
+  backwardAddZero_reductive := ReductiveBackwardOperator.id
 
--- Public API wrappers preserving backward-compatible names.
+-- Public API wrappers.
 
 /-- Convenient alias for the lifted Interval config domain on IMP configurations. -/
 abbrev impConfigIntervalDomain : GammaDomain (ConfigSharp Interval) Config :=
   configGammaDomain intervalGammaDomain
 
 /-- The generic Interval concretization for a fixed IMP program. -/
-def gammaProgramInterval (program : Stmt) : Framework.Gamma (ConfigSharp Interval) Config :=
+def gammaProgramInterval (program : Stmt) : Framework.Concretization (ConfigSharp Interval) Config :=
   gammaProgram intervalAnalysisDomain program
 
 /-- Top abstract store for IMP Interval analysis. -/

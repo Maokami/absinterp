@@ -22,7 +22,7 @@ and the IMP-specific analysis machinery. A concrete instance must supply:
 
 - scalar expression evaluation primitives (`const`, `addTransfer`) with
   soundness,
-- branch refinement operators (`assumeNonzero`, `assumeZero`) with soundness,
+- branch filter operators (`filterNonzero`, `filterZero`) with soundness,
 - a proof that the bottom element has empty concretization.
 -/
 
@@ -49,32 +49,48 @@ structure IMPAnalysisDomain
   addTransfer_sound : ∀ {a₁ a₂ : A} {v₁ v₂ : Int},
     v₁ ∈ scalarDomain.gamma a₁ → v₂ ∈ scalarDomain.gamma a₂ →
     v₁ + v₂ ∈ scalarDomain.gamma (addTransfer a₁ a₂)
-  /-- Refine an abstract value under a nonzero assumption. -/
-  assumeNonzero : A → A
-  /-- Nonzero refinement is sound (`SoundAssume` with `P := (· ≠ 0)`). -/
-  assumeNonzero_sound :
-    SoundAssume scalarDomain.gamma (· ≠ 0) assumeNonzero
-  /-- Refine an abstract value under a zero assumption. -/
-  assumeZero : A → A
-  /-- Zero refinement is sound (`SoundAssume` with `P := (· = 0)`). -/
-  assumeZero_sound :
-    SoundAssume scalarDomain.gamma (· = 0) assumeZero
-  /-- Backward refinement for addition under nonzero constraint.
+  /-- Filter an abstract value under a nonzero assumption. -/
+  filterNonzero : A → A
+  /-- Nonzero filtering is sound (`SoundFilter` with `P := (· ≠ 0)`). -/
+  filterNonzero_sound :
+    SoundFilter scalarDomain.gamma (· ≠ 0) filterNonzero
+  /-- Nonzero filtering does not enlarge the abstract value. -/
+  filterNonzero_reductive :
+    ReductiveFilter filterNonzero
+  /-- Filter an abstract value under a zero assumption. -/
+  filterZero : A → A
+  /-- Zero filtering is sound (`SoundFilter` with `P := (· = 0)`). -/
+  filterZero_sound :
+    SoundFilter scalarDomain.gamma (· = 0) filterZero
+  /-- Zero filtering does not enlarge the abstract value. -/
+  filterZero_reductive :
+    ReductiveFilter filterZero
+  /-- Backward operator for addition under nonzero constraint.
       Given `v₁ ∈ γ(a₁)`, `v₂ ∈ γ(a₂)`, and `v₁ + v₂ ≠ 0`, refine both. -/
-  assumeNonzeroAdd : A → A → A × A := fun a₁ a₂ => (a₁, a₂)
-  /-- Nonzero-add backward refinement is sound (`SoundBackwardRefine` with
-      `rel := fun v₁ v₂ => v₁ + v₂ ≠ 0`). -/
-  assumeNonzeroAdd_sound :
-    SoundBackwardRefine scalarDomain.gamma
-      (fun v₁ v₂ => v₁ + v₂ ≠ 0) assumeNonzeroAdd
-  /-- Backward refinement for addition under zero constraint.
+  backwardAddNonzero : BackwardOperator A := fun a₁ a₂ => (a₁, a₂)
+  /-- Nonzero-add backward operator is sound. -/
+  backwardAddNonzero_sound :
+    SoundBackwardOperator scalarDomain.gamma
+      (fun v₁ v₂ => v₁ + v₂ ≠ 0) backwardAddNonzero
+  /-- Nonzero-add backward operator is reductive. -/
+  backwardAddNonzero_reductive :
+    ReductiveBackwardOperator backwardAddNonzero :=
+      by
+        intro a₁ a₂
+        exact ⟨le_rfl, le_rfl⟩
+  /-- Backward operator for addition under zero constraint.
       Given `v₁ ∈ γ(a₁)`, `v₂ ∈ γ(a₂)`, and `v₁ + v₂ = 0`, refine both. -/
-  assumeZeroAdd : A → A → A × A := fun a₁ a₂ => (a₁, a₂)
-  /-- Zero-add backward refinement is sound (`SoundBackwardRefine` with
-      `rel := fun v₁ v₂ => v₁ + v₂ = 0`). -/
-  assumeZeroAdd_sound :
-    SoundBackwardRefine scalarDomain.gamma
-      (fun v₁ v₂ => v₁ + v₂ = 0) assumeZeroAdd
+  backwardAddZero : BackwardOperator A := fun a₁ a₂ => (a₁, a₂)
+  /-- Zero-add backward operator is sound. -/
+  backwardAddZero_sound :
+    SoundBackwardOperator scalarDomain.gamma
+      (fun v₁ v₂ => v₁ + v₂ = 0) backwardAddZero
+  /-- Zero-add backward operator is reductive. -/
+  backwardAddZero_reductive :
+    ReductiveBackwardOperator backwardAddZero :=
+      by
+        intro a₁ a₂
+        exact ⟨le_rfl, le_rfl⟩
 
 namespace IMPAnalysisDomain
 

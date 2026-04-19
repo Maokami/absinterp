@@ -2,6 +2,8 @@ import Mathlib.Order.BooleanAlgebra.Set
 import Mathlib.Order.BoundedOrder.Basic
 import Mathlib.Order.Lattice
 
+import AbsInterp.Framework.Concretization
+
 /-!
 # Gamma-Only Abstract Domain Interface
 
@@ -14,7 +16,7 @@ The abstract carrier is required to carry `[Preorder] [OrderTop] [SemilatticeSup
 Mathlib instances. `[SemilatticeSup]` subsumes `[Max]` via `SemilatticeSup.toMax`,
 so the join `⊔` is available uniformly. An opt-in `GaloisConnection` bridge for
 domains that do have an `α` lives in
-`AbsInterp.Framework.Domains.Gamma.Interop`.
+`AbsInterp.Framework.Domains.Interop.GaloisConnection`.
 
 ## References
 
@@ -30,9 +32,6 @@ namespace Framework
 namespace Domains
 
 universe u v
-
-/-- Concretization map from abstract elements to concrete sets. -/
-abbrev Gamma (Abstract : Type u) (Concrete : Type v) := Abstract -> Set Concrete
 
 /--
 `gamma`-only abstract-domain contract.
@@ -56,7 +55,7 @@ structure GammaDomain
     (Abstract : Type u) [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
     (Concrete : Type v) where
   /-- The concretization function mapping abstract elements to concrete sets. -/
-  gamma : Gamma Abstract Concrete
+  gamma : Concretization Abstract Concrete
   gamma_monotone : ∀ ⦃a b : Abstract⦄, a ≤ b → gamma a ⊆ gamma b
   gamma_top : ∀ c : Concrete, c ∈ gamma ⊤
   join_sound : ∀ a b : Abstract, gamma a ∪ gamma b ⊆ gamma (a ⊔ b)

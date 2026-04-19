@@ -61,14 +61,14 @@ def updateStoreSharp
 def gammaStoreOf
     {Abstract : Type u}
     (gamma : Abstract → Set Int) :
-    Gamma (StoreSharp Abstract) Store :=
+    Concretization (StoreSharp Abstract) Store :=
   fun ρ => { σ : Store | ∀ x : Var, σ x ∈ gamma (ρ x) }
 
 /-- Lift a scalar concretization to IMP configurations via control-indexed stores. -/
 def gammaConfigOf
     {Abstract : Type u}
     (gamma : Abstract → Set Int) :
-    Gamma (ConfigSharp Abstract) Config :=
+    Concretization (ConfigSharp Abstract) Config :=
   fun κ => { c : Config | storeOfConfig c ∈ gammaStoreOf gamma (κ (controlOfConfig c)) }
 
 /--

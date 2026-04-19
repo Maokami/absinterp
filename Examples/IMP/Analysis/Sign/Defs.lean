@@ -26,23 +26,27 @@ def signAnalysisDomain : IMPAnalysisDomain Sign where
   const_sound := constSign_sound
   addTransfer := addTransfer
   addTransfer_sound := addTransfer_sound
-  assumeNonzero := assumeNonzero
-  assumeNonzero_sound := assumeNonzero_sound
-  assumeZero := assumeZero
-  assumeZero_sound := assumeZero_sound
-  assumeNonzeroAdd := assumeNonzeroAddSign
-  assumeNonzeroAdd_sound := assumeNonzeroAddSign_sound
-  assumeZeroAdd := assumeZeroAddSign
-  assumeZeroAdd_sound := assumeZeroAddSign_sound
+  filterNonzero := filterNonzeroSign
+  filterNonzero_sound := filterNonzeroSign_sound
+  filterNonzero_reductive := filterNonzeroSign_reductive
+  filterZero := filterZeroSign
+  filterZero_sound := filterZeroSign_sound
+  filterZero_reductive := filterZeroSign_reductive
+  backwardAddNonzero := backwardAddNonzeroSign
+  backwardAddNonzero_sound := backwardAddNonzeroSign_sound
+  backwardAddNonzero_reductive := backwardAddNonzeroSign_reductive
+  backwardAddZero := backwardAddZeroSign
+  backwardAddZero_sound := backwardAddZeroSign_sound
+  backwardAddZero_reductive := backwardAddZeroSign_reductive
 
--- Public API wrappers preserving backward-compatible names.
+-- Public API wrappers.
 
 /-- Convenient alias for the lifted Sign config domain on IMP configurations. -/
 abbrev impConfigSignDomain : GammaDomain (ConfigSharp Sign) Config :=
   configGammaDomain signGammaDomain
 
 /-- The generic Sign concretization for a fixed IMP program. -/
-def gammaProgramSign (program : Stmt) : Framework.Gamma (ConfigSharp Sign) Config :=
+def gammaProgramSign (program : Stmt) : Framework.Concretization (ConfigSharp Sign) Config :=
   gammaProgram signAnalysisDomain program
 
 /-- Top abstract store for IMP Sign analysis. -/

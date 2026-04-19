@@ -1,5 +1,5 @@
 import Cslib.Init
-import AbsInterp.Framework.Domains.Gamma
+import AbsInterp.Framework.Domains
 import AbsInterp.Framework.Iteration.Widening.Defs
 
 namespace AbsInterp
@@ -342,7 +342,7 @@ For intervals straddling zero, this returns the original interval since
 intervals are convex and cannot represent the gap. Precision is lost but
 soundness is preserved.
 -/
-def assumeNonzeroInterval (a : Interval) : Interval :=
+def filterNonzeroInterval (a : Interval) : Interval :=
   match a with
   | .bot => .bot
   | .top => .top
@@ -354,19 +354,19 @@ def assumeNonzeroInterval (a : Interval) : Interval :=
       else if hi = 0 then mk lo (-1)
       else .range lo hi h
 
-/-- `assumeNonzeroInterval` is sound for a concrete witness known to be nonzero. -/
-theorem assumeNonzeroInterval_sound
+/-- `filterNonzeroInterval` is sound for a concrete witness known to be nonzero. -/
+theorem filterNonzeroInterval_sound
     {a : Interval} {n : Int}
     (hn : n ∈ gammaInterval a)
     (hNe : n ≠ 0) :
-    n ∈ gammaInterval (assumeNonzeroInterval a) := by
+    n ∈ gammaInterval (filterNonzeroInterval a) := by
   cases a with
   | bot => simp only [gammaInterval, Set.mem_empty_iff_false] at hn
   | top => exact Set.mem_univ _
   | range lo hi h =>
     simp only [gammaInterval, Set.mem_setOf_eq] at hn
     rcases hn with ⟨hLo, hHi⟩
-    simp only [assumeNonzeroInterval]
+    simp only [filterNonzeroInterval]
     split
     · simp only [gammaInterval, Set.mem_setOf_eq]; exact ⟨hLo, hHi⟩
     · split
@@ -380,34 +380,86 @@ theorem assumeNonzeroInterval_sound
             · exact (mem_gammaInterval_mk_iff lo (-1) n).2 ⟨hLo, by omega⟩
             · simp only [gammaInterval, Set.mem_setOf_eq]; exact ⟨hLo, hHi⟩
 
-/-- Refine an interval by assuming the concrete value is exactly zero. -/
-def assumeZeroInterval (a : Interval) : Interval :=
+/-- `filterNonzeroInterval` is reductive. -/
+theorem filterNonzeroInterval_reductive :
+    AbsInterp.Framework.Domains.ReductiveFilter filterNonzeroInterval := by
+  intro a n hn
+  cases a with
+  | bot => exact hn
+  | top => exact hn
+  | range lo hi h =>
+      by_cases hHiNeg : hi < 0
+      · simpa [filterNonzeroInterval, hHiNeg, gammaInterval, Set.mem_setOf_eq] using hn
+      · by_cases hLoPos : 0 < lo
+        · simpa [filterNonzeroInterval, hHiNeg, hLoPos, gammaInterval, Set.mem_setOf_eq] using hn
+        · by_cases hZeroOnly : lo = 0 ∧ hi = 0
+          · simp [filterNonzeroInterval, hZeroOnly, gammaInterval] at hn
+          · by_cases hLoZero : lo = 0
+            · have hHiZero : hi ≠ 0 := by
+                intro hEq
+                exact hZeroOnly ⟨hLoZero, hEq⟩
+              have hn' : n ∈ gammaInterval (mk 1 hi) := by
+                simpa [filterNonzeroInterval, hHiNeg, hLoPos, hZeroOnly, hLoZero, hHiZero] using hn
+              rcases (mem_gammaInterval_mk_iff 1 hi n).1 hn' with ⟨hOneLe, hLeHi⟩
+              have hLoLe : lo ≤ n := by
+                omega
+              exact ⟨hLoLe, hLeHi⟩
+            · by_cases hHiZero : hi = 0
+              · have hn' : n ∈ gammaInterval (mk lo (-1)) := by
+                  simpa [filterNonzeroInterval, hHiNeg, hLoPos, hZeroOnly, hLoZero, hHiZero] using hn
+                rcases (mem_gammaInterval_mk_iff lo (-1) n).1 hn' with ⟨hLoLe, hLeNegOne⟩
+                have hLeHi : n ≤ hi := by
+                  omega
+                exact ⟨hLoLe, hLeHi⟩
+              · simpa [filterNonzeroInterval, hHiNeg, hLoPos, hZeroOnly, hLoZero, hHiZero,
+                  gammaInterval, Set.mem_setOf_eq] using hn
+
+/-- Filter an interval by keeping only the concrete value zero. -/
+def filterZeroInterval (a : Interval) : Interval :=
   match a with
   | .bot => .bot
   | .top => mk 0 0
   | .range lo hi _ =>
       if lo ≤ 0 ∧ 0 ≤ hi then mk 0 0 else .bot
 
-/-- `assumeZeroInterval` is sound for a concrete witness known to be zero. -/
-theorem assumeZeroInterval_sound
+/-- `filterZeroInterval` is sound for a concrete witness known to be zero. -/
+theorem filterZeroInterval_sound
     {a : Interval} {n : Int}
     (hn : n ∈ gammaInterval a)
     (hZero : n = 0) :
-    n ∈ gammaInterval (assumeZeroInterval a) := by
+    n ∈ gammaInterval (filterZeroInterval a) := by
   subst hZero
   cases a with
   | bot => simp only [gammaInterval, Set.mem_empty_iff_false] at hn
   | top =>
-    simp only [assumeZeroInterval]
+    simp only [filterZeroInterval]
     exact (mem_gammaInterval_mk_iff 0 0 0).2 ⟨le_rfl, le_rfl⟩
   | range lo hi _ =>
     simp only [gammaInterval, Set.mem_setOf_eq] at hn
-    simp only [assumeZeroInterval]
+    simp only [filterZeroInterval]
     split
     · exact (mem_gammaInterval_mk_iff 0 0 0).2 ⟨le_rfl, le_rfl⟩
     · rename_i hNot
       push Not at hNot
       omega
+
+/-- `filterZeroInterval` is reductive. -/
+theorem filterZeroInterval_reductive :
+    AbsInterp.Framework.Domains.ReductiveFilter filterZeroInterval := by
+  intro a n hn
+  cases a with
+  | bot => exact hn
+  | top => exact Set.mem_univ _
+  | range lo hi _ =>
+      by_cases hContainsZero : lo ≤ 0 ∧ 0 ≤ hi
+      · have hn' : n ∈ gammaInterval (mk 0 0) := by
+          simpa [filterZeroInterval, hContainsZero] using hn
+        rcases (mem_gammaInterval_mk_iff 0 0 n).1 hn' with ⟨h0n, hn0⟩
+        have : n = 0 := by
+          omega
+        subst this
+        simpa [gammaInterval, Set.mem_setOf_eq] using hContainsZero
+      · simp [filterZeroInterval, hContainsZero, gammaInterval] at hn
 
 /--
 Widening on intervals: if the new interval `b` exceeds `a`'s bounds in

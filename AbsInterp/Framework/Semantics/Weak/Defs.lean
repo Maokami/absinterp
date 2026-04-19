@@ -62,7 +62,7 @@ def GammaClosed
     {State : Type u}
     {Abstract : Type v}
     (cl : ClosureOp State)
-    (gamma : Gamma Abstract State) : Prop :=
+    (gamma : Concretization Abstract State) : Prop :=
   ∀ a, cl.cl (gamma a) ⊆ gamma a
 
 /--
@@ -75,7 +75,7 @@ theorem sound_weak_of_sound_closure
     {State : Type u}
     {Abstract : Type v}
     {post : Post State}
-    {gamma : Gamma Abstract State}
+    {gamma : Concretization Abstract State}
     {postSharp : PostSharp Abstract}
     {cl : ClosureOp State}
     (hSound : Sound post gamma postSharp)
@@ -102,7 +102,7 @@ theorem soundStep_weak_of_soundStep_closure
     {Label : Type v}
     {Abstract : Type w}
     {stepPost : StepPost State Label}
-    {gamma : Gamma Abstract State}
+    {gamma : Concretization Abstract State}
     {stepPostSharp : StepPostSharp Abstract Label}
     {cl : ClosureOp State}
     (hSound : SoundStep stepPost gamma stepPostSharp)
