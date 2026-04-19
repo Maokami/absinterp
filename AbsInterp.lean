@@ -5,7 +5,7 @@ import AbsInterp.Domains.Sign
 import AbsInterp.Framework
 import AbsInterp.Framework.Domains
 import AbsInterp.Framework.Domains.Backward
-import AbsInterp.Framework.Domains.GammaOnly
+import AbsInterp.Framework.Domains.Gamma
 import AbsInterp.Framework.Iteration
 import AbsInterp.Framework.Iteration.Collecting
 import AbsInterp.Framework.Iteration.NatIter

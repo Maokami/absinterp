@@ -24,8 +24,8 @@ These generalize the previously duplicated Sign and Interval lemma files.
 -/
 
 /-- Convenient alias for the lifted config domain. -/
-abbrev impConfigDomain (d : IMPAnalysisDomain A) : GammaOnlyDomain (ConfigSharp A) Config :=
-  configGammaOnlyDomain d.scalarDomain
+abbrev impConfigDomain (d : IMPAnalysisDomain A) : GammaDomain (ConfigSharp A) Config :=
+  configGammaDomain d.scalarDomain
 
 @[simp] theorem mem_gammaStoreOf_botStoreSharp_of
     {σ : Store} :

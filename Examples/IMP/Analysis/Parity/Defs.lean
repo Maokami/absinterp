@@ -20,7 +20,7 @@ Validates that adding a new domain to the generic framework requires minimal cod
 
 /-- IMP analysis domain instance for Parity. -/
 def parityAnalysisDomain : IMPAnalysisDomain Parity where
-  scalarDomain := parityGammaOnlyDomain
+  scalarDomain := parityGammaDomain
   gamma_bot := rfl
   const := constParity
   const_sound := constParity_sound
@@ -31,10 +31,10 @@ def parityAnalysisDomain : IMPAnalysisDomain Parity where
   assumeZero := assumeZeroParity
   assumeZero_sound := assumeZeroParity_sound
   assumeNonzeroAdd_sound :=
-    SoundBackwardRefine.id (gamma := parityGammaOnlyDomain.gamma)
+    SoundBackwardRefine.id (gamma := parityGammaDomain.gamma)
       (rel := fun v₁ v₂ => v₁ + v₂ ≠ 0)
   assumeZeroAdd_sound :=
-    SoundBackwardRefine.id (gamma := parityGammaOnlyDomain.gamma)
+    SoundBackwardRefine.id (gamma := parityGammaDomain.gamma)
       (rel := fun v₁ v₂ => v₁ + v₂ = 0)
 
 /-- The generic Parity concretization for a fixed IMP program. -/
