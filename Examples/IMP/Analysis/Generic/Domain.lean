@@ -17,7 +17,7 @@ universe u
 abstract analysis, so that transfer functions and soundness proofs can be
 written once generically.
 
-The interface sits between the scalar abstract domain (`GammaOnlyDomain A Int`)
+The interface sits between the scalar abstract domain (`GammaDomain A Int`)
 and the IMP-specific analysis machinery. A concrete instance must supply:
 
 - scalar expression evaluation primitives (`const`, `addTransfer`) with
@@ -29,14 +29,14 @@ and the IMP-specific analysis machinery. A concrete instance must supply:
 /--
 Domain-specific obligations for a generic IMP abstract analysis.
 
-An instance packages a scalar `GammaOnlyDomain` together with the transfer
+An instance packages a scalar `GammaDomain` together with the transfer
 primitives and soundness contracts needed by the generic IMP transfer function
 and its soundness proof.
 -/
 structure IMPAnalysisDomain
     (A : Type u) [Bot A] [Preorder A] [OrderTop A] [SemilatticeSup A] where
   /-- The underlying scalar gamma-only domain over integers. -/
-  scalarDomain : GammaOnlyDomain A Int
+  scalarDomain : GammaDomain A Int
   /-- The bottom element has empty concretization. -/
   gamma_bot : scalarDomain.gamma ⊥ = ∅
   /-- Abstract a concrete integer constant. -/

@@ -5,7 +5,7 @@ import Mathlib.Order.Lattice
 /-!
 # Gamma-Only Abstract Domain Interface
 
-`GammaOnlyDomain` packages the γ-only soundness contract for abstract domains:
+`GammaDomain` packages the γ-only soundness contract for abstract domains:
 a concretization function `gamma` together with monotonicity, top-coverage, and
 join-soundness obligations. No abstraction function `α` or Galois-connection
 obligation is required.
@@ -14,7 +14,7 @@ The abstract carrier is required to carry `[Preorder] [OrderTop] [SemilatticeSup
 Mathlib instances. `[SemilatticeSup]` subsumes `[Max]` via `SemilatticeSup.toMax`,
 so the join `⊔` is available uniformly. An opt-in `GaloisConnection` bridge for
 domains that do have an `α` lives in
-`AbsInterp.Framework.Domains.GammaOnly.Interop`.
+`AbsInterp.Framework.Domains.Gamma.Interop`.
 
 ## References
 
@@ -52,7 +52,7 @@ This deliberately omits `α` / Galois-connection obligations. While
 separate semantic soundness statement that the framework explicitly
 requires.
 -/
-structure GammaOnlyDomain
+structure GammaDomain
     (Abstract : Type u) [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
     (Concrete : Type v) where
   /-- The concretization function mapping abstract elements to concrete sets. -/

@@ -1,5 +1,5 @@
 import Cslib.Init
-import AbsInterp.Framework.Domains.GammaOnly
+import AbsInterp.Framework.Domains.Gamma
 
 namespace AbsInterp
 namespace Domains
@@ -96,7 +96,7 @@ instance : SemilatticeSup Parity where
   sup_le _ _ _ ha hb := joinParity_le_of_le ha hb
 
 /-- The complete gamma-only domain instance for Parity. -/
-def parityGammaOnlyDomain : GammaOnlyDomain Parity Int where
+def parityGammaDomain : GammaDomain Parity Int where
   gamma := gammaParity
   gamma_monotone := gammaParity_monotone
   gamma_top := fun _ => Set.mem_univ _

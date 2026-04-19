@@ -5,7 +5,7 @@ import Tests.Domains.Interval
 import Tests.Domains.Sign
 import Tests.Examples.IMP.Smoke
 import Tests.Examples.IMP.ParitySmoke
-import Tests.Framework.Domains.GammaOnly
+import Tests.Framework.Domains.Gamma
 import Tests.Instances.LTS.Smoke
 import Tests.Instances.LTS.Collecting
 import Tests.Instances.LTS.CollectingTrace

@@ -1,5 +1,5 @@
 import Cslib.Init
-import AbsInterp.Framework.Domains.GammaOnly
+import AbsInterp.Framework.Domains.Gamma
 import AbsInterp.Framework.Iteration.Widening.Defs
 
 namespace AbsInterp
@@ -474,8 +474,8 @@ theorem widenInterval_upperBound :
   right := widenInterval_right
 
 /-- Gamma-only interface instance for the interval domain. -/
-def intervalGammaOnlyDomain :
-    AbsInterp.Framework.Domains.GammaOnlyDomain Interval Int where
+def intervalGammaDomain :
+    AbsInterp.Framework.Domains.GammaDomain Interval Int where
   gamma := gammaInterval
   gamma_monotone := gammaInterval_monotone_of_leInterval
   gamma_top := gammaInterval_top

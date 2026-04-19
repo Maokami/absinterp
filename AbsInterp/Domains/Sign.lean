@@ -1,5 +1,5 @@
 import Cslib.Init
-import AbsInterp.Framework.Domains.GammaOnly
+import AbsInterp.Framework.Domains.Gamma
 
 namespace AbsInterp
 namespace Domains
@@ -395,8 +395,8 @@ theorem negTransfer_sound {a : Sign} {n : Int} (hn : n ∈ gammaSign a) :
       trivial
 
 /-- Gamma-only interface instance for the sign domain. -/
-def signGammaOnlyDomain :
-    AbsInterp.Framework.Domains.GammaOnlyDomain Sign Int where
+def signGammaDomain :
+    AbsInterp.Framework.Domains.GammaDomain Sign Int where
   gamma := gammaSign
   gamma_monotone := gammaSign_monotone_of_leSign
   gamma_top := gammaSign_top

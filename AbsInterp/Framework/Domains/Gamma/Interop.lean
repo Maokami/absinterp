@@ -2,14 +2,14 @@ import Mathlib.Order.GaloisConnection.Defs
 import Mathlib.Order.GaloisConnection.Basic
 import Mathlib.Order.BooleanAlgebra.Set
 import Mathlib.Order.Lattice
-import AbsInterp.Framework.Domains.GammaOnly
+import AbsInterp.Framework.Domains.Gamma
 
 /-!
-# Galois-connection interop for `GammaOnlyDomain`
+# Galois-connection interop for `GammaDomain`
 
-Opt-in bridge that builds a `GammaOnlyDomain` from a Mathlib
+Opt-in bridge that builds a `GammaDomain` from a Mathlib
 `GaloisConnection`. The core γ-only contract in
-`AbsInterp.Framework.Domains.GammaOnly` deliberately avoids depending on
+`AbsInterp.Framework.Domains.Gamma` deliberately avoids depending on
 `α` or Galois connections; this module is kept separate so that users
 who already have an `α : Set Concrete → Abstract` can reuse the
 existing Galois-theoretic lemmas without polluting the γ-only module.
@@ -22,7 +22,7 @@ namespace Domains
 universe u v
 
 /--
-Bridge: build a `GammaOnlyDomain` from a Mathlib `GaloisConnection` between
+Bridge: build a `GammaDomain` from a Mathlib `GaloisConnection` between
 `Abstract` and `Set Concrete` (with subset order).
 
 `α : Set Concrete → Abstract` is the abstraction map and `γ : Abstract → Set Concrete`
@@ -33,13 +33,13 @@ is the concretization. A `GaloisConnection α γ` automatically yields:
 - soundness of `⊔` on the abstract side (from `α`'s preservation of binary
   unions, which requires `[SemilatticeSup Abstract]`).
 -/
-def GammaOnlyDomain.ofGaloisConnection
+def GammaDomain.ofGaloisConnection
     {Abstract : Type u} [SemilatticeSup Abstract] [OrderTop Abstract]
     {Concrete : Type v}
     (gamma : Abstract → Set Concrete)
     (alpha : Set Concrete → Abstract)
     (gc : GaloisConnection alpha gamma) :
-    GammaOnlyDomain Abstract Concrete where
+    GammaDomain Abstract Concrete where
   gamma := gamma
   gamma_monotone := @(gc.monotone_u)
   gamma_top := by

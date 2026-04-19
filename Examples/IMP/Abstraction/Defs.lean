@@ -75,7 +75,7 @@ def gammaConfigOf
 Pointwise bottom element on abstract IMP stores.
 
 Bottom is an opt-in requirement (`[Bot Abstract]`); it is not carried by
-`GammaOnlyDomain` itself but is needed for "unreachable control location"
+`GammaDomain` itself but is needed for "unreachable control location"
 configurations like `singletonConfig`.
 -/
 def botStoreSharp
@@ -107,7 +107,7 @@ def botConfigSharp
   rfl
 
 /-!
-## Pointwise lifts of `GammaOnlyDomain`
+## Pointwise lifts of `GammaDomain`
 
 The Mathlib `Pi` instances (`Pi.preorder`, `Pi.instOrderTop`, `Pi.instSemilatticeSup`)
 give us `≤`, `⊤`, and `⊔` on `Var → Abstract` and `Stmt → Var → Abstract`
@@ -116,11 +116,11 @@ soundness obligations.
 -/
 
 /-- Pointwise IMP-store domain lifted from a scalar integer domain. -/
-def storeGammaOnlyDomain
+def storeGammaDomain
     {Abstract : Type u}
     [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
-    (cfg : GammaOnlyDomain Abstract Int) :
-    GammaOnlyDomain (StoreSharp Abstract) Store where
+    (cfg : GammaDomain Abstract Int) :
+    GammaDomain (StoreSharp Abstract) Store where
   gamma := gammaStoreOf cfg.gamma
   gamma_monotone := by
     intro ρ₁ ρ₂ hLe σ hσ x
@@ -136,24 +136,24 @@ def storeGammaOnlyDomain
     · exact Or.inr (hRight x)
 
 /-- Pointwise IMP-configuration domain lifted from a scalar integer domain. -/
-def configGammaOnlyDomain
+def configGammaDomain
     {Abstract : Type u}
     [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
-    (cfg : GammaOnlyDomain Abstract Int) :
-    GammaOnlyDomain (ConfigSharp Abstract) Config where
+    (cfg : GammaDomain Abstract Int) :
+    GammaDomain (ConfigSharp Abstract) Config where
   gamma := gammaConfigOf cfg.gamma
   gamma_monotone := by
     intro κ₁ κ₂ hLe c hc
-    exact (storeGammaOnlyDomain cfg).gamma_monotone (hLe (controlOfConfig c)) hc
+    exact (storeGammaDomain cfg).gamma_monotone (hLe (controlOfConfig c)) hc
   gamma_top := by
     intro c
-    exact (storeGammaOnlyDomain cfg).gamma_top (storeOfConfig c)
+    exact (storeGammaDomain cfg).gamma_top (storeOfConfig c)
   join_sound := by
     intro κ₁ κ₂ c hc
     change
       storeOfConfig c ∈ gammaStoreOf cfg.gamma (κ₁ (controlOfConfig c)) ∪
         gammaStoreOf cfg.gamma (κ₂ (controlOfConfig c)) at hc
-    exact (storeGammaOnlyDomain cfg).join_sound
+    exact (storeGammaDomain cfg).join_sound
       (κ₁ (controlOfConfig c)) (κ₂ (controlOfConfig c)) hc
 
 /--
@@ -167,7 +167,7 @@ intentionally unused beyond helping type inference.
 def joinConfig
     {Abstract : Type u}
     [Preorder Abstract] [OrderTop Abstract] [SemilatticeSup Abstract]
-    (_cfg : GammaOnlyDomain Abstract Int) :
+    (_cfg : GammaDomain Abstract Int) :
     ConfigSharp Abstract → ConfigSharp Abstract → ConfigSharp Abstract :=
   fun κ₁ κ₂ pc x => κ₁ pc x ⊔ κ₂ pc x
 

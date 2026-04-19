@@ -20,7 +20,7 @@ All transfer functions and soundness proofs are inherited from `Generic/`.
 
 /-- IMP analysis domain instance for Sign. -/
 def signAnalysisDomain : IMPAnalysisDomain Sign where
-  scalarDomain := signGammaOnlyDomain
+  scalarDomain := signGammaDomain
   gamma_bot := rfl
   const := constSign
   const_sound := constSign_sound
@@ -38,8 +38,8 @@ def signAnalysisDomain : IMPAnalysisDomain Sign where
 -- Public API wrappers preserving backward-compatible names.
 
 /-- Convenient alias for the lifted Sign config domain on IMP configurations. -/
-abbrev impConfigSignDomain : GammaOnlyDomain (ConfigSharp Sign) Config :=
-  configGammaOnlyDomain signGammaOnlyDomain
+abbrev impConfigSignDomain : GammaDomain (ConfigSharp Sign) Config :=
+  configGammaDomain signGammaDomain
 
 /-- The generic Sign concretization for a fixed IMP program. -/
 def gammaProgramSign (program : Stmt) : Framework.Gamma (ConfigSharp Sign) Config :=
