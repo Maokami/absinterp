@@ -21,28 +21,20 @@ Validates that adding a new domain to the generic framework requires minimal cod
 /-- IMP analysis domain instance for Parity. -/
 def parityAnalysisDomain : IMPAnalysisDomain Parity where
   scalarDomain := parityConcretizationDomain
-  gamma_bot := rfl
-  const := constParity
-  const_sound := constParity_sound
-  addTransfer := addParityTransfer
-  addTransfer_sound := addParityTransfer_sound
-  intersect := intersectParity
-  intersect_sound := intersectParity_sound
-  intersect_reductive := intersectParity_reductive
-  filterNonzero := filterNonzeroParity
-  filterNonzero_sound := filterNonzeroParity_sound
-  filterNonzero_reductive := filterNonzeroParity_reductive
-  filterZero := filterZeroParity
-  filterZero_sound := filterZeroParity_sound
-  filterZero_reductive := filterZeroParity_reductive
-  backwardAddNonzero_sound :=
-    SoundBackwardOperator.id (gamma := parityConcretizationDomain.gamma)
-      (rel := fun v₁ v₂ => v₁ + v₂ ≠ 0)
-  backwardAddNonzero_reductive := ReductiveBackwardOperator.id
-  backwardAddZero_sound :=
-    SoundBackwardOperator.id (gamma := parityConcretizationDomain.gamma)
-      (rel := fun v₁ v₂ => v₁ + v₂ = 0)
-  backwardAddZero_reductive := ReductiveBackwardOperator.id
+  bottom := { gamma_bot := rfl }
+  const := { point := constParity, sound := constParity_sound }
+  addTransfer := { transfer := addParityTransfer, sound := addParityTransfer_sound }
+  intersect := { meetLike := intersectParity, sound := intersectParity_sound, reductive := intersectParity_reductive }
+  filterNonzero := {
+    operator := filterNonzeroParity
+    sound := filterNonzeroParity_sound
+    reductive := filterNonzeroParity_reductive
+  }
+  filterZero := {
+    operator := filterZeroParity
+    sound := filterZeroParity_sound
+    reductive := filterZeroParity_reductive
+  }
 
 /-- The generic Parity concretization for a fixed IMP program. -/
 def gammaProgramParity (program : Stmt) : Framework.Concretization (ConfigSharp Parity) Config :=

@@ -21,28 +21,20 @@ All transfer functions and soundness proofs are inherited from `Generic/`.
 /-- IMP analysis domain instance for Interval. -/
 def intervalAnalysisDomain : IMPAnalysisDomain Interval where
   scalarDomain := intervalConcretizationDomain
-  gamma_bot := rfl
-  const := constInterval
-  const_sound := constInterval_sound
-  addTransfer := addIntervalTransfer
-  addTransfer_sound := addIntervalTransfer_sound
-  intersect := meetInterval
-  intersect_sound := meetInterval_sound
-  intersect_reductive := meetInterval_reductive
-  filterNonzero := filterNonzeroInterval
-  filterNonzero_sound := filterNonzeroInterval_sound
-  filterNonzero_reductive := filterNonzeroInterval_reductive
-  filterZero := filterZeroInterval
-  filterZero_sound := filterZeroInterval_sound
-  filterZero_reductive := filterZeroInterval_reductive
-  backwardAddNonzero_sound :=
-    SoundBackwardOperator.id (gamma := intervalConcretizationDomain.gamma)
-      (rel := fun v₁ v₂ => v₁ + v₂ ≠ 0)
-  backwardAddNonzero_reductive := ReductiveBackwardOperator.id
-  backwardAddZero_sound :=
-    SoundBackwardOperator.id (gamma := intervalConcretizationDomain.gamma)
-      (rel := fun v₁ v₂ => v₁ + v₂ = 0)
-  backwardAddZero_reductive := ReductiveBackwardOperator.id
+  bottom := { gamma_bot := rfl }
+  const := { point := constInterval, sound := constInterval_sound }
+  addTransfer := { transfer := addIntervalTransfer, sound := addIntervalTransfer_sound }
+  intersect := { meetLike := meetInterval, sound := meetInterval_sound, reductive := meetInterval_reductive }
+  filterNonzero := {
+    operator := filterNonzeroInterval
+    sound := filterNonzeroInterval_sound
+    reductive := filterNonzeroInterval_reductive
+  }
+  filterZero := {
+    operator := filterZeroInterval
+    sound := filterZeroInterval_sound
+    reductive := filterZeroInterval_reductive
+  }
 
 -- Public API wrappers.
 

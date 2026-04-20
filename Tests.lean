@@ -6,6 +6,7 @@ import Tests.Domains.Parity
 import Tests.Domains.Sign
 import Tests.Examples.IMP.Smoke
 import Tests.Examples.IMP.ParitySmoke
+import Tests.Framework.Domains.Capabilities
 import Tests.Framework.Domains.Concretization
 import Tests.Instances.LTS.Smoke
 import Tests.Instances.LTS.Collecting
