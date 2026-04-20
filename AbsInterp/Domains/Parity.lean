@@ -72,13 +72,6 @@ def joinParity : Parity → Parity → Parity
   | .odd, .odd => .odd
   | _, _ => .top
 
-instance : Max Parity := ⟨joinParity⟩
-
-theorem joinParity_sound : ∀ a b : Parity, gammaParity a ∪ gammaParity b ⊆ gammaParity (a ⊔ b) := by
-  intro a b n hn
-  show n ∈ gammaParity (joinParity a b)
-  cases a <;> cases b <;> simp [joinParity, gammaParity] at hn ⊢ <;> tauto
-
 theorem joinParity_le_left (a b : Parity) : a ≤ joinParity a b := by
   cases a <;> cases b <;> simp [LE.le, leParity, joinParity]
 
