@@ -35,6 +35,7 @@ All theorems in this file are axiom-clean (`propext`, `Quot.sound`,
 namespace Examples.IMP.Programs
 
 open AbsInterp.Domains
+open AbsInterp.Framework.Domains
 open AbsInterp.Framework.Iteration
 
 /-! ## The IMP program -/
@@ -85,14 +86,16 @@ theorem loopBodySign_sound
     (under `n ≠ 0`) are both in `γ(loopTransferSign a)`. -/
 theorem loopTransferSign_sound_init (a : Sign) :
     (5 : Int) ∈ gammaSign (loopTransferSign a) :=
-  joinSign_sound _ _ (Or.inl (constSign_sound 5))
+  ConcretizationDomain.gamma_union_subset_sup signConcretizationDomain _ _
+    (Or.inl (constSign_sound 5))
 
 theorem loopTransferSign_sound_body
     {a : Sign} {n : Int}
     (hn : n ∈ gammaSign a)
     (hNz : n ≠ 0) :
     n + (-1) ∈ gammaSign (loopTransferSign a) :=
-  joinSign_sound _ _ (Or.inr (loopBodySign_sound hn hNz))
+  ConcretizationDomain.gamma_union_subset_sup signConcretizationDomain _ _
+    (Or.inr (loopBodySign_sound hn hNz))
 
 /-! ## Concrete exit property
 
