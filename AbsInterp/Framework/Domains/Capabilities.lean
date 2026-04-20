@@ -48,14 +48,26 @@ reductive in both arguments.
 
 This is intentionally weaker than requiring a `SemilatticeInf`.
 -/
+def SoundMeetLike
+    {Abstract : Type u} {Concrete : Type v}
+    (gamma : Concretization Abstract Concrete)
+    (meetLike : Abstract → Abstract → Abstract) : Prop :=
+  ∀ {a₁ a₂ : Abstract} {c : Concrete},
+    c ∈ gamma a₁ → c ∈ gamma a₂ → c ∈ gamma (meetLike a₁ a₂)
+
+/-- A meet-like operator is reductive when it stays below both inputs. -/
+def ReductiveMeetLike
+    {Abstract : Type u} [Preorder Abstract]
+    (meetLike : Abstract → Abstract → Abstract) : Prop :=
+  ∀ a₁ a₂ : Abstract, meetLike a₁ a₂ ≤ a₁ ∧ meetLike a₁ a₂ ≤ a₂
+
 structure MeetLike
     (Abstract : Type u) [Preorder Abstract]
     {Concrete : Type v}
     (gamma : Concretization Abstract Concrete) where
   meetLike : Abstract → Abstract → Abstract
-  sound : ∀ {a₁ a₂ : Abstract} {c : Concrete},
-    c ∈ gamma a₁ → c ∈ gamma a₂ → c ∈ gamma (meetLike a₁ a₂)
-  reductive : ∀ a₁ a₂ : Abstract, meetLike a₁ a₂ ≤ a₁ ∧ meetLike a₁ a₂ ≤ a₂
+  sound : SoundMeetLike gamma meetLike
+  reductive : ReductiveMeetLike meetLike
 
 instance
     {Abstract : Type u} [Preorder Abstract]

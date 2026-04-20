@@ -35,12 +35,6 @@ def parityAnalysisDomain : IMPAnalysisDomain Parity where
     sound := filterZeroParity_sound
     reductive := filterZeroParity_reductive
   }
-  backwardAddNonzero :=
-    RelationalBackwardOperator.id (gamma := parityConcretizationDomain.gamma)
-      (rel := fun v₁ v₂ => v₁ + v₂ ≠ 0)
-  backwardAddZero :=
-    RelationalBackwardOperator.id (gamma := parityConcretizationDomain.gamma)
-      (rel := fun v₁ v₂ => v₁ + v₂ = 0)
 
 /-- The generic Parity concretization for a fixed IMP program. -/
 def gammaProgramParity (program : Stmt) : Framework.Concretization (ConfigSharp Parity) Config :=

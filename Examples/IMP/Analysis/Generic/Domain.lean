@@ -56,12 +56,18 @@ structure IMPAnalysisDomain
       Given `v₁ ∈ γ(a₁)`, `v₂ ∈ γ(a₂)`, and `v₁ + v₂ ≠ 0`, refine both. -/
   backwardAddNonzero :
     RelationalBackwardOperator A scalarDomain.gamma
-      (fun v₁ v₂ => v₁ + v₂ ≠ 0)
+      (fun v₁ v₂ => v₁ + v₂ ≠ 0) :=
+    RelationalBackwardOperator.id
+      (gamma := scalarDomain.gamma)
+      (rel := fun v₁ v₂ => v₁ + v₂ ≠ 0)
   /-- Backward operator for addition under zero constraint.
       Given `v₁ ∈ γ(a₁)`, `v₂ ∈ γ(a₂)`, and `v₁ + v₂ = 0`, refine both. -/
   backwardAddZero :
     RelationalBackwardOperator A scalarDomain.gamma
-      (fun v₁ v₂ => v₁ + v₂ = 0)
+      (fun v₁ v₂ => v₁ + v₂ = 0) :=
+    RelationalBackwardOperator.id
+      (gamma := scalarDomain.gamma)
+      (rel := fun v₁ v₂ => v₁ + v₂ = 0)
 
 namespace IMPAnalysisDomain
 
@@ -78,23 +84,19 @@ theorem const_sound (n : Int) :
   d.const.sound n
 
 /-- Addition-transfer soundness accessor. -/
-theorem addTransfer_sound
-    {a₁ a₂ : A} {v₁ v₂ : Int} :
-    v₁ ∈ d.scalarDomain.gamma a₁ → v₂ ∈ d.scalarDomain.gamma a₂ →
-    v₁ + v₂ ∈ d.scalarDomain.gamma (d.addTransfer a₁ a₂) :=
+theorem addTransfer_sound :
+    SoundBinaryTransfer d.scalarDomain.gamma (· + ·) d.addTransfer :=
   d.addTransfer.sound
 
 /-- Meet-like soundness accessor. -/
-theorem intersect_sound
-    {a₁ a₂ : A} {v : Int} :
-    v ∈ d.scalarDomain.gamma a₁ → v ∈ d.scalarDomain.gamma a₂ →
-    v ∈ d.scalarDomain.gamma (d.intersect a₁ a₂) :=
+theorem intersect_sound :
+    SoundMeetLike d.scalarDomain.gamma d.intersect :=
   d.intersect.sound
 
 /-- Meet-like reductiveness accessor. -/
-theorem intersect_reductive (a₁ a₂ : A) :
-    d.intersect a₁ a₂ ≤ a₁ ∧ d.intersect a₁ a₂ ≤ a₂ :=
-  d.intersect.reductive a₁ a₂
+theorem intersect_reductive :
+    ReductiveMeetLike d.intersect :=
+  d.intersect.reductive
 
 /-- Nonzero-filter soundness accessor. -/
 theorem filterNonzero_sound :

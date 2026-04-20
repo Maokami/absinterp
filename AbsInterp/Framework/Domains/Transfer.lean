@@ -15,6 +15,15 @@ Bundled abstract transformers and generic monotonicity predicates. These sit
 between the semantic kernel and language-specific analysis adapters.
 -/
 
+/-- Soundness of a unary abstract transfer for a concrete operation `op`. -/
+def SoundUnaryTransfer
+    {Abstract : Type u} {Concrete : Type v}
+    (gamma : Concretization Abstract Concrete)
+    (op : Concrete → Concrete)
+    (transfer : Abstract → Abstract) : Prop :=
+  ∀ {a : Abstract} {c : Concrete},
+    c ∈ gamma a → op c ∈ gamma (transfer a)
+
 /-- Bundled sound unary transfer for a concrete operation `op`. -/
 structure UnaryTransfer
     (Abstract : Type u)
@@ -22,8 +31,7 @@ structure UnaryTransfer
     (gamma : Concretization Abstract Concrete)
     (op : Concrete → Concrete) where
   transfer : Abstract → Abstract
-  sound : ∀ {a : Abstract} {c : Concrete},
-    c ∈ gamma a → op c ∈ gamma (transfer a)
+  sound : SoundUnaryTransfer gamma op transfer
 
 instance
     {Abstract : Type u}
@@ -34,6 +42,15 @@ instance
       (fun _ => Abstract → Abstract) where
   coe transfer := transfer.transfer
 
+/-- Soundness of a binary abstract transfer for a concrete operation `op`. -/
+def SoundBinaryTransfer
+    {Abstract : Type u} {Concrete : Type v}
+    (gamma : Concretization Abstract Concrete)
+    (op : Concrete → Concrete → Concrete)
+    (transfer : Abstract → Abstract → Abstract) : Prop :=
+  ∀ {a₁ a₂ : Abstract} {c₁ c₂ : Concrete},
+    c₁ ∈ gamma a₁ → c₂ ∈ gamma a₂ → op c₁ c₂ ∈ gamma (transfer a₁ a₂)
+
 /-- Bundled sound binary transfer for a concrete operation `op`. -/
 structure BinaryTransfer
     (Abstract : Type u)
@@ -41,8 +58,7 @@ structure BinaryTransfer
     (gamma : Concretization Abstract Concrete)
     (op : Concrete → Concrete → Concrete) where
   transfer : Abstract → Abstract → Abstract
-  sound : ∀ {a₁ a₂ : Abstract} {c₁ c₂ : Concrete},
-    c₁ ∈ gamma a₁ → c₂ ∈ gamma a₂ → op c₁ c₂ ∈ gamma (transfer a₁ a₂)
+  sound : SoundBinaryTransfer gamma op transfer
 
 instance
     {Abstract : Type u}

@@ -35,12 +35,6 @@ def intervalAnalysisDomain : IMPAnalysisDomain Interval where
     sound := filterZeroInterval_sound
     reductive := filterZeroInterval_reductive
   }
-  backwardAddNonzero :=
-    RelationalBackwardOperator.id (gamma := intervalConcretizationDomain.gamma)
-      (rel := fun v₁ v₂ => v₁ + v₂ ≠ 0)
-  backwardAddZero :=
-    RelationalBackwardOperator.id (gamma := intervalConcretizationDomain.gamma)
-      (rel := fun v₁ v₂ => v₁ + v₂ = 0)
 
 -- Public API wrappers.
 
