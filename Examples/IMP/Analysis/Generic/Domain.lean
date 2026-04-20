@@ -83,10 +83,7 @@ structure IMPAnalysisDomain
       (fun v₁ v₂ => v₁ + v₂ ≠ 0) backwardAddNonzero
   /-- Nonzero-add backward operator is reductive. -/
   backwardAddNonzero_reductive :
-    ReductiveBackwardOperator backwardAddNonzero :=
-      by
-        intro a₁ a₂
-        exact ⟨le_rfl, le_rfl⟩
+    ReductiveBackwardOperator backwardAddNonzero
   /-- Backward operator for addition under zero constraint.
       Given `v₁ ∈ γ(a₁)`, `v₂ ∈ γ(a₂)`, and `v₁ + v₂ = 0`, refine both. -/
   backwardAddZero : BackwardOperator A := fun a₁ a₂ => (a₁, a₂)
@@ -96,10 +93,7 @@ structure IMPAnalysisDomain
       (fun v₁ v₂ => v₁ + v₂ = 0) backwardAddZero
   /-- Zero-add backward operator is reductive. -/
   backwardAddZero_reductive :
-    ReductiveBackwardOperator backwardAddZero :=
-      by
-        intro a₁ a₂
-        exact ⟨le_rfl, le_rfl⟩
+    ReductiveBackwardOperator backwardAddZero
 
 namespace IMPAnalysisDomain
 
