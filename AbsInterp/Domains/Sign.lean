@@ -141,13 +141,6 @@ def joinSign (a b : Sign) : Sign :=
     (hasZero a || hasZero b)
     (hasPos a || hasPos b)
 
-private theorem joinSign_sound_local (a b : Sign) :
-    gammaSign a ∪ gammaSign b ⊆ gammaSign (joinSign a b) := by
-  intro n hn
-  cases a <;> cases b <;>
-    simp [gammaSign, joinSign, signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
-    tauto
-
 @[simp] theorem joinSign_bot_left (a : Sign) :
     joinSign .bot a = a := by
   cases a <;> rfl
@@ -156,11 +149,17 @@ private theorem joinSign_sound_local (a b : Sign) :
     joinSign a .bot = a := by
   cases a <;> rfl
 
-theorem joinSign_le_left (a b : Sign) : a ≤ joinSign a b :=
-  fun _ hn => joinSign_sound_local a b (Or.inl hn)
+theorem joinSign_le_left (a b : Sign) : a ≤ joinSign a b := by
+  intro n hn
+  cases a <;> cases b <;>
+    simp [gammaSign, joinSign, signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
+    tauto
 
-theorem joinSign_le_right (a b : Sign) : b ≤ joinSign a b :=
-  fun _ hn => joinSign_sound_local a b (Or.inr hn)
+theorem joinSign_le_right (a b : Sign) : b ≤ joinSign a b := by
+  intro n hn
+  cases a <;> cases b <;>
+    simp [gammaSign, joinSign, signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
+    tauto
 
 theorem joinSign_le_of_le {a b c : Sign} (ha : a ≤ c) (hb : b ≤ c) :
     joinSign a b ≤ c := by
