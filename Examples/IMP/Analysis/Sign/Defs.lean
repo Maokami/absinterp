@@ -21,26 +21,30 @@ All transfer functions and soundness proofs are inherited from `Generic/`.
 /-- IMP analysis domain instance for Sign. -/
 def signAnalysisDomain : IMPAnalysisDomain Sign where
   scalarDomain := signConcretizationDomain
-  gamma_bot := rfl
-  const := constSign
-  const_sound := constSign_sound
-  addTransfer := addTransfer
-  addTransfer_sound := addTransfer_sound
-  intersect := meetSign
-  intersect_sound := meetSign_sound
-  intersect_reductive := meetSign_reductive
-  filterNonzero := filterNonzeroSign
-  filterNonzero_sound := filterNonzeroSign_sound
-  filterNonzero_reductive := filterNonzeroSign_reductive
-  filterZero := filterZeroSign
-  filterZero_sound := filterZeroSign_sound
-  filterZero_reductive := filterZeroSign_reductive
-  backwardAddNonzero := backwardAddNonzeroSign
-  backwardAddNonzero_sound := backwardAddNonzeroSign_sound
-  backwardAddNonzero_reductive := backwardAddNonzeroSign_reductive
-  backwardAddZero := backwardAddZeroSign
-  backwardAddZero_sound := backwardAddZeroSign_sound
-  backwardAddZero_reductive := backwardAddZeroSign_reductive
+  bottom := { gamma_bot := rfl }
+  const := { point := constSign, sound := constSign_sound }
+  addTransfer := { transfer := addTransfer, sound := addTransfer_sound }
+  intersect := { meetLike := meetSign, sound := meetSign_sound, reductive := meetSign_reductive }
+  filterNonzero := {
+    operator := filterNonzeroSign
+    sound := filterNonzeroSign_sound
+    reductive := filterNonzeroSign_reductive
+  }
+  filterZero := {
+    operator := filterZeroSign
+    sound := filterZeroSign_sound
+    reductive := filterZeroSign_reductive
+  }
+  backwardAddNonzero := {
+    operator := backwardAddNonzeroSign
+    sound := backwardAddNonzeroSign_sound
+    reductive := backwardAddNonzeroSign_reductive
+  }
+  backwardAddZero := {
+    operator := backwardAddZeroSign
+    sound := backwardAddZeroSign_sound
+    reductive := backwardAddZeroSign_reductive
+  }
 
 -- Public API wrappers.
 

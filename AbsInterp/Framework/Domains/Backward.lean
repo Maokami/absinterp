@@ -84,6 +84,48 @@ def ReductiveBackwardOperator
   ∀ a₁ a₂ : Abstract,
     (backward a₁ a₂).1 ≤ a₁ ∧ (backward a₁ a₂).2 ≤ a₂
 
+/-- Bundled unary filter operator with soundness and reductiveness proofs. -/
+structure FilterOperator
+    (Abstract : Type u) [Preorder Abstract]
+    {Concrete : Type v}
+    (gamma : Concretization Abstract Concrete)
+    (P : Concrete → Prop) where
+  operator : Abstract → Abstract
+  sound : SoundFilter gamma P operator
+  reductive : ReductiveFilter operator
+
+instance
+    {Abstract : Type u} [Preorder Abstract]
+    {Concrete : Type v}
+    {gamma : Concretization Abstract Concrete}
+    {P : Concrete → Prop} :
+    CoeFun (FilterOperator Abstract (gamma := gamma) P)
+      (fun _ => Abstract → Abstract) where
+  coe filterOperator := filterOperator.operator
+
+/--
+Bundled binary backward operator with soundness and reductiveness proofs.
+
+This is the bundled capability form of `BackwardOperator`.
+-/
+structure RelationalBackwardOperator
+    (Abstract : Type u) [Preorder Abstract]
+    {Concrete : Type v}
+    (gamma : Concretization Abstract Concrete)
+    (rel : Concrete → Concrete → Prop) where
+  operator : BackwardOperator Abstract
+  sound : SoundBackwardOperator gamma rel operator
+  reductive : ReductiveBackwardOperator operator
+
+instance
+    {Abstract : Type u} [Preorder Abstract]
+    {Concrete : Type v}
+    {gamma : Concretization Abstract Concrete}
+    {rel : Concrete → Concrete → Prop} :
+    CoeFun (RelationalBackwardOperator Abstract (gamma := gamma) rel)
+      (fun _ => Abstract → Abstract → Abstract × Abstract) where
+  coe backwardOperator := backwardOperator.operator
+
 namespace ReductiveFilter
 
 /-- The identity filter is reductive. -/
@@ -93,6 +135,23 @@ theorem id
   fun _ => le_rfl
 
 end ReductiveFilter
+
+namespace FilterOperator
+
+/-- The identity filter operator is sound and reductive for any property. -/
+def id
+    {Abstract : Type u} [Preorder Abstract]
+    {Concrete : Type v}
+    {gamma : Concretization Abstract Concrete}
+    {P : Concrete → Prop} :
+    FilterOperator Abstract (gamma := gamma) P where
+  operator := fun a => a
+  sound := by
+    intro a c hc _
+    exact hc
+  reductive := ReductiveFilter.id
+
+end FilterOperator
 
 namespace SoundBackwardOperator
 
@@ -116,16 +175,30 @@ theorem id
 
 end ReductiveBackwardOperator
 
+namespace RelationalBackwardOperator
+
+/-- The identity backward operator bundle is sound and reductive. -/
+def id
+    {Abstract : Type u} [Preorder Abstract]
+    {Concrete : Type v}
+    {gamma : Concretization Abstract Concrete}
+    {rel : Concrete → Concrete → Prop} :
+    RelationalBackwardOperator Abstract (gamma := gamma) rel where
+  operator := fun a₁ a₂ => (a₁, a₂)
+  sound := SoundBackwardOperator.id
+  reductive := ReductiveBackwardOperator.id
+
+end RelationalBackwardOperator
+
 /-!
 ## Usage note
 
 These predicates are the canonical contract for unary filters and binary
 backward operators. `Examples/IMP/Analysis/Generic/Domain.lean` wires the
-`IMPAnalysisDomain` filter and backward-operator fields through
-`SoundFilter`, `ReductiveFilter`, `SoundBackwardOperator`, and
-`ReductiveBackwardOperator` directly. `SoundBackwardOperator.id` and
-`ReductiveBackwardOperator.id` are reused as defaults for domains (e.g.
-Parity, Interval) that do not override the binary backward operators.
+`IMPAnalysisDomain` filter and backward-operator fields through the bundled
+`FilterOperator` and `RelationalBackwardOperator` capabilities, whose proof
+fields are still expressed with `SoundFilter`, `ReductiveFilter`,
+`SoundBackwardOperator`, and `ReductiveBackwardOperator`.
 -/
 
 end Domains
