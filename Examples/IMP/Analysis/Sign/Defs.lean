@@ -20,12 +20,15 @@ All transfer functions and soundness proofs are inherited from `Generic/`.
 
 /-- IMP analysis domain instance for Sign. -/
 def signAnalysisDomain : IMPAnalysisDomain Sign where
-  scalarDomain := signGammaDomain
+  scalarDomain := signConcretizationDomain
   gamma_bot := rfl
   const := constSign
   const_sound := constSign_sound
   addTransfer := addTransfer
   addTransfer_sound := addTransfer_sound
+  intersect := meetSign
+  intersect_sound := meetSign_sound
+  intersect_reductive := meetSign_reductive
   filterNonzero := filterNonzeroSign
   filterNonzero_sound := filterNonzeroSign_sound
   filterNonzero_reductive := filterNonzeroSign_reductive
@@ -42,8 +45,8 @@ def signAnalysisDomain : IMPAnalysisDomain Sign where
 -- Public API wrappers.
 
 /-- Convenient alias for the lifted Sign config domain on IMP configurations. -/
-abbrev impConfigSignDomain : GammaDomain (ConfigSharp Sign) Config :=
-  configGammaDomain signGammaDomain
+abbrev impConfigSignDomain : ConcretizationDomain (ConfigSharp Sign) Config :=
+  configConcretizationDomain signConcretizationDomain
 
 /-- The generic Sign concretization for a fixed IMP program. -/
 def gammaProgramSign (program : Stmt) : Framework.Concretization (ConfigSharp Sign) Config :=

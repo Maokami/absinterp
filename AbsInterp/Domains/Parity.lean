@@ -95,12 +95,11 @@ instance : SemilatticeSup Parity where
   le_sup_right := joinParity_le_right
   sup_le _ _ _ ha hb := joinParity_le_of_le ha hb
 
-/-- The complete gamma-only domain instance for Parity. -/
-def parityGammaDomain : GammaDomain Parity Int where
+/-- The complete concretization-domain instance for Parity. -/
+def parityConcretizationDomain : ConcretizationDomain Parity Int where
   gamma := gammaParity
   gamma_monotone := gammaParity_monotone
   gamma_top := fun _ => Set.mem_univ _
-  join_sound := joinParity_sound
 
 /-- Abstract a concrete integer constant by its parity. -/
 def constParity (n : Int) : Parity :=
@@ -128,6 +127,27 @@ theorem addParityTransfer_sound
     m + n ∈ gammaParity (addParityTransfer a b) := by
   cases a <;> cases b <;> simp_all [addParityTransfer, gammaParity]
   all_goals omega
+
+/-- Intersection on the parity lattice. -/
+def intersectParity : Parity → Parity → Parity
+  | .bot, _ => .bot
+  | _, .bot => .bot
+  | .top, a => a
+  | a, .top => a
+  | .even, .even => .even
+  | .odd, .odd => .odd
+  | _, _ => .bot
+
+theorem intersectParity_sound
+    {a b : Parity} {n : Int}
+    (ha : n ∈ gammaParity a)
+    (hb : n ∈ gammaParity b) :
+    n ∈ gammaParity (intersectParity a b) := by
+  cases a <;> cases b <;> simp [intersectParity, gammaParity] at ha hb ⊢ <;> omega
+
+theorem intersectParity_reductive (a b : Parity) :
+    intersectParity a b ≤ a ∧ intersectParity a b ≤ b := by
+  cases a <;> cases b <;> simp [LE.le, leParity, intersectParity]
 
 /-- Filter a parity value under a nonzero assumption (identity — parity cannot refine). -/
 def filterNonzeroParity : Parity → Parity := id

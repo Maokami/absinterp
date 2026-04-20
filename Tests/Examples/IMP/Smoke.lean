@@ -45,6 +45,11 @@ example :
   native_decide
 
 example :
+    refineAddStore signAnalysisDomain topStoreSign (.var Var.x0) (.var Var.x0)
+      (.nonneg, .nonpos) Var.x0 = .zero := by
+  native_decide
+
+example :
     SoundTrace
       (liftTracePost (postStep impLTS))
       (gammaProgramSign branchOnX0)

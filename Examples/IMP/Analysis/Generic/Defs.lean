@@ -17,7 +17,7 @@ open AbsInterp.Instances.LTS
 
 universe u
 
-variable {A : Type u} [Bot A] [Preorder A] [OrderTop A] [SemilatticeSup A]
+variable {A : Type u} [Bot A] [SemilatticeSup A] [OrderTop A]
 
 /-!
 # Generic IMP Transfer Functions
@@ -33,11 +33,20 @@ def evalExpr (d : IMPAnalysisDomain A) (ρ : StoreSharp A) : Expr → A
   | .add e1 e2 => d.addTransfer (evalExpr d ρ e1) (evalExpr d ρ e2)
 
 /-- Refine variables in an abstract store using a backward-refined pair.
-    Each sub-expression that is a variable gets its store entry updated. -/
+    If both expressions are the same variable, combine the two refinements with
+    `d.intersect` instead of overwriting one with the other. -/
 def refineAddStore
+    (d : IMPAnalysisDomain A)
     (ρ : StoreSharp A) (e1 e2 : Expr) (pair : A × A) : StoreSharp A :=
-  let ρ' := match e1 with | .var x => updateStoreSharp ρ x pair.1 | _ => ρ
-  match e2 with | .var y => updateStoreSharp ρ' y pair.2 | _ => ρ'
+  match e1, e2 with
+  | .var x, .var y =>
+      if x = y then
+        updateStoreSharp ρ x (d.intersect pair.1 pair.2)
+      else
+        updateStoreSharp (updateStoreSharp ρ x pair.1) y pair.2
+  | .var x, _ => updateStoreSharp ρ x pair.1
+  | _, .var y => updateStoreSharp ρ y pair.2
+  | _, _ => ρ
 
 /-- Filter an abstract store under a taken `if` branch. -/
 def filterTrueStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
@@ -46,7 +55,7 @@ def filterTrueStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
   | .lit n => if n = 0 then botStoreSharp else ρ
   | .var x => updateStoreSharp ρ x (d.filterNonzero (ρ x))
   | .add e1 e2 =>
-      refineAddStore ρ e1 e2 (d.backwardAddNonzero (evalExpr d ρ e1) (evalExpr d ρ e2))
+      refineAddStore d ρ e1 e2 (d.backwardAddNonzero (evalExpr d ρ e1) (evalExpr d ρ e2))
 
 /-- Filter an abstract store under a not-taken `if` branch. -/
 def filterFalseStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
@@ -55,7 +64,7 @@ def filterFalseStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
   | .lit n => if n = 0 then ρ else botStoreSharp
   | .var x => updateStoreSharp ρ x (d.filterZero (ρ x))
   | .add e1 e2 =>
-      refineAddStore ρ e1 e2 (d.backwardAddZero (evalExpr d ρ e1) (evalExpr d ρ e2))
+      refineAddStore d ρ e1 e2 (d.backwardAddZero (evalExpr d ρ e1) (evalExpr d ρ e2))
 
 /--
 Generic transfer for the labeled IMP LTS, parameterized by an IMP analysis

@@ -17,11 +17,12 @@ universe u
 abstract analysis, so that transfer functions and soundness proofs can be
 written once generically.
 
-The interface sits between the scalar abstract domain (`GammaDomain A Int`)
+The interface sits between the scalar abstract domain (`ConcretizationDomain A Int`)
 and the IMP-specific analysis machinery. A concrete instance must supply:
 
 - scalar expression evaluation primitives (`const`, `addTransfer`) with
   soundness,
+- a scalar intersection operator used to combine same-variable backward refinements,
 - branch filter operators (`filterNonzero`, `filterZero`) with soundness,
 - a proof that the bottom element has empty concretization.
 -/
@@ -29,14 +30,14 @@ and the IMP-specific analysis machinery. A concrete instance must supply:
 /--
 Domain-specific obligations for a generic IMP abstract analysis.
 
-An instance packages a scalar `GammaDomain` together with the transfer
+An instance packages a scalar `ConcretizationDomain` together with the transfer
 primitives and soundness contracts needed by the generic IMP transfer function
 and its soundness proof.
 -/
 structure IMPAnalysisDomain
-    (A : Type u) [Bot A] [Preorder A] [OrderTop A] [SemilatticeSup A] where
-  /-- The underlying scalar gamma-only domain over integers. -/
-  scalarDomain : GammaDomain A Int
+    (A : Type u) [Bot A] [SemilatticeSup A] [OrderTop A] where
+  /-- The underlying scalar concretization domain over integers. -/
+  scalarDomain : ConcretizationDomain A Int
   /-- The bottom element has empty concretization. -/
   gamma_bot : scalarDomain.gamma ⊥ = ∅
   /-- Abstract a concrete integer constant. -/
@@ -49,6 +50,14 @@ structure IMPAnalysisDomain
   addTransfer_sound : ∀ {a₁ a₂ : A} {v₁ v₂ : Int},
     v₁ ∈ scalarDomain.gamma a₁ → v₂ ∈ scalarDomain.gamma a₂ →
     v₁ + v₂ ∈ scalarDomain.gamma (addTransfer a₁ a₂)
+  /-- Combine two scalar refinements for the same concrete value. -/
+  intersect : A → A → A
+  /-- Intersection is sound for concrete values that belong to both inputs. -/
+  intersect_sound : ∀ {a₁ a₂ : A} {v : Int},
+    v ∈ scalarDomain.gamma a₁ → v ∈ scalarDomain.gamma a₂ →
+    v ∈ scalarDomain.gamma (intersect a₁ a₂)
+  /-- Intersection is reductive in both arguments. -/
+  intersect_reductive : ∀ a₁ a₂ : A, intersect a₁ a₂ ≤ a₁ ∧ intersect a₁ a₂ ≤ a₂
   /-- Filter an abstract value under a nonzero assumption. -/
   filterNonzero : A → A
   /-- Nonzero filtering is sound (`SoundFilter` with `P := (· ≠ 0)`). -/
@@ -94,7 +103,7 @@ structure IMPAnalysisDomain
 
 namespace IMPAnalysisDomain
 
-variable {A : Type u} [Bot A] [Preorder A] [OrderTop A] [SemilatticeSup A]
+variable {A : Type u} [Bot A] [SemilatticeSup A] [OrderTop A]
 variable (d : IMPAnalysisDomain A)
 
 /-- Convenience accessor for the scalar concretization function. -/

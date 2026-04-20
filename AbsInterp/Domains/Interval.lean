@@ -250,7 +250,7 @@ def meetInterval (a b : Interval) : Interval :=
   | .range lo1 hi1 _, .range lo2 hi2 _ => mk (max lo1 lo2) (min hi1 hi2)
 
 /-- `meetInterval` soundly under-approximates intersection concretization. -/
-theorem meetInterval_sound (a b : Interval) :
+theorem meetInterval_subset_inter (a b : Interval) :
     gammaInterval (meetInterval a b) ⊆ gammaInterval a ∩ gammaInterval b := by
   intro n hn
   cases a with
@@ -274,6 +274,37 @@ theorem meetInterval_sound (a b : Interval) :
       have hBounds := (mem_gammaInterval_mk_iff (max lo1 lo2) (min hi1 hi2) n).1 hn
       simp only [gammaInterval, Set.mem_inter_iff, Set.mem_setOf_eq]
       omega
+
+/-- If a concrete value lies in both intervals, it lies in their meet. -/
+theorem meetInterval_sound
+    {a b : Interval}
+    {n : Int}
+    (ha : n ∈ gammaInterval a)
+    (hb : n ∈ gammaInterval b) :
+    n ∈ gammaInterval (meetInterval a b) := by
+  cases a with
+  | bot => simp only [gammaInterval, Set.mem_empty_iff_false] at ha
+  | top =>
+      cases b with
+      | bot => simp only [gammaInterval, Set.mem_empty_iff_false] at hb
+      | top => simp [meetInterval, gammaInterval]
+      | range lo hi h =>
+          simpa [meetInterval] using hb
+  | range lo1 hi1 h1 =>
+      cases b with
+      | bot => simp only [gammaInterval, Set.mem_empty_iff_false] at hb
+      | top => simpa [meetInterval] using ha
+      | range lo2 hi2 h2 =>
+          simp only [gammaInterval, Set.mem_setOf_eq] at ha hb ⊢
+          rw [meetInterval]
+          exact (mem_gammaInterval_mk_iff (max lo1 lo2) (min hi1 hi2) n).2 (by omega)
+
+/-- `meetInterval` is reductive in both arguments. -/
+theorem meetInterval_reductive (a b : Interval) :
+    meetInterval a b ≤ a ∧ meetInterval a b ≤ b := by
+  constructor <;> intro n hn
+  · exact (meetInterval_subset_inter a b hn).1
+  · exact (meetInterval_subset_inter a b hn).2
 
 /-- Abstract negation on canonical intervals. -/
 def negIntervalTransfer (a : Interval) : Interval :=
@@ -525,13 +556,12 @@ theorem widenInterval_upperBound :
   left := widenInterval_left
   right := widenInterval_right
 
-/-- Gamma-only interface instance for the interval domain. -/
-def intervalGammaDomain :
-    AbsInterp.Framework.Domains.GammaDomain Interval Int where
+/-- Concretization-domain instance for the interval domain. -/
+def intervalConcretizationDomain :
+    AbsInterp.Framework.Domains.ConcretizationDomain Interval Int where
   gamma := gammaInterval
   gamma_monotone := gammaInterval_monotone_of_leInterval
   gamma_top := gammaInterval_top
-  join_sound := joinInterval_sound
 
 end Domains
 end AbsInterp

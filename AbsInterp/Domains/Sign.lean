@@ -322,6 +322,19 @@ theorem meetSign_sound
     simp [gammaSign, meetSign, signOfFlags, hasNeg, hasZero, hasPos] at ha hb ⊢ <;>
     omega
 
+/-- `meetSign` is reductive in both arguments. -/
+theorem meetSign_reductive (a b : Sign) :
+    meetSign a b ≤ a ∧ meetSign a b ≤ b := by
+  constructor
+  · intro n hn
+    cases a <;> cases b <;>
+      simp [gammaSign, meetSign, signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
+      omega
+  · intro n hn
+    cases a <;> cases b <;>
+      simp [gammaSign, meetSign, signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
+      omega
+
 /-- Backward operator for addition under a nonzero-result constraint. -/
 def backwardAddNonzeroSign (a₁ a₂ : Sign) : Sign × Sign :=
   if a₁ = .bot ∨ a₂ = .bot then (.bot, .bot)
@@ -436,13 +449,12 @@ theorem negTransfer_sound {a : Sign} {n : Int} (hn : n ∈ gammaSign a) :
       change True
       trivial
 
-/-- Gamma-only interface instance for the sign domain. -/
-def signGammaDomain :
-    AbsInterp.Framework.Domains.GammaDomain Sign Int where
+/-- Concretization-domain instance for the sign domain. -/
+def signConcretizationDomain :
+    AbsInterp.Framework.Domains.ConcretizationDomain Sign Int where
   gamma := gammaSign
   gamma_monotone := gammaSign_monotone_of_leSign
   gamma_top := gammaSign_top
-  join_sound := joinSign_sound
 
 end Domains
 end AbsInterp

@@ -55,6 +55,9 @@ example : meetSign Sign.neg Sign.nonneg = Sign.bot := by rfl
 example : meetSign Sign.top Sign.pos = Sign.pos := by rfl
 example : meetSign Sign.nonpos Sign.nonneg = Sign.zero := by rfl
 example : meetSign Sign.neg Sign.nonpos = Sign.neg := by rfl
+example :
+    (0 : Int) ∈ gammaSign (meetSign Sign.nonneg Sign.nonpos) := by
+  exact meetSign_sound (by simp [gammaSign]) (by simp [gammaSign])
 
 -- backwardAddNonzeroSign tests
 /-- nonneg + zero ≠ 0 refines nonneg to pos. -/
