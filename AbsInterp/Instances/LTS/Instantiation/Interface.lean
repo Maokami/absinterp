@@ -36,7 +36,7 @@ structure LTSAbstraction
   /-- The underlying CSLib LTS. -/
   lts : Cslib.LTS State Label
   /-- The concretization function mapping abstract elements to concrete state sets. -/
-  gamma : Gamma Abstract State
+  gamma : Concretization Abstract State
   /-- The abstract transfer function (one step per label). -/
   transfer : StepPostSharp Abstract Label
   soundStep : SoundStep (postStep lts) gamma transfer
@@ -47,7 +47,7 @@ def LTSAbstraction.ofExplicit
     {Label : Type v}
     {Abstract : Type w}
     (lts : Cslib.LTS State Label)
-    (gamma : Gamma Abstract State)
+    (gamma : Concretization Abstract State)
     (transfer : StepPostSharp Abstract Label)
     (soundStep : SoundStep (postStep lts) gamma transfer) :
     LTSAbstraction State Label Abstract :=

@@ -17,7 +17,7 @@ open AbsInterp.Instances.LTS
 
 universe u
 
-variable {A : Type u} [Bot A] [Preorder A] [OrderTop A] [SemilatticeSup A]
+variable {A : Type u} [Bot A] [SemilatticeSup A] [OrderTop A]
 
 /-!
 # Generic IMP Transfer Functions
@@ -33,29 +33,38 @@ def evalExpr (d : IMPAnalysisDomain A) (ρ : StoreSharp A) : Expr → A
   | .add e1 e2 => d.addTransfer (evalExpr d ρ e1) (evalExpr d ρ e2)
 
 /-- Refine variables in an abstract store using a backward-refined pair.
-    Each sub-expression that is a variable gets its store entry updated. -/
+    If both expressions are the same variable, combine the two refinements with
+    `d.intersect` instead of overwriting one with the other. -/
 def refineAddStore
+    (d : IMPAnalysisDomain A)
     (ρ : StoreSharp A) (e1 e2 : Expr) (pair : A × A) : StoreSharp A :=
-  let ρ' := match e1 with | .var x => updateStoreSharp ρ x pair.1 | _ => ρ
-  match e2 with | .var y => updateStoreSharp ρ' y pair.2 | _ => ρ'
+  match e1, e2 with
+  | .var x, .var y =>
+      if x = y then
+        updateStoreSharp ρ x (d.intersect pair.1 pair.2)
+      else
+        updateStoreSharp (updateStoreSharp ρ x pair.1) y pair.2
+  | .var x, _ => updateStoreSharp ρ x pair.1
+  | _, .var y => updateStoreSharp ρ y pair.2
+  | _, _ => ρ
 
-/-- Refine an abstract store under a taken `if` branch. -/
-def assumeTrueStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
+/-- Filter an abstract store under a taken `if` branch. -/
+def filterTrueStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
     (ρ : StoreSharp A) : StoreSharp A :=
   match cond with
   | .lit n => if n = 0 then botStoreSharp else ρ
-  | .var x => updateStoreSharp ρ x (d.assumeNonzero (ρ x))
+  | .var x => updateStoreSharp ρ x (d.filterNonzero (ρ x))
   | .add e1 e2 =>
-      refineAddStore ρ e1 e2 (d.assumeNonzeroAdd (evalExpr d ρ e1) (evalExpr d ρ e2))
+      refineAddStore d ρ e1 e2 (d.backwardAddNonzero (evalExpr d ρ e1) (evalExpr d ρ e2))
 
-/-- Refine an abstract store under a not-taken `if` branch. -/
-def assumeFalseStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
+/-- Filter an abstract store under a not-taken `if` branch. -/
+def filterFalseStoreOf (d : IMPAnalysisDomain A) (cond : Expr)
     (ρ : StoreSharp A) : StoreSharp A :=
   match cond with
   | .lit n => if n = 0 then ρ else botStoreSharp
-  | .var x => updateStoreSharp ρ x (d.assumeZero (ρ x))
+  | .var x => updateStoreSharp ρ x (d.filterZero (ρ x))
   | .add e1 e2 =>
-      refineAddStore ρ e1 e2 (d.assumeZeroAdd (evalExpr d ρ e1) (evalExpr d ρ e2))
+      refineAddStore d ρ e1 e2 (d.backwardAddZero (evalExpr d ρ e1) (evalExpr d ρ e2))
 
 /--
 Generic transfer for the labeled IMP LTS, parameterized by an IMP analysis
@@ -80,13 +89,13 @@ def transferProgram (d : IMPAnalysisDomain A) :
       transferProgram d s2 μ κ
   | .ite cond s1 s2, .ifTrue, κ =>
       joinConfig d.scalarDomain
-        (singletonConfig s1 (assumeTrueStoreOf d cond (κ (.ite cond s1 s2))))
+        (singletonConfig s1 (filterTrueStoreOf d cond (κ (.ite cond s1 s2))))
         (joinConfig d.scalarDomain
           (transferProgram d s1 .ifTrue κ)
           (transferProgram d s2 .ifTrue κ))
   | .ite cond s1 s2, .ifFalse, κ =>
       joinConfig d.scalarDomain
-        (singletonConfig s2 (assumeFalseStoreOf d cond (κ (.ite cond s1 s2))))
+        (singletonConfig s2 (filterFalseStoreOf d cond (κ (.ite cond s1 s2))))
         (joinConfig d.scalarDomain
           (transferProgram d s1 .ifFalse κ)
           (transferProgram d s2 .ifFalse κ))
@@ -97,10 +106,10 @@ def transferProgram (d : IMPAnalysisDomain A) :
   | .while cond body, .whileTrue, κ =>
       singletonConfig
         (.seq body (.while cond body))
-        (assumeTrueStoreOf d cond (κ (.while cond body)))
+        (filterTrueStoreOf d cond (κ (.while cond body)))
   | .while cond body, .whileFalse, κ =>
       singletonConfig .skip
-        (assumeFalseStoreOf d cond (κ (.while cond body)))
+        (filterFalseStoreOf d cond (κ (.while cond body)))
   | .while cond body, .seqStep μ, κ =>
       liftSeqConfig (.while cond body)
         (transferProgram d body μ (seqView (.while cond body) κ))
@@ -112,7 +121,7 @@ termination_by program _ _ => program
 
 /-- The generic concretization for a fixed IMP program and domain. -/
 def gammaProgram (d : IMPAnalysisDomain A) (program : Stmt) :
-    AbsInterp.Framework.Gamma (ConfigSharp A) Config :=
+    AbsInterp.Framework.Concretization (ConfigSharp A) Config :=
   gammaProgramConfigOf program d.scalarDomain.gamma
 
 /-- Package the generic transfer as a framework step transformer. -/

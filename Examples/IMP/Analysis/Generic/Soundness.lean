@@ -14,7 +14,7 @@ open AbsInterp.Instances.LTS
 
 universe u
 
-variable {A : Type u} [Bot A] [Preorder A] [OrderTop A] [SemilatticeSup A] (d : IMPAnalysisDomain A)
+variable {A : Type u} [Bot A] [SemilatticeSup A] [OrderTop A] (d : IMPAnalysisDomain A)
 
 /-!
 # Generic IMP Soundness Proof
@@ -142,19 +142,19 @@ theorem localStepSoundOfActive
       cases hStep with
       | if_true hCond =>
           have hStore :
-              σ ∈ gammaStoreOf d.scalarDomain.gamma (assumeTrueStoreOf d cond (κ (.ite cond s1 s2))) :=
-            mem_gammaStoreOf_assumeTrueStoreOf d hσ hCond
+              σ ∈ gammaStoreOf d.scalarDomain.gamma (filterTrueStoreOf d cond (κ (.ite cond s1 s2))) :=
+            mem_gammaStoreOf_filterTrueStoreOf d hσ hCond
           have hRoot :
               (s1, σ) ∈
                 gammaProgram d (.ite cond s1 s2)
-                  (singletonConfig s1 (assumeTrueStoreOf d cond (κ (.ite cond s1 s2)))) := by
+                  (singletonConfig s1 (filterTrueStoreOf d cond (κ (.ite cond s1 s2)))) := by
             refine ⟨ActiveIn.iteThen (ActiveIn.self s1), ?_⟩
             simpa [singletonConfig] using hStore
           have hJoin :
               (s1, σ) ∈
                 gammaProgram d (.ite cond s1 s2)
                   (joinConfig d.scalarDomain
-                    (singletonConfig s1 (assumeTrueStoreOf d cond (κ (.ite cond s1 s2))))
+                    (singletonConfig s1 (filterTrueStoreOf d cond (κ (.ite cond s1 s2))))
                     (joinConfig d.scalarDomain
                       (transferProgram d s1 .ifTrue κ)
                       (transferProgram d s2 .ifTrue κ))) :=
@@ -162,19 +162,19 @@ theorem localStepSoundOfActive
           simpa [transferProgram] using hJoin
       | if_false hCond =>
           have hStore :
-              σ ∈ gammaStoreOf d.scalarDomain.gamma (assumeFalseStoreOf d cond (κ (.ite cond s1 s2))) :=
-            mem_gammaStoreOf_assumeFalseStoreOf d hσ hCond
+              σ ∈ gammaStoreOf d.scalarDomain.gamma (filterFalseStoreOf d cond (κ (.ite cond s1 s2))) :=
+            mem_gammaStoreOf_filterFalseStoreOf d hσ hCond
           have hRoot :
               (s2, σ) ∈
                 gammaProgram d (.ite cond s1 s2)
-                  (singletonConfig s2 (assumeFalseStoreOf d cond (κ (.ite cond s1 s2)))) := by
+                  (singletonConfig s2 (filterFalseStoreOf d cond (κ (.ite cond s1 s2)))) := by
             refine ⟨ActiveIn.iteElse (ActiveIn.self s2), ?_⟩
             simpa [singletonConfig] using hStore
           have hJoin :
               (s2, σ) ∈
                 gammaProgram d (.ite cond s1 s2)
                   (joinConfig d.scalarDomain
-                    (singletonConfig s2 (assumeFalseStoreOf d cond (κ (.ite cond s1 s2))))
+                    (singletonConfig s2 (filterFalseStoreOf d cond (κ (.ite cond s1 s2))))
                     (joinConfig d.scalarDomain
                       (transferProgram d s1 .ifFalse κ)
                       (transferProgram d s2 .ifFalse κ))) :=
@@ -200,7 +200,7 @@ theorem localStepSoundOfActive
           simpa [transferProgram] using
             mem_gammaProgram_join_right_of d
               (program := .ite cond s1 s2)
-              (κ₁ := singletonConfig s1 (assumeTrueStoreOf d cond (κ (.ite cond s1 s2))))
+              (κ₁ := singletonConfig s1 (filterTrueStoreOf d cond (κ (.ite cond s1 s2))))
               (κ₂ := joinConfig d.scalarDomain
                 (transferProgram d s1 .ifTrue κ)
                 (transferProgram d s2 .ifTrue κ))
@@ -216,7 +216,7 @@ theorem localStepSoundOfActive
           simpa [transferProgram] using
             mem_gammaProgram_join_right_of d
               (program := .ite cond s1 s2)
-              (κ₁ := singletonConfig s2 (assumeFalseStoreOf d cond (κ (.ite cond s1 s2))))
+              (κ₁ := singletonConfig s2 (filterFalseStoreOf d cond (κ (.ite cond s1 s2))))
               (κ₂ := joinConfig d.scalarDomain
                 (transferProgram d s1 .ifFalse κ)
                 (transferProgram d s2 .ifFalse κ))
@@ -276,7 +276,7 @@ theorem localStepSoundOfActive
           simpa [transferProgram] using
             mem_gammaProgram_join_right_of d
               (program := .ite cond s1 s2)
-              (κ₁ := singletonConfig s1 (assumeTrueStoreOf d cond (κ (.ite cond s1 s2))))
+              (κ₁ := singletonConfig s1 (filterTrueStoreOf d cond (κ (.ite cond s1 s2))))
               (κ₂ := joinConfig d.scalarDomain
                 (transferProgram d s1 .ifTrue κ)
                 (transferProgram d s2 .ifTrue κ))
@@ -292,7 +292,7 @@ theorem localStepSoundOfActive
           simpa [transferProgram] using
             mem_gammaProgram_join_right_of d
               (program := .ite cond s1 s2)
-              (κ₁ := singletonConfig s2 (assumeFalseStoreOf d cond (κ (.ite cond s1 s2))))
+              (κ₁ := singletonConfig s2 (filterFalseStoreOf d cond (κ (.ite cond s1 s2))))
               (κ₂ := joinConfig d.scalarDomain
                 (transferProgram d s1 .ifFalse κ)
                 (transferProgram d s2 .ifFalse κ))
@@ -338,25 +338,25 @@ theorem localStepSoundOfActive
       cases hStep with
       | while_true hCond =>
           have hStore :
-              σ ∈ gammaStoreOf d.scalarDomain.gamma (assumeTrueStoreOf d cond (κ (.while cond body))) :=
-            mem_gammaStoreOf_assumeTrueStoreOf d hσ hCond
+              σ ∈ gammaStoreOf d.scalarDomain.gamma (filterTrueStoreOf d cond (κ (.while cond body))) :=
+            mem_gammaStoreOf_filterTrueStoreOf d hσ hCond
           have hRoot :
               (.seq body (.while cond body), σ) ∈
                 gammaProgram d (.while cond body)
                   (singletonConfig (.seq body (.while cond body))
-                    (assumeTrueStoreOf d cond (κ (.while cond body)))) := by
+                    (filterTrueStoreOf d cond (κ (.while cond body)))) := by
             refine ⟨ActiveIn.whileBody (ActiveIn.self body), ?_⟩
             simpa [singletonConfig] using hStore
           simpa [transferProgram] using hRoot
       | while_false hCond =>
           have hStore :
-              σ ∈ gammaStoreOf d.scalarDomain.gamma (assumeFalseStoreOf d cond (κ (.while cond body))) :=
-            mem_gammaStoreOf_assumeFalseStoreOf d hσ hCond
+              σ ∈ gammaStoreOf d.scalarDomain.gamma (filterFalseStoreOf d cond (κ (.while cond body))) :=
+            mem_gammaStoreOf_filterFalseStoreOf d hσ hCond
           have hRoot :
               (.skip, σ) ∈
                 gammaProgram d (.while cond body)
                   (singletonConfig .skip
-                    (assumeFalseStoreOf d cond (κ (.while cond body)))) := by
+                    (filterFalseStoreOf d cond (κ (.while cond body)))) := by
             refine ⟨ActiveIn.whileDone, ?_⟩
             simpa [singletonConfig] using hStore
           simpa [transferProgram] using hRoot

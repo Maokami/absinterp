@@ -1,5 +1,5 @@
 import Cslib.Init
-import AbsInterp.Framework.Domains.Gamma
+import AbsInterp.Framework.Domains
 
 namespace AbsInterp
 namespace Domains
@@ -246,8 +246,8 @@ theorem addTransfer_sound
     simp [gammaSign, addTransfer] at hm hn ⊢ <;>
     omega
 
-/-- Refine a sign by assuming the concrete value is nonzero. -/
-def assumeNonzero : Sign -> Sign
+/-- Filter a sign by keeping only nonzero concrete values. -/
+def filterNonzeroSign : Sign -> Sign
   | .bot => .bot
   | .neg => .neg
   | .zero => .bot
@@ -256,8 +256,8 @@ def assumeNonzero : Sign -> Sign
   | .nonneg => .pos
   | .top => .top
 
-/-- Refine a sign by assuming the concrete value is exactly zero. -/
-def assumeZero : Sign -> Sign
+/-- Filter a sign by keeping only the concrete value zero. -/
+def filterZeroSign : Sign -> Sign
   | .bot => .bot
   | .neg => .bot
   | .zero => .zero
@@ -266,26 +266,42 @@ def assumeZero : Sign -> Sign
   | .nonneg => .zero
   | .top => .zero
 
-/-- `assumeNonzero` is sound for a concrete witness known to be nonzero. -/
-theorem assumeNonzero_sound
+/-- `filterNonzeroSign` is sound for a concrete witness known to be nonzero. -/
+theorem filterNonzeroSign_sound
     {a : Sign}
     {n : Int}
     (hn : n ∈ gammaSign a)
     (hNe : n ≠ 0) :
-    n ∈ gammaSign (assumeNonzero a) := by
+    n ∈ gammaSign (filterNonzeroSign a) := by
   cases a <;>
-    simp [gammaSign, assumeNonzero] at hn ⊢ <;>
+    simp [gammaSign, filterNonzeroSign] at hn ⊢ <;>
     omega
 
-/-- `assumeZero` is sound for a concrete witness known to be zero. -/
-theorem assumeZero_sound
+/-- `filterNonzeroSign` is reductive. -/
+theorem filterNonzeroSign_reductive :
+    AbsInterp.Framework.Domains.ReductiveFilter filterNonzeroSign := by
+  intro a n hn
+  cases a <;>
+    simp [gammaSign, filterNonzeroSign] at hn ⊢ <;>
+    omega
+
+/-- `filterZeroSign` is sound for a concrete witness known to be zero. -/
+theorem filterZeroSign_sound
     {a : Sign}
     {n : Int}
     (hn : n ∈ gammaSign a)
     (hZero : n = 0) :
-    n ∈ gammaSign (assumeZero a) := by
+    n ∈ gammaSign (filterZeroSign a) := by
   cases a <;>
-    simp [gammaSign, assumeZero] at hn ⊢ <;>
+    simp [gammaSign, filterZeroSign] at hn ⊢ <;>
+    omega
+
+/-- `filterZeroSign` is reductive. -/
+theorem filterZeroSign_reductive :
+    AbsInterp.Framework.Domains.ReductiveFilter filterZeroSign := by
+  intro a n hn
+  cases a <;>
+    simp [gammaSign, filterZeroSign] at hn ⊢ <;>
     omega
 
 /-- Meet (greatest lower bound) on signs. -/
@@ -306,52 +322,91 @@ theorem meetSign_sound
     simp [gammaSign, meetSign, signOfFlags, hasNeg, hasZero, hasPos] at ha hb ⊢ <;>
     omega
 
-/-- Backward refinement for addition under nonzero constraint. -/
-def assumeNonzeroAddSign (a₁ a₂ : Sign) : Sign × Sign :=
+/-- `meetSign` is reductive in both arguments. -/
+theorem meetSign_reductive (a b : Sign) :
+    meetSign a b ≤ a ∧ meetSign a b ≤ b := by
+  constructor
+  · intro n hn
+    cases a <;> cases b <;>
+      simp [gammaSign, meetSign, signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
+      omega
+  · intro n hn
+    cases a <;> cases b <;>
+      simp [gammaSign, meetSign, signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
+      omega
+
+/-- Backward operator for addition under a nonzero-result constraint. -/
+def backwardAddNonzeroSign (a₁ a₂ : Sign) : Sign × Sign :=
   if a₁ = .bot ∨ a₂ = .bot then (.bot, .bot)
   else match a₂ with
-  | .zero => (assumeNonzero a₁, a₂)
+  | .zero => (filterNonzeroSign a₁, a₂)
   | _ => match a₁ with
-    | .zero => (a₁, assumeNonzero a₂)
+    | .zero => (a₁, filterNonzeroSign a₂)
     | _ => (a₁, a₂)
 
-/-- `assumeNonzeroAddSign` is sound. -/
-theorem assumeNonzeroAddSign_sound
+/-- `backwardAddNonzeroSign` is sound. -/
+theorem backwardAddNonzeroSign_sound
     {a₁ a₂ : Sign}
     {v₁ v₂ : Int}
     (h₁ : v₁ ∈ gammaSign a₁)
     (h₂ : v₂ ∈ gammaSign a₂)
     (hNe : v₁ + v₂ ≠ 0) :
-    v₁ ∈ gammaSign (assumeNonzeroAddSign a₁ a₂).1 ∧
-    v₂ ∈ gammaSign (assumeNonzeroAddSign a₁ a₂).2 := by
+    v₁ ∈ gammaSign (backwardAddNonzeroSign a₁ a₂).1 ∧
+    v₂ ∈ gammaSign (backwardAddNonzeroSign a₁ a₂).2 := by
   cases a₁ <;> cases a₂ <;>
-    simp [gammaSign, assumeNonzeroAddSign, assumeNonzero] at h₁ h₂ ⊢ <;>
+    simp [gammaSign, backwardAddNonzeroSign, filterNonzeroSign] at h₁ h₂ ⊢ <;>
     omega
 
-/-- Backward refinement for addition under zero constraint. -/
-def assumeZeroAddSign (a₁ a₂ : Sign) : Sign × Sign :=
+/-- `backwardAddNonzeroSign` is reductive. -/
+theorem backwardAddNonzeroSign_reductive :
+    AbsInterp.Framework.Domains.ReductiveBackwardOperator backwardAddNonzeroSign := by
+  intro a₁ a₂
+  constructor <;> intro n hn
+  · cases a₁ <;> cases a₂ <;>
+      simp [gammaSign, backwardAddNonzeroSign, filterNonzeroSign] at hn ⊢ <;>
+      omega
+  · cases a₁ <;> cases a₂ <;>
+      simp [gammaSign, backwardAddNonzeroSign, filterNonzeroSign] at hn ⊢ <;>
+      omega
+
+/-- Backward operator for addition under a zero-result constraint. -/
+def backwardAddZeroSign (a₁ a₂ : Sign) : Sign × Sign :=
   ( match a₂ with
-    | .bot => .bot | .zero => assumeZero a₁ | .pos => meetSign a₁ .neg
+    | .bot => .bot | .zero => filterZeroSign a₁ | .pos => meetSign a₁ .neg
     | .neg => meetSign a₁ .pos | .nonneg => meetSign a₁ .nonpos
     | .nonpos => meetSign a₁ .nonneg | .top => a₁
   , match a₁ with
-    | .bot => .bot | .zero => assumeZero a₂ | .pos => meetSign a₂ .neg
+    | .bot => .bot | .zero => filterZeroSign a₂ | .pos => meetSign a₂ .neg
     | .neg => meetSign a₂ .pos | .nonneg => meetSign a₂ .nonpos
     | .nonpos => meetSign a₂ .nonneg | .top => a₂ )
 
-/-- `assumeZeroAddSign` is sound. -/
-theorem assumeZeroAddSign_sound
+/-- `backwardAddZeroSign` is sound. -/
+theorem backwardAddZeroSign_sound
     {a₁ a₂ : Sign}
     {v₁ v₂ : Int}
     (h₁ : v₁ ∈ gammaSign a₁)
     (h₂ : v₂ ∈ gammaSign a₂)
     (hZero : v₁ + v₂ = 0) :
-    v₁ ∈ gammaSign (assumeZeroAddSign a₁ a₂).1 ∧
-    v₂ ∈ gammaSign (assumeZeroAddSign a₁ a₂).2 := by
+    v₁ ∈ gammaSign (backwardAddZeroSign a₁ a₂).1 ∧
+    v₂ ∈ gammaSign (backwardAddZeroSign a₁ a₂).2 := by
   cases a₁ <;> cases a₂ <;>
-    simp [gammaSign, assumeZeroAddSign, assumeZero, meetSign,
+    simp [gammaSign, backwardAddZeroSign, filterZeroSign, meetSign,
           signOfFlags, hasNeg, hasZero, hasPos] at h₁ h₂ ⊢ <;>
     omega
+
+/-- `backwardAddZeroSign` is reductive. -/
+theorem backwardAddZeroSign_reductive :
+    AbsInterp.Framework.Domains.ReductiveBackwardOperator backwardAddZeroSign := by
+  intro a₁ a₂
+  constructor <;> intro n hn
+  · cases a₁ <;> cases a₂ <;>
+      simp [gammaSign, backwardAddZeroSign, filterZeroSign, meetSign,
+        signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
+      omega
+  · cases a₁ <;> cases a₂ <;>
+      simp [gammaSign, backwardAddZeroSign, filterZeroSign, meetSign,
+        signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
+      omega
 
 /-- Baseline unary transfer shape: abstract negation. -/
 def negTransfer : Sign -> Sign
@@ -394,13 +449,12 @@ theorem negTransfer_sound {a : Sign} {n : Int} (hn : n ∈ gammaSign a) :
       change True
       trivial
 
-/-- Gamma-only interface instance for the sign domain. -/
-def signGammaDomain :
-    AbsInterp.Framework.Domains.GammaDomain Sign Int where
+/-- Concretization-domain instance for the sign domain. -/
+def signConcretizationDomain :
+    AbsInterp.Framework.Domains.ConcretizationDomain Sign Int where
   gamma := gammaSign
   gamma_monotone := gammaSign_monotone_of_leSign
   gamma_top := gammaSign_top
-  join_sound := joinSign_sound
 
 end Domains
 end AbsInterp

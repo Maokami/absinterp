@@ -48,7 +48,7 @@ theorem soundTrace_of_soundStep
     {Label : Type v}
     {Abstract : Type w}
     {stepPost : Label -> Post State}
-    {gamma : Gamma Abstract State}
+    {gamma : Concretization Abstract State}
     {stepPostSharp : StepPostSharp Abstract Label}
     (hStep : SoundStep stepPost gamma stepPostSharp)
     (hStepMono : ∀ label : Label, MonotonePost (stepPost label)) :

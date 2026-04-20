@@ -36,7 +36,7 @@ theorem LTSAbstraction.soundTraceLiftedOfExplicit
     {Label : Type v}
     {Abstract : Type w}
     (lts : Cslib.LTS State Label)
-    (gamma : Gamma Abstract State)
+    (gamma : Concretization Abstract State)
     (transfer : StepPostSharp Abstract Label)
     (soundStep : SoundStep (postStep lts) gamma transfer) :
     SoundTrace

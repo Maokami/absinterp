@@ -14,7 +14,7 @@ open AbsInterp.Instances.LTS
 
 universe u
 
-variable {A : Type u} [Bot A] [Preorder A] [OrderTop A] [SemilatticeSup A] (d : IMPAnalysisDomain A)
+variable {A : Type u} [Bot A] [SemilatticeSup A] [OrderTop A] (d : IMPAnalysisDomain A)
 
 /-!
 # Generic IMP Analysis Lemmas
@@ -24,8 +24,8 @@ These generalize the previously duplicated Sign and Interval lemma files.
 -/
 
 /-- Convenient alias for the lifted config domain. -/
-abbrev impConfigDomain (d : IMPAnalysisDomain A) : GammaDomain (ConfigSharp A) Config :=
-  configGammaDomain d.scalarDomain
+abbrev impConfigDomain (d : IMPAnalysisDomain A) : ConcretizationDomain (ConfigSharp A) Config :=
+  configConcretizationDomain d.scalarDomain
 
 @[simp] theorem mem_gammaStoreOf_botStoreSharp_of
     {σ : Store} :
@@ -69,7 +69,11 @@ theorem mem_gammaProgram_join_left_of
     (hc : c ∈ gammaProgram d program κ₁) :
     c ∈ gammaProgram d program (joinConfig d.scalarDomain κ₁ κ₂) := by
   rcases hc with ⟨hActive, hConf⟩
-  exact ⟨hActive, (impConfigDomain d).join_sound κ₁ κ₂ (Or.inl hConf)⟩
+  have hJoin :
+      gammaConfigOf d.scalarDomain.gamma κ₁ ∪ gammaConfigOf d.scalarDomain.gamma κ₂ ⊆
+        gammaConfigOf d.scalarDomain.gamma (joinConfig d.scalarDomain κ₁ κ₂) :=
+    ConcretizationDomain.gamma_union_subset_sup (cfg := impConfigDomain d) κ₁ κ₂
+  exact ⟨hActive, hJoin (Or.inl hConf)⟩
 
 theorem mem_gammaProgram_join_right_of
     {program : Stmt}
@@ -78,7 +82,11 @@ theorem mem_gammaProgram_join_right_of
     (hc : c ∈ gammaProgram d program κ₂) :
     c ∈ gammaProgram d program (joinConfig d.scalarDomain κ₁ κ₂) := by
   rcases hc with ⟨hActive, hConf⟩
-  exact ⟨hActive, (impConfigDomain d).join_sound κ₁ κ₂ (Or.inr hConf)⟩
+  have hJoin :
+      gammaConfigOf d.scalarDomain.gamma κ₁ ∪ gammaConfigOf d.scalarDomain.gamma κ₂ ⊆
+        gammaConfigOf d.scalarDomain.gamma (joinConfig d.scalarDomain κ₁ κ₂) :=
+    ConcretizationDomain.gamma_union_subset_sup (cfg := impConfigDomain d) κ₁ κ₂
+  exact ⟨hActive, hJoin (Or.inr hConf)⟩
 
 theorem mem_gammaProgram_seqLeft_of
     {s1 s2 : Stmt}
@@ -174,66 +182,78 @@ theorem mem_gammaStoreOf_refineAddStore
     (hσ : σ ∈ gammaStoreOf d.scalarDomain.gamma ρ)
     (h1 : eval σ e1 ∈ d.scalarDomain.gamma pair.1)
     (h2 : eval σ e2 ∈ d.scalarDomain.gamma pair.2) :
-    σ ∈ gammaStoreOf d.scalarDomain.gamma (refineAddStore ρ e1 e2 pair) := by
+    σ ∈ gammaStoreOf d.scalarDomain.gamma (refineAddStore d ρ e1 e2 pair) := by
   cases e1 with
   | var x =>
-      simp only [refineAddStore]
       cases e2 with
       | var y =>
-          exact mem_gammaStoreOf_refineVar d (mem_gammaStoreOf_refineVar d hσ h1) h2
-      | _ => exact mem_gammaStoreOf_refineVar d hσ h1
+          by_cases hEq : x = y
+          · subst hEq
+            simp only [refineAddStore]
+            exact mem_gammaStoreOf_refineVar d hσ
+              (d.intersect_sound (by simpa [eval] using h1) (by simpa [eval] using h2))
+          · simp only [refineAddStore, hEq]
+            exact mem_gammaStoreOf_refineVar d
+              (mem_gammaStoreOf_refineVar d hσ (by simpa [eval] using h1))
+              (by simpa [eval] using h2)
+      | _ =>
+          simp only [refineAddStore]
+          exact mem_gammaStoreOf_refineVar d hσ (by simpa [eval] using h1)
   | _ =>
-      simp only [refineAddStore]
       cases e2 with
-      | var y => exact mem_gammaStoreOf_refineVar d hσ h2
-      | _ => exact hσ
+      | var y =>
+          simp only [refineAddStore]
+          exact mem_gammaStoreOf_refineVar d hσ (by simpa [eval] using h2)
+      | _ =>
+          simp only [refineAddStore]
+          exact hσ
 
-theorem mem_gammaStoreOf_assumeTrueStoreOf
+theorem mem_gammaStoreOf_filterTrueStoreOf
     {cond : Expr}
     {ρ : StoreSharp A}
     {σ : Store}
     (hσ : σ ∈ gammaStoreOf d.scalarDomain.gamma ρ)
     (hCond : eval σ cond ≠ 0) :
-    σ ∈ gammaStoreOf d.scalarDomain.gamma (assumeTrueStoreOf d cond ρ) := by
+    σ ∈ gammaStoreOf d.scalarDomain.gamma (filterTrueStoreOf d cond ρ) := by
   cases cond with
   | lit n =>
       have hNe : n ≠ 0 := by simpa using hCond
-      simpa [assumeTrueStoreOf, hNe] using hσ
+      simpa [filterTrueStoreOf, hNe] using hσ
   | var x =>
       intro y
       by_cases hEq : x = y
       · subst hEq
-        simp [assumeTrueStoreOf, updateStoreSharp]
-        exact d.assumeNonzero_sound (hσ x) hCond
-      · simp [assumeTrueStoreOf, updateStoreSharp, hEq, hσ y]
+        simp [filterTrueStoreOf, updateStoreSharp]
+        exact d.filterNonzero_sound (hσ x) hCond
+      · simp [filterTrueStoreOf, updateStoreSharp, hEq, hσ y]
   | add e1 e2 =>
-      simp only [assumeTrueStoreOf]
-      have hPair := d.assumeNonzeroAdd_sound
+      simp only [filterTrueStoreOf]
+      have hPair := d.backwardAddNonzero_sound
         (evalExpr_sound d hσ (e := e1)) (evalExpr_sound d hσ (e := e2))
         (by simpa [eval] using hCond)
       exact mem_gammaStoreOf_refineAddStore d hσ hPair.1 hPair.2
 
-theorem mem_gammaStoreOf_assumeFalseStoreOf
+theorem mem_gammaStoreOf_filterFalseStoreOf
     {cond : Expr}
     {ρ : StoreSharp A}
     {σ : Store}
     (hσ : σ ∈ gammaStoreOf d.scalarDomain.gamma ρ)
     (hCond : eval σ cond = 0) :
-    σ ∈ gammaStoreOf d.scalarDomain.gamma (assumeFalseStoreOf d cond ρ) := by
+    σ ∈ gammaStoreOf d.scalarDomain.gamma (filterFalseStoreOf d cond ρ) := by
   cases cond with
   | lit n =>
       have hZero : n = 0 := by simpa using hCond
-      simpa [assumeFalseStoreOf, hZero] using hσ
+      simpa [filterFalseStoreOf, hZero] using hσ
   | var x =>
       intro y
       by_cases hEq : x = y
       · subst hEq
-        simp [assumeFalseStoreOf, updateStoreSharp]
-        exact d.assumeZero_sound (hσ x) hCond
-      · simp [assumeFalseStoreOf, updateStoreSharp, hEq, hσ y]
+        simp [filterFalseStoreOf, updateStoreSharp]
+        exact d.filterZero_sound (hσ x) hCond
+      · simp [filterFalseStoreOf, updateStoreSharp, hEq, hσ y]
   | add e1 e2 =>
-      simp only [assumeFalseStoreOf]
-      have hPair := d.assumeZeroAdd_sound
+      simp only [filterFalseStoreOf]
+      have hPair := d.backwardAddZero_sound
         (evalExpr_sound d hσ (e := e1)) (evalExpr_sound d hσ (e := e2))
         (by simpa [eval] using hCond)
       exact mem_gammaStoreOf_refineAddStore d hσ hPair.1 hPair.2

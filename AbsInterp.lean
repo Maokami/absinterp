@@ -3,9 +3,11 @@ import AbsInterp.Domains.Interval
 import AbsInterp.Domains.Parity
 import AbsInterp.Domains.Sign
 import AbsInterp.Framework
+import AbsInterp.Framework.Concretization
 import AbsInterp.Framework.Domains
 import AbsInterp.Framework.Domains.Backward
-import AbsInterp.Framework.Domains.Gamma
+import AbsInterp.Framework.Domains.Concretization
+import AbsInterp.Framework.Domains.Interop.GaloisConnection
 import AbsInterp.Framework.Iteration
 import AbsInterp.Framework.Iteration.Collecting
 import AbsInterp.Framework.Iteration.NatIter

@@ -97,7 +97,7 @@ theorem sound_iterateNat_of_sound
     {State : Type u}
     {Abstract : Type _}
     {next : Post State}
-    {gamma : Gamma Abstract State}
+    {gamma : Concretization Abstract State}
     {nextSharp : PostSharp Abstract}
     (hSound : Sound next gamma nextSharp)
     (hMono : MonotonePost next) :

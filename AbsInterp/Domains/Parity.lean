@@ -1,5 +1,5 @@
 import Cslib.Init
-import AbsInterp.Framework.Domains.Gamma
+import AbsInterp.Framework.Domains
 
 namespace AbsInterp
 namespace Domains
@@ -95,12 +95,11 @@ instance : SemilatticeSup Parity where
   le_sup_right := joinParity_le_right
   sup_le _ _ _ ha hb := joinParity_le_of_le ha hb
 
-/-- The complete gamma-only domain instance for Parity. -/
-def parityGammaDomain : GammaDomain Parity Int where
+/-- The complete concretization-domain instance for Parity. -/
+def parityConcretizationDomain : ConcretizationDomain Parity Int where
   gamma := gammaParity
   gamma_monotone := gammaParity_monotone
   gamma_top := fun _ => Set.mem_univ _
-  join_sound := joinParity_sound
 
 /-- Abstract a concrete integer constant by its parity. -/
 def constParity (n : Int) : Parity :=
@@ -129,29 +128,59 @@ theorem addParityTransfer_sound
   cases a <;> cases b <;> simp_all [addParityTransfer, gammaParity]
   all_goals omega
 
-/-- Refine a parity value under a nonzero assumption (identity — parity cannot refine). -/
-def assumeNonzeroParity : Parity → Parity := id
+/-- Intersection on the parity lattice. -/
+def intersectParity : Parity → Parity → Parity
+  | .bot, _ => .bot
+  | _, .bot => .bot
+  | .top, a => a
+  | a, .top => a
+  | .even, .even => .even
+  | .odd, .odd => .odd
+  | _, _ => .bot
 
-theorem assumeNonzeroParity_sound
+theorem intersectParity_sound
+    {a b : Parity} {n : Int}
+    (ha : n ∈ gammaParity a)
+    (hb : n ∈ gammaParity b) :
+    n ∈ gammaParity (intersectParity a b) := by
+  cases a <;> cases b <;> simp [intersectParity, gammaParity] at ha hb ⊢ <;> omega
+
+theorem intersectParity_reductive (a b : Parity) :
+    intersectParity a b ≤ a ∧ intersectParity a b ≤ b := by
+  cases a <;> cases b <;> simp [LE.le, leParity, intersectParity]
+
+/-- Filter a parity value under a nonzero assumption (identity — parity cannot refine). -/
+def filterNonzeroParity : Parity → Parity := id
+
+theorem filterNonzeroParity_sound
     {a : Parity} {n : Int}
     (hn : n ∈ gammaParity a)
     (_ : n ≠ 0) :
-    n ∈ gammaParity (assumeNonzeroParity a) := hn
+    n ∈ gammaParity (filterNonzeroParity a) := hn
 
-/-- Refine a parity value under a zero assumption. -/
-def assumeZeroParity : Parity → Parity
+theorem filterNonzeroParity_reductive :
+    AbsInterp.Framework.Domains.ReductiveFilter filterNonzeroParity :=
+  AbsInterp.Framework.Domains.ReductiveFilter.id
+
+/-- Filter a parity value under a zero assumption. -/
+def filterZeroParity : Parity → Parity
   | .bot => .bot
   | .even => .even
   | .odd => .bot
   | .top => .even
 
-theorem assumeZeroParity_sound
+theorem filterZeroParity_sound
     {a : Parity} {n : Int}
     (hn : n ∈ gammaParity a)
     (hZero : n = 0) :
-    n ∈ gammaParity (assumeZeroParity a) := by
+    n ∈ gammaParity (filterZeroParity a) := by
   subst hZero
-  cases a <;> simp_all [assumeZeroParity, gammaParity]
+  cases a <;> simp_all [filterZeroParity, gammaParity]
+
+theorem filterZeroParity_reductive :
+    AbsInterp.Framework.Domains.ReductiveFilter filterZeroParity := by
+  intro a
+  cases a <;> simp [LE.le, leParity, filterZeroParity]
 
 end Domains
 end AbsInterp

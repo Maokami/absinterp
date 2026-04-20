@@ -22,7 +22,7 @@ theorem Sound.compose
     {State : Type u}
     {Abstract : Type v}
     {post1 post2 : Post State}
-    {gamma : Gamma Abstract State}
+    {gamma : Concretization Abstract State}
     {postSharp1 postSharp2 : PostSharp Abstract}
     (h1 : Sound post1 gamma postSharp1)
     (h2 : Sound post2 gamma postSharp2)

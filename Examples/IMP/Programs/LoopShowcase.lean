@@ -16,14 +16,14 @@ while x0 do
 
 ## Approach
 
-The abstract loop body transfer `loopBodySign` applies `assumeNonzero`
+The abstract loop body transfer `loopBodySign` applies `filterNonzeroSign`
 (loop condition) then `addTransfer _ neg` (decrement). The full loop
 transfer `loopTransferSign` joins the initial entry (`pos` from `x0 := 5`)
 with the body result.
 
 Iterating: `bot → pos → top → top` (fixpoint). We prove `top` is a
 post-fixpoint and that it is sound w.r.t. the concrete loop body. After
-the loop-exit condition `x0 = 0`, backward refinement via `assumeZero`
+the loop-exit condition `x0 = 0`, filtering via `filterZeroSign`
 yields `zero`, proving that any terminating execution has `x0 = 0`.
 
 ## Axiom note
@@ -50,7 +50,7 @@ def loopShowcase : Stmt :=
 
 /-- Abstract loop body: assume `x0 ≠ 0` (loop condition), then `x0 := x0 + (-1)`. -/
 def loopBodySign (a : Sign) : Sign :=
-  addTransfer (assumeNonzero a) (constSign (-1))
+  addTransfer (filterNonzeroSign a) (constSign (-1))
 
 /-- Full loop transfer: join of initial entry (`pos` from `x0 := 5`) with body result. -/
 def loopTransferSign (a : Sign) : Sign :=
@@ -78,7 +78,7 @@ theorem loopBodySign_sound
     (hn : n ∈ gammaSign a)
     (hNz : n ≠ 0) :
     n + (-1) ∈ gammaSign (loopBodySign a) :=
-  addTransfer_sound (assumeNonzero_sound hn hNz) (constSign_sound (-1))
+  addTransfer_sound (filterNonzeroSign_sound hn hNz) (constSign_sound (-1))
 
 /-- The full loop transfer is sound w.r.t. concrete semantics.
     For any `n ∈ γ(a)`: the initial value 5 and the body result `n-1`
@@ -102,7 +102,7 @@ concrete program property. -/
 
 /-- After loop exit, the abstract value is `zero`. -/
 theorem loopShowcase_exit_abstract :
-    assumeZero loopPfp = Sign.zero := rfl
+    filterZeroSign loopPfp = Sign.zero := rfl
 
 /-- At loop exit (`x0 = 0`), the analysis proves `x0 ∈ {0}`.
     Any execution that terminates the countdown loop has `x0 = 0`. -/
@@ -111,6 +111,6 @@ theorem loopShowcase_exit_x0_zero
     (hInv : n ∈ gammaSign loopPfp)
     (hExit : n = 0) :
     n ∈ gammaSign .zero :=
-  assumeZero_sound hInv hExit
+  filterZeroSign_sound hInv hExit
 
 end Examples.IMP.Programs

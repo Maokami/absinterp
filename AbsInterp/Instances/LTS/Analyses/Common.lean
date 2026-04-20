@@ -19,7 +19,7 @@ abbrev ReadGamma
     (Abstract : Type u)
     (Observation : Type v)
     (State : Type w) :=
-  (State -> Observation) -> Gamma Abstract State
+  (State -> Observation) -> Concretization Abstract State
 
 /-- Lift a concretization through a state observation function. -/
 def gammaStateOfRead
