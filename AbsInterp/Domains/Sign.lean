@@ -114,6 +114,10 @@ instance : OrderTop Sign where
   top := .top
   le_top _ := Set.subset_univ _
 
+instance : OrderBot Sign where
+  bot := .bot
+  bot_le _ := fun _ hn => by simp [gammaSign] at hn
+
 theorem gammaSign_monotone_of_leSign ⦃a b : Sign⦄ (hAB : a ≤ b) :
     gammaSign a ⊆ gammaSign b :=
   hAB

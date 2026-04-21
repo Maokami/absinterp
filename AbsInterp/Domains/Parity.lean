@@ -61,6 +61,10 @@ instance : OrderTop Parity where
   top := .top
   le_top a := by cases a <;> simp [leParity, LE.le]
 
+instance : OrderBot Parity where
+  bot := .bot
+  bot_le a := by cases a <;> simp [LE.le, leParity]
+
 theorem gammaParity_monotone : ∀ ⦃a b : Parity⦄, leParity a b → gammaParity a ⊆ gammaParity b := by
   intro a b hab; cases a <;> cases b <;> simp_all [leParity, gammaParity, Set.subset_univ]
 
