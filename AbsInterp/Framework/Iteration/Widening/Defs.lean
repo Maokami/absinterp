@@ -1,5 +1,7 @@
 import Init.SizeOf
 
+import AbsInterp.Framework.Iteration.Fixpoint.Defs
+
 namespace AbsInterp
 namespace Framework
 namespace Iteration
@@ -11,14 +13,6 @@ abbrev Widen (Abstract : Type u) := Abstract -> Abstract -> Abstract
 
 /-- Narrowing interface for abstract iterative solvers. -/
 abbrev Narrow (Abstract : Type u) := Abstract -> Abstract -> Abstract
-
-/-- Post-fixpoint property: `f(a) ⊑ a`. -/
-def IsPostFixpoint
-    {Abstract : Type u}
-    (le : Abstract -> Abstract -> Prop)
-    (f : Abstract -> Abstract)
-    (a : Abstract) : Prop :=
-  le (f a) a
 
 /-- Widening upper-bound contract: `widen a b` is above both `a` and `b`. -/
 structure WidenUpperBound

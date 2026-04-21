@@ -11,7 +11,10 @@ open AbsInterp.Framework.Iteration
 /-! # Flat3 smoke test for widening/narrowing interfaces
 
 A toy 3-element flat lattice `{bot, mid, top}` exercising
-`WAcc`, `witer`, `pfp`, `IsPostFixpoint`, and `sound_of_isPostFixpoint`.
+`WAcc`, `witer`, `pfp`, `IsPostFixpoint`, `sound_of_isPostFixpoint`,
+and the collecting/omega bridge corollaries
+`kleeneNat_subset_of_isPostFixpoint` and
+`omegaReachable_subset_of_isPostFixpoint`.
 
 The `pfp_eq_top` theorem uses `native_decide` to compute the widening
 result. This is test-only code; the upstream soundness path is
@@ -131,6 +134,38 @@ example : ∀ n, iterateNat post (gamma .top) n ⊆ gamma .top := by
     post_sound post_monotone
     (fun h => gamma_mono h)
   simp [IsPostFixpoint, le]
+
+/-! ## Fixpoint → collecting/omega bridge exercised on Flat3
+
+Package `post` as a `CollectingStep`, then use the reachF-level soundness
+of the constant-top abstract transfer to push through to `kleeneNat` and
+`omegaReachable` conclusions. -/
+
+/-- Collecting step wrapper for the Flat3 concrete post. -/
+def collecting : CollectingStep Nat where
+  post := post
+  monotone := post_monotone
+
+/-- Abstract reachF transfer: constantly `.top`. The post-fixpoint condition
+    is trivial because `gamma .top = Set.univ` absorbs the initial set. -/
+theorem reachF_sound (init : Set Nat) :
+    Sound (collecting.reachF init) gamma (fun _ => Flat3.top) := by
+  intro a s _; exact Set.mem_univ s
+
+/-- `.top` is a post-fixpoint of the constant-top abstract transfer. -/
+theorem reachSharp_postFixpoint :
+    IsPostFixpoint le (fun _ : Flat3 => Flat3.top) .top := by
+  simp [IsPostFixpoint, le]
+
+/-- Bridge: every finite Kleene iterate of collecting from `{0}` is in `gamma .top`. -/
+example : ∀ n, collecting.kleeneNat {0} n ⊆ gamma .top :=
+  kleeneNat_subset_of_isPostFixpoint collecting {0}
+    (reachF_sound {0}) (fun h => gamma_mono h) reachSharp_postFixpoint
+
+/-- Bridge: every ω-reachable state from `{0}` is in `gamma .top`. -/
+example : omegaReachable collecting {0} ⊆ gamma .top :=
+  omegaReachable_subset_of_isPostFixpoint collecting {0}
+    (reachF_sound {0}) (fun h => gamma_mono h) reachSharp_postFixpoint
 
 end Flat3
 
