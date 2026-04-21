@@ -100,14 +100,17 @@ theorem sound_reachTransfer
       cfg.domain.gamma
       (cfg.reachTransfer initAbs) := by
   intro a s hs
-  have hUnion :
-      cfg.domain.gamma initAbs ∪ cfg.domain.gamma (cfg.transferAny a) ⊆
-        cfg.domain.gamma (initAbs ⊔ cfg.transferAny a) :=
-    ConcretizationDomain.gamma_union_subset_sup cfg.domain
-      initAbs (cfg.transferAny a)
   rcases hs with hInitMem | hPostMem
-  · exact hUnion (Or.inl (hInit hInitMem))
-  · exact hUnion (Or.inr (cfg.soundAny a hPostMem))
+  ·
+    have hLeft : initAbs ≤ cfg.reachTransfer initAbs a := by
+      change initAbs ≤ initAbs ⊔ cfg.transferAny a
+      exact le_sup_left
+    exact cfg.domain.gamma_monotone hLeft (hInit hInitMem)
+  ·
+    have hRight : cfg.transferAny a ≤ cfg.reachTransfer initAbs a := by
+      change cfg.transferAny a ≤ initAbs ⊔ cfg.transferAny a
+      exact le_sup_right
+    exact cfg.domain.gamma_monotone hRight (cfg.soundAny a hPostMem)
 
 end LTSCollectingAbstraction
 
