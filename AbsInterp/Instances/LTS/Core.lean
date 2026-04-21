@@ -6,3 +6,5 @@ import AbsInterp.Instances.LTS.Semantics.Weak
 import AbsInterp.Instances.LTS.Semantics.Omega
 import AbsInterp.Instances.LTS.Instantiation.Interface
 import AbsInterp.Instances.LTS.Instantiation.Soundness
+import AbsInterp.Instances.LTS.Instantiation.CollectingInterface
+import AbsInterp.Instances.LTS.Instantiation.CollectingSoundness
