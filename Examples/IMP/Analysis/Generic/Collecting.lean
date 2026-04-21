@@ -40,30 +40,22 @@ def transferAnyProgram (d : IMPAnalysisDomain A) :
   | .assign x e, κ =>
       transferProgram d (.assign x e) .assign κ
   | .seq s1 s2, κ =>
-      joinConfig d.scalarDomain
-        (liftSeqConfig s2 (transferAnyProgram d s1 (seqView s2 κ)))
-        (joinConfig d.scalarDomain
-          (singletonConfig s2 ((seqView s2 κ) .skip))
-          (transferAnyProgram d s2 κ))
+      liftSeqConfig s2 (transferAnyProgram d s1 (seqView s2 κ)) ⊔
+        (singletonConfig s2 ((seqView s2 κ) .skip) ⊔
+          transferAnyProgram d s2 κ)
   | .ite cond s1 s2, κ =>
-      joinConfig d.scalarDomain
-        (singletonConfig s1 (filterTrueStoreOf d cond (κ (.ite cond s1 s2))))
-        (joinConfig d.scalarDomain
-          (singletonConfig s2 (filterFalseStoreOf d cond (κ (.ite cond s1 s2))))
-          (joinConfig d.scalarDomain
-            (transferAnyProgram d s1 κ)
-            (transferAnyProgram d s2 κ)))
+      singletonConfig s1 (filterTrueStoreOf d cond (κ (.ite cond s1 s2))) ⊔
+        (singletonConfig s2 (filterFalseStoreOf d cond (κ (.ite cond s1 s2))) ⊔
+          (transferAnyProgram d s1 κ ⊔
+            transferAnyProgram d s2 κ))
   | .while cond body, κ =>
-      joinConfig d.scalarDomain
-        (singletonConfig (.seq body (.while cond body))
-          (filterTrueStoreOf d cond (κ (.while cond body))))
-        (joinConfig d.scalarDomain
-          (singletonConfig .skip (filterFalseStoreOf d cond (κ (.while cond body))))
-          (joinConfig d.scalarDomain
-            (liftSeqConfig (.while cond body)
-              (transferAnyProgram d body (seqView (.while cond body) κ)))
-            (singletonConfig (.while cond body)
-              ((seqView (.while cond body) κ) .skip))))
+      singletonConfig (.seq body (.while cond body))
+          (filterTrueStoreOf d cond (κ (.while cond body))) ⊔
+        (singletonConfig .skip (filterFalseStoreOf d cond (κ (.while cond body))) ⊔
+          (liftSeqConfig (.while cond body)
+            (transferAnyProgram d body (seqView (.while cond body) κ)) ⊔
+            singletonConfig (.while cond body)
+              ((seqView (.while cond body) κ) .skip)))
 
 /-- Package the unlabeled collecting transfer as a framework one-step transformer. -/
 def impCollectingTransfer (d : IMPAnalysisDomain A) (program : Stmt) :
@@ -115,41 +107,41 @@ theorem transferProgram_le_transferAnyProgram :
           simp only [transferProgram]
           have h := ih2 .assign κ s y
           refine le_trans h ?_
-          simp only [transferAnyProgram, joinConfig]
+          simp only [transferAnyProgram]
           exact le_sup_of_le_right (le_sup_of_le_right (le_refl _))
       | ifTrue =>
           intro s y
           simp only [transferProgram]
           have h := ih2 .ifTrue κ s y
           refine le_trans h ?_
-          simp only [transferAnyProgram, joinConfig]
+          simp only [transferAnyProgram]
           exact le_sup_of_le_right (le_sup_of_le_right (le_refl _))
       | ifFalse =>
           intro s y
           simp only [transferProgram]
           have h := ih2 .ifFalse κ s y
           refine le_trans h ?_
-          simp only [transferAnyProgram, joinConfig]
+          simp only [transferAnyProgram]
           exact le_sup_of_le_right (le_sup_of_le_right (le_refl _))
       | whileTrue =>
           intro s y
           simp only [transferProgram]
           have h := ih2 .whileTrue κ s y
           refine le_trans h ?_
-          simp only [transferAnyProgram, joinConfig]
+          simp only [transferAnyProgram]
           exact le_sup_of_le_right (le_sup_of_le_right (le_refl _))
       | whileFalse =>
           intro s y
           simp only [transferProgram]
           have h := ih2 .whileFalse κ s y
           refine le_trans h ?_
-          simp only [transferAnyProgram, joinConfig]
+          simp only [transferAnyProgram]
           exact le_sup_of_le_right (le_sup_of_le_right (le_refl _))
       | seqDone =>
           -- transferProgram = joinConfig (singletonConfig s2 ((seqView s2 κ) .skip)) (transferProgram d s2 .seqDone κ)
           -- transferAnyProgram = joinConfig (liftSeqConfig s2 (transferAnyProgram d s1 (seqView s2 κ))) (joinConfig (singletonConfig s2 ((seqView s2 κ) .skip)) (transferAnyProgram d s2 κ))
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           refine sup_le ?_ ?_
           · -- singletonConfig piece: directly a component of transferAnyProgram
             exact le_sup_of_le_right (le_sup_of_le_left (le_refl _))
@@ -161,7 +153,7 @@ theorem transferProgram_le_transferAnyProgram :
           -- transferProgram = joinConfig (liftSeqConfig s2 (transferProgram d s1 μ' (seqView s2 κ))) (transferProgram d s2 (.seqStep μ') κ)
           -- transferAnyProgram = joinConfig (liftSeqConfig s2 (transferAnyProgram d s1 (seqView s2 κ))) (...)
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           refine sup_le ?_ ?_
           · -- liftSeqConfig monotonicity + IH on s1
             have hs1 := ih1 μ' (seqView s2 κ)
@@ -176,7 +168,7 @@ theorem transferProgram_le_transferAnyProgram :
       cases μ with
       | ifTrue =>
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           refine sup_le ?_ (sup_le ?_ ?_)
           · exact le_sup_of_le_left (le_refl _)
           · have h := ih1 .ifTrue κ s y
@@ -187,7 +179,7 @@ theorem transferProgram_le_transferAnyProgram :
             exact le_sup_of_le_right (le_sup_of_le_right (le_sup_of_le_right (le_refl _)))
       | ifFalse =>
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           refine sup_le ?_ (sup_le ?_ ?_)
           · exact le_sup_of_le_right (le_sup_of_le_left (le_refl _))
           · have h := ih1 .ifFalse κ s y
@@ -198,7 +190,7 @@ theorem transferProgram_le_transferAnyProgram :
             exact le_sup_of_le_right (le_sup_of_le_right (le_sup_of_le_right (le_refl _)))
       | assign =>
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           refine sup_le ?_ ?_
           · have h := ih1 .assign κ s y
             refine le_trans h ?_
@@ -208,7 +200,7 @@ theorem transferProgram_le_transferAnyProgram :
             exact le_sup_of_le_right (le_sup_of_le_right (le_sup_of_le_right (le_refl _)))
       | seqStep μ' =>
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           refine sup_le ?_ ?_
           · have h := ih1 (.seqStep μ') κ s y
             refine le_trans h ?_
@@ -218,7 +210,7 @@ theorem transferProgram_le_transferAnyProgram :
             exact le_sup_of_le_right (le_sup_of_le_right (le_sup_of_le_right (le_refl _)))
       | seqDone =>
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           refine sup_le ?_ ?_
           · have h := ih1 .seqDone κ s y
             refine le_trans h ?_
@@ -228,7 +220,7 @@ theorem transferProgram_le_transferAnyProgram :
             exact le_sup_of_le_right (le_sup_of_le_right (le_sup_of_le_right (le_refl _)))
       | whileTrue =>
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           refine sup_le ?_ ?_
           · have h := ih1 .whileTrue κ s y
             refine le_trans h ?_
@@ -238,7 +230,7 @@ theorem transferProgram_le_transferAnyProgram :
             exact le_sup_of_le_right (le_sup_of_le_right (le_sup_of_le_right (le_refl _)))
       | whileFalse =>
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           refine sup_le ?_ ?_
           · have h := ih1 .whileFalse κ s y
             refine le_trans h ?_
@@ -251,21 +243,21 @@ theorem transferProgram_le_transferAnyProgram :
       cases μ with
       | whileTrue =>
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           exact le_sup_of_le_left (le_refl _)
       | whileFalse =>
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           exact le_sup_of_le_right (le_sup_of_le_left (le_refl _))
       | seqDone =>
           intro s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           exact le_sup_of_le_right (le_sup_of_le_right (le_sup_of_le_right (le_refl _)))
       | seqStep μ' =>
           intro s y
           have hBody := ih μ' (seqView (.while cond body) κ)
           have hLift := liftSeqConfig_mono (s2 := .while cond body) hBody s y
-          simp only [transferProgram, transferAnyProgram, joinConfig]
+          simp only [transferProgram, transferAnyProgram]
           refine le_trans hLift ?_
           exact le_sup_of_le_right (le_sup_of_le_right (le_sup_of_le_left (le_refl _)))
       | assign | ifTrue | ifFalse =>
@@ -332,14 +324,12 @@ theorem sound_impReachTransfer
   intro a c hc
   rcases hc with hInitMem | hPostMem
   · -- init contribution
-    have hLeft : initAbs ≤ impReachTransfer d program initAbs a := by
-      intro s x; exact le_sup_of_le_left (le_refl _)
+    have hLeft : initAbs ≤ impReachTransfer d program initAbs a := le_sup_left
     exact gammaProgram_monotone d hLeft program (hInit hInitMem)
   · -- postAny contribution
     have hSound : c ∈ gammaProgram d program (transferAnyProgram d program a) :=
       soundAny_imp d program a hPostMem
-    have hRight : transferAnyProgram d program a ≤ impReachTransfer d program initAbs a := by
-      intro s x; exact le_sup_of_le_right (le_refl _)
+    have hRight : transferAnyProgram d program a ≤ impReachTransfer d program initAbs a := le_sup_right
     exact gammaProgram_monotone d hRight program hSound
 
 /-- Specialisation of the generic Kleene-iterate bridge to IMP. -/
