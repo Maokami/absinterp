@@ -112,6 +112,10 @@ instance : OrderTop Interval where
   top := .top
   le_top _ := Set.subset_univ _
 
+instance : OrderBot Interval where
+  bot := .bot
+  bot_le _ := fun _ hn => by simp [gammaInterval] at hn
+
 theorem gammaInterval_monotone_of_leInterval ⦃a b : Interval⦄ (hAB : a ≤ b) :
     gammaInterval a ⊆ gammaInterval b :=
   hAB

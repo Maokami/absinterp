@@ -79,4 +79,41 @@ def impSignAbstraction (program : Stmt) :
     LTSAbstraction Config StepLabel (ConfigSharp Sign) :=
   impAbstraction signAnalysisDomain program
 
+/-! ## Collecting/fixpoint path -/
+
+/-- Unlabeled collecting transfer specialized to the Sign IMP analysis. -/
+def impSignCollectingTransfer (program : Stmt) :
+    PostSharp (ConfigSharp Sign) :=
+  impCollectingTransfer signAnalysisDomain program
+
+/-- Generic Sign IMP collecting soundness (unlabeled `postAny`). -/
+theorem soundAny_impSign (program : Stmt) :
+    Sound (postAny impLTS) (gammaProgramSign program) (impSignCollectingTransfer program) :=
+  soundAny_imp signAnalysisDomain program
+
+/-- Reach transfer over Sign IMP collecting, for a given abstract initial value. -/
+def impSignReachTransfer (program : Stmt) (initAbs : ConfigSharp Sign) :
+    PostSharp (ConfigSharp Sign) :=
+  impReachTransfer signAnalysisDomain program initAbs
+
+/-- Sign specialisation of the generic IMP ω-reachable bridge. -/
+theorem omegaReachableLTS_subset_of_isPostFixpoint_impSign
+    (program : Stmt) (init : Set Config)
+    (initAbs a : ConfigSharp Sign)
+    (hInit : init ⊆ gammaProgramSign program initAbs)
+    (hFix : AbsInterp.Framework.Iteration.IsPostFixpoint (· ≤ ·)
+      (impSignReachTransfer program initAbs) a) :
+    omegaReachableLTS impLTS init ⊆ gammaProgramSign program a :=
+  omegaReachableLTS_subset_of_isPostFixpoint_imp signAnalysisDomain program init initAbs a hInit hFix
+
+/-- Sign specialisation of the generic IMP Kleene-iterate bridge. -/
+theorem kleeneNat_subset_of_isPostFixpoint_impSign
+    (program : Stmt) (init : Set Config)
+    (initAbs a : ConfigSharp Sign)
+    (hInit : init ⊆ gammaProgramSign program initAbs)
+    (hFix : AbsInterp.Framework.Iteration.IsPostFixpoint (· ≤ ·)
+      (impSignReachTransfer program initAbs) a) :
+    ∀ n, (postAny_collectingStep impLTS).kleeneNat init n ⊆ gammaProgramSign program a :=
+  kleeneNat_subset_of_isPostFixpoint_imp signAnalysisDomain program init initAbs a hInit hFix
+
 end Examples.IMP

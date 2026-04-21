@@ -60,4 +60,41 @@ def impParityAbstraction (program : Stmt) :
     LTSAbstraction Config StepLabel (ConfigSharp Parity) :=
   impAbstraction parityAnalysisDomain program
 
+/-! ## Collecting/fixpoint path -/
+
+/-- Unlabeled collecting transfer specialized to the Parity IMP analysis. -/
+def impParityCollectingTransfer (program : Stmt) :
+    PostSharp (ConfigSharp Parity) :=
+  impCollectingTransfer parityAnalysisDomain program
+
+/-- Generic Parity IMP collecting soundness (unlabeled `postAny`). -/
+theorem soundAny_impParity (program : Stmt) :
+    Sound (postAny impLTS) (gammaProgramParity program) (impParityCollectingTransfer program) :=
+  soundAny_imp parityAnalysisDomain program
+
+/-- Reach transfer over Parity IMP collecting, for a given abstract initial value. -/
+def impParityReachTransfer (program : Stmt) (initAbs : ConfigSharp Parity) :
+    PostSharp (ConfigSharp Parity) :=
+  impReachTransfer parityAnalysisDomain program initAbs
+
+/-- Parity specialisation of the generic IMP ω-reachable bridge. -/
+theorem omegaReachableLTS_subset_of_isPostFixpoint_impParity
+    (program : Stmt) (init : Set Config)
+    (initAbs a : ConfigSharp Parity)
+    (hInit : init ⊆ gammaProgramParity program initAbs)
+    (hFix : AbsInterp.Framework.Iteration.IsPostFixpoint (· ≤ ·)
+      (impParityReachTransfer program initAbs) a) :
+    omegaReachableLTS impLTS init ⊆ gammaProgramParity program a :=
+  omegaReachableLTS_subset_of_isPostFixpoint_imp parityAnalysisDomain program init initAbs a hInit hFix
+
+/-- Parity specialisation of the generic IMP Kleene-iterate bridge. -/
+theorem kleeneNat_subset_of_isPostFixpoint_impParity
+    (program : Stmt) (init : Set Config)
+    (initAbs a : ConfigSharp Parity)
+    (hInit : init ⊆ gammaProgramParity program initAbs)
+    (hFix : AbsInterp.Framework.Iteration.IsPostFixpoint (· ≤ ·)
+      (impParityReachTransfer program initAbs) a) :
+    ∀ n, (postAny_collectingStep impLTS).kleeneNat init n ⊆ gammaProgramParity program a :=
+  kleeneNat_subset_of_isPostFixpoint_imp parityAnalysisDomain program init initAbs a hInit hFix
+
 end Examples.IMP

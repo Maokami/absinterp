@@ -69,4 +69,41 @@ def impIntervalAbstraction (program : Stmt) :
     LTSAbstraction Config StepLabel (ConfigSharp Interval) :=
   impAbstraction intervalAnalysisDomain program
 
+/-! ## Collecting/fixpoint path -/
+
+/-- Unlabeled collecting transfer specialized to the Interval IMP analysis. -/
+def impIntervalCollectingTransfer (program : Stmt) :
+    PostSharp (ConfigSharp Interval) :=
+  impCollectingTransfer intervalAnalysisDomain program
+
+/-- Generic Interval IMP collecting soundness (unlabeled `postAny`). -/
+theorem soundAny_impInterval (program : Stmt) :
+    Sound (postAny impLTS) (gammaProgramInterval program) (impIntervalCollectingTransfer program) :=
+  soundAny_imp intervalAnalysisDomain program
+
+/-- Reach transfer over Interval IMP collecting, for a given abstract initial value. -/
+def impIntervalReachTransfer (program : Stmt) (initAbs : ConfigSharp Interval) :
+    PostSharp (ConfigSharp Interval) :=
+  impReachTransfer intervalAnalysisDomain program initAbs
+
+/-- Interval specialisation of the generic IMP ω-reachable bridge. -/
+theorem omegaReachableLTS_subset_of_isPostFixpoint_impInterval
+    (program : Stmt) (init : Set Config)
+    (initAbs a : ConfigSharp Interval)
+    (hInit : init ⊆ gammaProgramInterval program initAbs)
+    (hFix : AbsInterp.Framework.Iteration.IsPostFixpoint (· ≤ ·)
+      (impIntervalReachTransfer program initAbs) a) :
+    omegaReachableLTS impLTS init ⊆ gammaProgramInterval program a :=
+  omegaReachableLTS_subset_of_isPostFixpoint_imp intervalAnalysisDomain program init initAbs a hInit hFix
+
+/-- Interval specialisation of the generic IMP Kleene-iterate bridge. -/
+theorem kleeneNat_subset_of_isPostFixpoint_impInterval
+    (program : Stmt) (init : Set Config)
+    (initAbs a : ConfigSharp Interval)
+    (hInit : init ⊆ gammaProgramInterval program initAbs)
+    (hFix : AbsInterp.Framework.Iteration.IsPostFixpoint (· ≤ ·)
+      (impIntervalReachTransfer program initAbs) a) :
+    ∀ n, (postAny_collectingStep impLTS).kleeneNat init n ⊆ gammaProgramInterval program a :=
+  kleeneNat_subset_of_isPostFixpoint_imp intervalAnalysisDomain program init initAbs a hInit hFix
+
 end Examples.IMP
