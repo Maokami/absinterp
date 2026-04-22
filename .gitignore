@@ -4,3 +4,9 @@
 /N40AI.pdf
 
 .vscode/
+
+# Nested Verso documentation project build artifacts.
+/site/.lake
+/site/lake-manifest.json
+/site/_out
+/site/_publish

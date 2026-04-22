@@ -7,23 +7,34 @@ The project has two linked goals:
 
 1. Build a reusable abstract interpretation framework in Lean 4, centered on
    CSLib's labeled transition system view of semantics.
-2. Validate that framework on a small but nontrivial language by implementing a
-   generic abstract interpreter for loop-free IMP over the canonical IMP LTS.
+2. Validate that framework on a small but nontrivial language by implementing
+   generic IMP adapters and case studies over the canonical IMP LTS, covering
+   both labeled trace soundness and unlabeled collecting/fixpoint reasoning.
 
 The long-term direction is to mature the reusable pieces toward upstream CSLib
 contribution, rather than treating this repository as a one-off example dump.
 
+For a layered design overview — goals, design principles, dependency structure,
+IMP's role as a validation adapter, and the upstream boundary — see
+[`docs/architecture.md`](docs/architecture.md).
+
+A web version of the architecture note, a reading guide, and a
+minimal talk deck live in the nested Verso project at [`site/`](site/).
+See [`site/README.md`](site/README.md) for local build instructions
+and the GitHub Pages publication path.
+
 ## What is in place
 
-- A reusable `gamma`-only domain interface, following the soundness-first
-  approach from Leroy's N40AI notes.
-- A framework layer for concrete/abstract transformers, trace lifting, and
-  soundness from one-step transformers to traces.
-- A CSLib-LTS instantiation layer that packages those abstractions for labeled
-  transition systems.
-- Concrete Sign and Interval domains.
-- A loop-free IMP example suite whose main case study is a generic Sign
-  analysis over the canonical labeled IMP LTS.
+- A reusable `ConcretizationDomain` kernel plus a capability layer
+  (`BottomConcretization`, `MeetLike`, `FilterOperator`,
+  `RelationalBackwardOperator`, transfer capabilities).
+- A framework layer for concrete/abstract transformers, trace lifting,
+  collecting semantics, fixpoint bridges, and widening.
+- A CSLib-LTS instantiation layer for both labeled trace abstractions and
+  unlabeled collecting abstractions.
+- Concrete Sign, Interval, and Parity domains.
+- An IMP example suite that exercises both the labeled trace path and the
+  collecting/fixpoint path, including a stronger Interval collecting showcase.
 
 ## Repository map
 
@@ -38,7 +49,10 @@ contribution, rather than treating this repository as a one-off example dump.
 - `Examples/IMP`
   IMP example suite.
   The main path is:
-  `Syntax`/`Semantics`/`LTS` -> `Analysis/Sign` -> `Programs/Showcase`.
+  `Syntax`/`Semantics`/`LTS`
+  -> `Analysis/Generic`
+  -> domain wrappers
+  -> `Programs/{Showcase,CollectingShowcase}`.
   Tutorial mini-examples live under `Programs/Tutorial`.
 - `Tests`
   Smoke tests and theorem-level regression checks across framework, domains,
@@ -49,8 +63,10 @@ contribution, rather than treating this repository as a one-off example dump.
 - Start with `AbsInterp/Framework` if you want the reusable theory.
 - Read `AbsInterp/Instances/LTS` next to see how the framework is connected
   to CSLib-style LTS semantics.
-- Read `Examples/IMP/Analysis/Sign` and `Examples/IMP/Programs/Showcase` for
-  the flagship end-to-end case study.
+- Read `Examples/IMP/Analysis/Generic`, then `Examples/IMP/Analysis/Sign` or
+  `Examples/IMP/Analysis/Interval`, and then
+  `Examples/IMP/Programs/{Showcase,CollectingShowcase}` for the flagship
+  end-to-end case studies.
 - Read `Examples/IMP/Programs/Tutorial` only if you want the smaller teaching
   examples first.
 
