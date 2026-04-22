@@ -1,0 +1,31 @@
+name = "absinterp-docs"
+version = "0.1.0"
+defaultTargets = ["site", "slides"]
+
+[leanOptions]
+pp.unicode.fun = true
+
+# Verso is pinned to its `v4.30.0-rc1` tag, which matches the repository-wide
+# Lean toolchain (leanprover/lean4:v4.30.0-rc1). See `site/README.md` for the
+# revision-strategy rationale and the upgrade plan once Lean v4.30.0 stable
+# ships.
+[[require]]
+name = "verso"
+git = "https://github.com/leanprover/verso.git"
+rev = "v4.30.0-rc1"
+
+[[lean_lib]]
+name = "AbsinterpDocs"
+
+[[lean_lib]]
+name = "AbsinterpSlides"
+
+[[lean_exe]]
+name = "site"
+root = "Main"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "slides"
+root = "SlidesMain"
+supportInterpreter = true
