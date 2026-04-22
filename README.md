@@ -21,7 +21,8 @@ IMP's role as a validation adapter, and the upstream boundary — see
 A web version of the architecture note, a reading guide, and a
 minimal talk deck live in the nested Verso project at [`site/`](site/).
 See [`site/README.md`](site/README.md) for local build instructions
-and the GitHub Pages publication path.
+and the GitHub Pages publication path. To publish the site, enable
+GitHub Pages with **Source = GitHub Actions** in the repository settings.
 
 ## What is in place
 
