@@ -19,10 +19,12 @@ site/
 │   ├── Architecture.lean
 │   ├── ReadingGuide.lean
 │   └── IMPCollectingShowcase.lean
-├── SlidesMain.lean           # entry point for the slide deck
-├── AbsinterpSlides.lean      # barrel importing AbsinterpSlides.Intro
+├── SlidesMain.lean           # entry point for the short overview deck
+├── SeminarMain.lean          # entry point for the seminar deck
+├── AbsinterpSlides.lean      # barrel importing Intro + Seminar
 └── AbsinterpSlides/
-    └── Intro.lean            # single-deck slide content
+    ├── Intro.lean            # short public deck (~10 minutes)
+    └── Seminar.lean          # research seminar deck (~20–30 minutes)
 ```
 
 ## Verso revision strategy
@@ -78,21 +80,30 @@ python3 -m http.server 8000
 
 and open <http://localhost:8000>.
 
-## Build the slide deck
+## Build the slide decks
+
+There are two decks, each with its own executable:
+
+- `slides` — the short public overview deck
+  (`AbsinterpSlides/Intro.lean`), ~10 minutes.
+- `seminar-slides` — the deeper research-seminar deck
+  (`AbsinterpSlides/Seminar.lean`), ~20–30 minutes.
 
 ```bash
 cd site
 lake exe slides
+lake exe seminar-slides
 ```
 
-The slides executable emits a single-file HTML at
-`site/_out/slides/html-single/index.html`. Open that file in a
-browser.
+The executables emit single-file HTML at:
 
-The current slide deck uses `VersoManual` as the backing genre, with
-each top-level section acting as a logical slide. When Verso ships a
-dedicated slides genre whose toolchain matches ours, migrate
-`AbsinterpSlides/Intro.lean` to that genre.
+- `site/_out/slides/html-single/index.html`
+- `site/_out/seminar/html-single/index.html`
+
+Both decks use `VersoManual` as the backing genre, with each top-level
+section acting as a logical slide. When Verso ships a dedicated slides
+genre whose toolchain matches ours, migrate both
+`AbsinterpSlides/{Intro,Seminar}.lean` to that genre.
 
 ## GitHub Pages deployment
 
@@ -101,9 +112,11 @@ on every push to `main` and publishes the emitted HTML to GitHub Pages.
 Repository settings must have Pages enabled with the "GitHub Actions"
 source for the workflow to succeed.
 
-Published URL:
-`https://<owner>.github.io/<repo>/` — for this repository, once enabled
-that resolves to `https://maokami.github.io/absinterp/`.
+Published URLs:
+
+- Main docs site — `https://maokami.github.io/absinterp/`
+- Short overview deck — `https://maokami.github.io/absinterp/slides/`
+- Research-seminar deck — `https://maokami.github.io/absinterp/seminar/`
 
 ## Do not
 
