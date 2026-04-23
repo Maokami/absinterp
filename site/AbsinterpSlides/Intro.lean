@@ -3,117 +3,150 @@ import VersoManual
 open Verso.Genre Manual
 
 /-!
-A minimal talk deck for `absinterp`. Built with `VersoManual` because the
-official Verso stack does not yet ship a dedicated slide genre; each
-top-level section is a logical slide. The executable emits a single-file
-HTML that can be opened in a browser and scrolled through, or styled
-downstream for slide-show rendering. Replace with the official Verso
-slide genre once it ships a tag compatible with the repository toolchain.
+Talk deck for `absinterp`. Built with `VersoManual` because the
+repository's pinned Verso/toolchain combination does not ship a
+dedicated slide genre; each top-level `#` section is one logical slide
+(about one minute of delivery). When Verso ships an official slide
+genre with a matching toolchain tag, migrate this module to it.
 -/
 
 #doc (Manual) "Layered Abstract Interpretation in Lean 4" =>
 %%%
 shortTitle := "absinterp slides"
-authors := ["absinterp contributors"]
+authors := ["Maokami"]
 %%%
 
-A short talk deck for `absinterp`.
+A 10–15 minute talk on `absinterp` — a reusable Lean 4
+abstract-interpretation framework built over CSLib-style LTS
+semantics, validated on IMP with an axiom-clean value invariant.
 
-# Project goal
+# The problem
 
-`absinterp` is a Lean 4 library for *reusable* abstract interpretation
-over *CSLib-style LTS semantics*. IMP is the validation case study,
-not the product.
+Abstract interpretation is mature theory.
+Lean 4 + CSLib already ship the concrete-side primitives —
+`LTS`, `MTr`, `ωTr`, `HasTau`.
 
-- Soundness-first, γ-only — no Galois connection required.
-- Long-term target: mature the reusable pieces toward an upstream CSLib
-  contribution.
+What is missing: a *reusable, γ-only* abstract-interpretation layer
+sitting cleanly on top.
+
+`absinterp` builds that layer.
+
+- Soundness-first. Every abstract operation comes with a
+  concretization-level proof.
+- γ-only. No Galois connection required.
+- CSLib-native. The concrete side is an LTS, not a re-implementation.
+
+# Not an IMP analyzer
+
+*Before:* one-off analyzers per language, reproving the same
+boilerplate — monotone lifts, trace lifting, fixpoint soundness.
+
+*After:* a small layered stack. IMP is the *first validator*, not the
+product.
+
+- No `IMP` identifier ever appears in the framework core.
+- Adding a new language means instantiating an adapter, not rebuilding
+  the theory.
+- Everything below the adapter layer is language- and domain-agnostic.
 
 # Layered architecture
 
-The framework is a strict, one-directional stack.
+```
+┌────────────────────────────────────────┐
+│ 5 · IMP adapters + case studies        │
+├────────────────────────────────────────┤
+│ 4 · CSLib LTS adapters                 │
+├────────────────────────────────────────┤
+│ 3 · Generic soundness + iteration      │
+├────────────────────────────────────────┤
+│ 2 · Domain capabilities                │
+├────────────────────────────────────────┤
+│ 1 · Semantic core                      │
+└────────────────────────────────────────┘
+```
 
-- *Semantic core.* `Concretization`, `ConcretizationDomain`,
-  `gamma_union_subset_sup`.
-- *Domain capabilities.* `BottomConcretization`, `MeetLike`,
-  `PointAbstraction`, `FilterOperator`, `RelationalBackwardOperator`,
-  transfers.
-- *Generic soundness + iteration.* Step/trace lifting, collecting
-  semantics, the fixpoint bridge, the widening engine.
-- *CSLib LTS adapters.* `LTSAbstraction` (trace) and
-  `LTSCollectingAbstraction` (collecting).
-- *IMP adapter.* `IMPAnalysisDomain`, `transferProgram`,
-  `transferAnyProgram`, per-domain wrappers, programs.
+- *5* — `IMPAnalysisDomain`, per-domain wrappers, showcases.
+- *4* — `LTSAbstraction` (trace) · `LTSCollectingAbstraction` (collecting).
+- *3* — trace lifting, fixpoint bridge, widening engine.
+- *2* — filters, meet-like, backward operators, transfers.
+- *1* — `ConcretizationDomain` + `gamma_union_subset_sup`.
 
-Higher layers depend only on lower layers. IMP arithmetic never leaks
-into the framework core.
+Strict, one-directional: every layer depends only on lower layers.
 
-# Trace vs. collecting paths
-
-The framework ships two independent end-to-end paths.
+# Two paths out of the framework
 
 : Labeled trace path
 
-  `LTSAbstraction` takes a labeled `Label → Abstract → Abstract`
-  transfer plus a step-soundness proof; `soundTraceLifted` derives
-  trace-level soundness.
+  `LTSAbstraction` takes a labeled transfer
+  `Label → Abstract → Abstract` and a one-step soundness proof.
+  `soundTraceLifted` derives `SoundTrace` over `liftTracePost`.
 
-: Unlabeled collecting/fixpoint path
+: Unlabeled collecting / fixpoint path
 
-  `LTSCollectingAbstraction` takes an unlabeled `Abstract → Abstract`
-  transfer plus `postAny`-soundness; the fixpoint bridge
+  `LTSCollectingAbstraction` takes an unlabeled transfer
+  `Abstract → Abstract` and a `postAny`-soundness proof.
   `omegaReachable_subset_of_isPostFixpoint` turns an abstract
-  post-fixpoint into a concrete safety conclusion.
+  post-fixpoint into `omegaReachableLTS init ⊆ γ a`.
 
-The two paths are kept parallel on purpose: bridging them requires
-extra structure (finite label enumeration, abstract aggregation) that
-only some clients can pay for.
+Why parallel, not unified? Bridging them costs finite label
+enumeration or abstract aggregation — a price only *some* clients can
+pay.
 
-# IMP case studies
+# Flagship: `x0 = 5` through the collecting bridge
 
-IMP exercises the framework end-to-end.
+```
+x0 := 5 ;;
+while x0 do
+  x0 := x0 + 0
+```
 
-- *`Programs/Showcase.lean`* — labeled Sign analysis along fixed
-  traces over the canonical IMP LTS.
-- *`Programs/WidenShowcase.lean`* — widening on a small finite
-  `Flat3` domain, exercising `WAcc` / `witer` / `pfp`.
-- *`Programs/CollectingShowcase.lean`* — the flagship collecting
-  case study: proves `x0 = 5` at the while head of
-  `x0 := 5;; while x0 do x0 := x0 + 0` via a hand-written Interval
-  post-fixpoint. Axiom-clean — no `native_decide`.
+*Theorem.* For every `(wloop, σ) ∈ omegaReachableLTS impLTS init`,
+`σ Var.x0 = 5`.
+
+Why it matters:
+
+- A real *value* invariant — not `ActiveIn`, not a sign-domain
+  approximation.
+- Hand-written Interval post-fixpoint `[5, 5]`, closed under every
+  transfer the program touches.
+- Proof rides the generic collecting bridge end-to-end, not a bespoke
+  loop argument.
+- *Axiom-clean* — `propext`, `Quot.sound`, `Classical.choice` only;
+  no `native_decide`.
 
 # Upstream boundary
 
-Candidates for CSLib upstreaming:
+*Candidates for CSLib*:
 
-- semantic kernel (`ConcretizationDomain`, `gamma_union_subset_sup`);
-- capability layer;
-- generic soundness + iteration + fixpoint + widening;
-- CSLib LTS adapters (`LTSAbstraction`, `LTSCollectingAbstraction`,
-  readout helpers).
+- `Concretization`, `ConcretizationDomain`, `gamma_union_subset_sup`.
+- Capability layer — filters, meet-like, backward operators,
+  transfers.
+- Generic soundness + iteration + fixpoint + widening.
+- `LTSAbstraction`, `LTSCollectingAbstraction`, readout helpers.
 
-Lives only in this repo:
+*Stays local*:
 
-- IMP syntax/semantics/`impLTS`;
-- `IMPAnalysisDomain`;
-- program-specific showcases and tutorials.
+- IMP syntax, semantics, `impLTS`.
+- `IMPAnalysisDomain`.
+- Program-specific showcases, tutorial LTSs.
 
-The split is principled: anything mentioning IMP belongs above the
+The split is principled: anything mentioning IMP stays *above* the
 framework boundary.
 
-# Status and next steps
+# Status and what's next
 
-- Axiom-clean upstream-candidate path, with `Tests/Axioms.lean` as
-  a compile-time guard on the axiom footprint.
-- Two flagship showcase invariants in place (Sign trace, Interval
-  collecting `x0 = 5`).
-- Still open: relational domain instances, narrowing, realistic
-  widening over config abstractions, namespacing/docstring pass for
-  the first CSLib PR.
+- Axiom footprint pinned at compile time by `Tests/Axioms.lean`.
+- Two flagship invariants in place: Sign trace analysis and Interval
+  collecting `x0 = 5`.
+- Open work:
+  - relational domains (congruences, pairwise difference);
+  - narrowing and realistic config-level widening;
+  - namespacing + docstring sweep for the first CSLib PR;
+  - migrate the slide deck to the official Verso slide genre when a
+    matching toolchain tag ships.
 
 # Pointers
 
-- Repository:
-  [github.com/Maokami/absinterp](https://github.com/Maokami/absinterp)
-- Architecture note: `docs/architecture.md`
-- Documentation site: this Verso project
+- Code — [`github.com/Maokami/absinterp`](https://github.com/Maokami/absinterp)
+- Live docs — [`maokami.github.io/absinterp/`](https://maokami.github.io/absinterp/)
+- Architecture note — `docs/architecture.md` (also in the docs site)
