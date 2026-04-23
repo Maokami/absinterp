@@ -56,6 +56,14 @@ static analyses. Mechanising it in Lean 4 benefits from:
 - {ref "imp-collecting-showcase"}[IMP Collecting Showcase] — the flagship
   Interval value-invariant theorem and its proof structure.
 
+# Slide decks
+
+- [Short overview](slides/) — a ~10 minute public deck. Published at
+  `/slides/`.
+- [Research seminar](seminar/) — a ~20–30 minute deeper deck aimed at
+  Lean users and PL / static-analysis researchers. Published at
+  `/seminar/`.
+
 # Repository
 
 The source, issue tracker, and PRs live at

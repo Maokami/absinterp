@@ -1,6 +1,6 @@
 name = "absinterp-docs"
 version = "0.1.0"
-defaultTargets = ["site", "slides"]
+defaultTargets = ["site", "slides", "seminar-slides"]
 
 [leanOptions]
 pp.unicode.fun = true
@@ -28,4 +28,9 @@ supportInterpreter = true
 [[lean_exe]]
 name = "slides"
 root = "SlidesMain"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "seminar-slides"
+root = "SeminarMain"
 supportInterpreter = true

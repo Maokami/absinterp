@@ -44,17 +44,23 @@ jobs:
       - name: Build documentation site
         run: lake exe site
 
-      - name: Build slide deck
+      - name: Build overview slide deck
         run: lake exe slides
+
+      - name: Build seminar slide deck
+        run: lake exe seminar-slides
 
       - name: Collect publishable HTML
         run: |
           mkdir -p _publish
           # Site (multi-page HTML) becomes the root of the deployed site.
           cp -R _out/html-multi/. _publish/
-          # Slides ship as a single-file deck under /slides/.
+          # Short overview deck ships under /slides/.
           mkdir -p _publish/slides
           cp -R _out/slides/html-single/. _publish/slides/
+          # Seminar deck ships under /seminar/.
+          mkdir -p _publish/seminar
+          cp -R _out/seminar/html-single/. _publish/seminar/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
