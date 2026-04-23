@@ -25,13 +25,21 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install Lean toolchain
-        uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: site
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Verify Lean toolchain
+        run: |
+          lean --version
+          lake --version
 
       - name: Resolve Verso dependency
         run: lake update verso
+
+      - name: Build docs project
+        run: lake build
 
       - name: Build documentation site
         run: lake exe site
