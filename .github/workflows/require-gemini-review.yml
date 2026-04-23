@@ -35,6 +35,21 @@ jobs:
               return;
             }
 
+            const isUnsupportedTypeNote = (body) =>
+              typeof body === 'string' &&
+              body.toLowerCase().includes('unable to generate a review') &&
+              body.toLowerCase().includes('file types involved');
+
+            const issueComments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number: pr_number }
+            );
+            const unsupportedTypeComment = issueComments.find(
+              c =>
+                c.user?.login === 'gemini-code-assist[bot]' &&
+                isUnsupportedTypeNote(c.body)
+            );
+
             // Check if Gemini has reviewed any commit on this PR.
             // We intentionally do NOT require the review to match the HEAD SHA:
             // after a review-feedback commit, Gemini may skip re-reviewing,
@@ -51,6 +66,14 @@ jobs:
 
             if (geminiReview) {
               core.info(`Gemini review found (commit: ${geminiReview.commit_id}, state: ${geminiReview.state})`);
+              return;
+            }
+
+            if (unsupportedTypeComment) {
+              core.info(
+                'Gemini reported unsupported file types for this PR; ' +
+                'treating the review requirement as satisfied.'
+              );
               return;
             }
 
@@ -72,6 +95,23 @@ jobs:
                 core.info(`Gemini review found (commit: ${found.commit_id}, state: ${found.state})`);
                 return;
               }
+
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                { owner, repo, issue_number: pr_number }
+              );
+              const unsupported = comments.find(
+                c =>
+                  c.user?.login === 'gemini-code-assist[bot]' &&
+                  isUnsupportedTypeNote(c.body)
+              );
+              if (unsupported) {
+                core.info(
+                  'Gemini reported unsupported file types for this PR; ' +
+                  'treating the review requirement as satisfied.'
+                );
+                return;
+              }
             }
             core.setFailed(
               'Gemini Code Assist review not received within 10 minutes. ' +
@@ -89,6 +129,26 @@ jobs:
 
             if (!pr_number) {
               core.info('No PR number found, skipping.');
+              return;
+            }
+
+            const issueComments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number: pr_number }
+            );
+            const unsupportedTypeComment = issueComments.find(
+              c =>
+                c.user?.login === 'gemini-code-assist[bot]' &&
+                typeof c.body === 'string' &&
+                c.body.toLowerCase().includes('unable to generate a review') &&
+                c.body.toLowerCase().includes('file types involved')
+            );
+
+            if (unsupportedTypeComment) {
+              core.info(
+                'Gemini reported unsupported file types for this PR; ' +
+                'skipping unresolved-thread enforcement.'
+              );
               return;
             }
 
