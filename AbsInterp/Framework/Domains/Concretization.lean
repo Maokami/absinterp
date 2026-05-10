@@ -60,14 +60,8 @@ theorem gamma_union_subset_sup
     cfg.gamma a ∪ cfg.gamma b ⊆ cfg.gamma (a ⊔ b) := by
   intro c hc
   rcases hc with ha | hb
-  · have hSup : a ≤ a ⊔ b := by
-      show a ≤ (a ⊔ b : Abstract)
-      exact le_sup_of_le_left le_rfl
-    exact cfg.gamma_monotone hSup ha
-  · have hSup : b ≤ a ⊔ b := by
-      show b ≤ (a ⊔ b : Abstract)
-      exact le_sup_of_le_right le_rfl
-    exact cfg.gamma_monotone hSup hb
+  · exact cfg.gamma_monotone le_sup_left ha
+  · exact cfg.gamma_monotone le_sup_right hb
 
 end ConcretizationDomain
 
