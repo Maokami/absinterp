@@ -14,6 +14,8 @@ import Tests.Instances.LTS.CollectingTrace
 import Tests.Instances.LTS.IntervalHook
 import Tests.Instances.LTS.SignHook
 import Tests.Instances.LTS.CollectingHook
+import Tests.Instances.LTS.Weak
+import Tests.Instances.LTS.Omega
 import Tests.Framework.Iteration.NatIter
 import Tests.Framework.Iteration.Widening
 import Tests.Framework.Semantics.AbstractOrder

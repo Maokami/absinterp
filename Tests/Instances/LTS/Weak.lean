@@ -81,5 +81,27 @@ example : ({0} : Set Nat) ⊆ (tauClosureOp toyLTS).cl {0} :=
 -- weakPostAny_collectingStep instantiation compiles
 example : CollectingStep Nat := weakPostAny_collectingStep toyLTS
 
+-- End-to-end: strong step soundness on a (trivially τ-closed) ⊤ concretization
+-- lifts to weak (τ-closure) step soundness via `soundStep_weakClosure_of_soundStep`.
+example :
+    SoundStep
+      (fun label => weakPost (tauClosureOp toyLTS) (postStep toyLTS label))
+      (fun _ : Unit => (Set.univ : Set Nat)) (fun _ _ => ()) := by
+  apply soundStep_weakClosure_of_soundStep toyLTS
+  · intro _ _ _ _; exact Set.mem_univ _
+  · intro _ _ _; exact Set.mem_univ _
+
+-- The same hypotheses, packaged as an `LTSAbstraction`, give weak trace soundness
+-- via `LTSAbstraction.soundTraceWeak`.
+example :
+    SoundTrace
+      (liftTracePost
+        (fun label => weakPost (tauClosureOp toyLTS) (postStep toyLTS label)))
+      (fun _ : Unit => (Set.univ : Set Nat))
+      (liftTracePostSharp (fun _ _ => ())) :=
+  (LTSAbstraction.ofExplicit toyLTS (fun _ : Unit => (Set.univ : Set Nat))
+      (fun _ _ => ()) (fun _ _ _ _ => Set.mem_univ _)).soundTraceWeak
+    (fun _ _ _ => Set.mem_univ _)
+
 end InstancesLTSWeak
 end Tests

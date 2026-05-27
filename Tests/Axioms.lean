@@ -42,6 +42,12 @@ the mismatch will cause a compile-time error and fail CI.
 /-- info: 'AbsInterp.Instances.LTS.tauClosureOp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms AbsInterp.Instances.LTS.tauClosureOp
 
+/-- info: 'AbsInterp.Instances.LTS.soundStep_weakClosure_of_soundStep' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms AbsInterp.Instances.LTS.soundStep_weakClosure_of_soundStep
+
+/-- info: 'AbsInterp.Instances.LTS.LTSAbstraction.soundTraceWeak' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms AbsInterp.Instances.LTS.LTSAbstraction.soundTraceWeak
+
 /-- info: 'AbsInterp.Instances.LTS.sound_reachTransferAny' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms AbsInterp.Instances.LTS.sound_reachTransferAny
 
