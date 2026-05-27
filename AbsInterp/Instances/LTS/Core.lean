@@ -8,3 +8,4 @@ import AbsInterp.Instances.LTS.Instantiation.Interface
 import AbsInterp.Instances.LTS.Instantiation.Soundness
 import AbsInterp.Instances.LTS.Instantiation.CollectingInterface
 import AbsInterp.Instances.LTS.Instantiation.CollectingSoundness
+import AbsInterp.Instances.LTS.Instantiation.WeakSoundness

@@ -126,8 +126,8 @@ def toyCollecting : LTSCollectingAbstraction Nat Unit Top2 :=
 /-- `.top` is a post-fixpoint of the reachability transfer. -/
 theorem toy_isPostFixpoint :
     IsPostFixpoint (· ≤ ·) (toyCollecting.reachTransfer .top) .top := by
-  simp [IsPostFixpoint, LTSCollectingAbstraction.reachTransfer, transferAnyToy,
-        toyCollecting, collectingAbstractionOfCollectingSound]
+  simp [IsPostFixpoint, LTSCollectingAbstraction.reachTransfer, reachTransferAny,
+        transferAnyToy, toyCollecting, collectingAbstractionOfCollectingSound]
 
 /-- Any initial concrete set is bounded by `.top`. -/
 theorem init_subset_gammaTop (init : Set Nat) :

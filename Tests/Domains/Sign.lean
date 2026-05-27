@@ -43,13 +43,6 @@ example : joinSign Sign.neg Sign.zero = Sign.nonpos := by
 example : joinSign Sign.neg Sign.pos = Sign.top := by
   rfl
 
-example : negTransfer Sign.nonpos = Sign.nonneg := by
-  rfl
-
-example (n : Int) (hn : n ∈ gammaSign Sign.nonneg) :
-    -n ∈ gammaSign (negTransfer Sign.nonneg) := by
-  exact negTransfer_sound hn
-
 -- meetSign tests
 example : meetSign Sign.neg Sign.nonneg = Sign.bot := by rfl
 example : meetSign Sign.top Sign.pos = Sign.pos := by rfl

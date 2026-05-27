@@ -4,6 +4,7 @@ import Cslib.Foundations.Semantics.LTS.Basic
 import AbsInterp.Domains
 import AbsInterp.Framework
 import AbsInterp.Instances.LTS
+import AbsInterp.Instances.LTS.Analyses.Sign
 
 import Examples.IMP.Semantics
 

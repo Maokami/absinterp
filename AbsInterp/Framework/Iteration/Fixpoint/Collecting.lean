@@ -11,8 +11,8 @@ import AbsInterp.Framework.Semantics.Omega.Defs
 Reusable corollaries that turn an abstract post-fixpoint into a sound
 over-approximation of collecting Kleene iterates and of ω-reachability.
 
-These are the headline Session 4 results: once a solver has produced an
-abstract post-fixpoint, these theorems deliver the concrete safety
+These are the headline post-fixpoint bridge results: once a solver has produced
+an abstract post-fixpoint, these theorems deliver the concrete safety
 conclusion without any further iteration-specific reasoning.
 -/
 

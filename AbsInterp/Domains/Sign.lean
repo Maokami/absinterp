@@ -116,7 +116,7 @@ instance : OrderTop Sign where
 
 instance : OrderBot Sign where
   bot := .bot
-  bot_le _ := fun _ hn => by simp [gammaSign] at hn
+  bot_le _ := Set.empty_subset _
 
 theorem gammaSign_monotone_of_leSign ⦃a b : Sign⦄ (hAB : a ≤ b) :
     gammaSign a ⊆ gammaSign b :=
@@ -406,47 +406,6 @@ theorem backwardAddZeroSign_reductive :
       simp [gammaSign, backwardAddZeroSign, filterZeroSign, meetSign,
         signOfFlags, hasNeg, hasZero, hasPos] at hn ⊢ <;>
       omega
-
-/-- Baseline unary transfer shape: abstract negation. -/
-def negTransfer : Sign -> Sign
-  | .bot => .bot
-  | .neg => .pos
-  | .zero => .zero
-  | .pos => .neg
-  | .nonpos => .nonneg
-  | .nonneg => .nonpos
-  | .top => .top
-
-theorem negTransfer_sound {a : Sign} {n : Int} (hn : n ∈ gammaSign a) :
-    -n ∈ gammaSign (negTransfer a) := by
-  cases a with
-  | bot =>
-      change False at hn
-      exact False.elim hn
-  | neg =>
-      change n < 0 at hn
-      change 0 < -n
-      omega
-  | zero =>
-      change n = 0 at hn
-      change -n = 0
-      omega
-  | pos =>
-      change 0 < n at hn
-      change -n < 0
-      omega
-  | nonpos =>
-      change n < 0 ∨ n = 0 at hn
-      change -n = 0 ∨ 0 < -n
-      omega
-  | nonneg =>
-      change n = 0 ∨ 0 < n at hn
-      change -n < 0 ∨ -n = 0
-      omega
-  | top =>
-      change True at hn
-      change True
-      trivial
 
 /-- Concretization-domain instance for the sign domain. -/
 def signConcretizationDomain :

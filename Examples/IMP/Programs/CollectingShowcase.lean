@@ -4,7 +4,7 @@ import Examples.IMP.Analysis.Interval
 /-!
 # IMP Collecting/Fixpoint Showcase
 
-Canonical IMP consumer of the Session 4/5 collecting/fixpoint bridge.
+Canonical IMP consumer of the collecting/fixpoint bridge.
 
 This file exercises the generic IMP collecting path end-to-end via the
 Interval domain, proving a real **value** invariant — every ω-reachable
