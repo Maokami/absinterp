@@ -11,8 +11,8 @@ This barrel exposes the reusable, domain-agnostic CSLib-LTS adapter layer:
 * `Analyses.Common` — generic readout helpers (`ReadGamma`, `StepSoundOfRead`,
   `CollectingSoundOfRead`) that connect any observation-based domain to an LTS.
 
-Domain-specific readout adapters (`Analyses.Sign`, `Analyses.Interval`) are
-deliberately *not* re-exported here: they pull in concrete scalar domains and
-are downstream convenience. Import them directly where needed; the root
-`AbsInterp` barrel still aggregates them.
+Domain-specific readout adapters (`Analyses.Sign`, `Analyses.Interval`,
+`Analyses.Parity`) are deliberately *not* re-exported here: they pull in
+concrete scalar domains and are downstream convenience. Import them directly
+where needed; the root `AbsInterp` barrel still aggregates them.
 -/

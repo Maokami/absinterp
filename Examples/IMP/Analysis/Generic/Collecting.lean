@@ -15,8 +15,8 @@ labeled transfer branches that can fire at each program shape.
 
 Together with `soundAny_imp` and the
 `{kleeneNat,omegaReachableLTS}_subset_of_isPostFixpoint_imp` corollaries,
-this is the IMP adapter into the Session 4 fixpoint bridge (and parallel
-to the Session 5 `LTSCollectingAbstraction` path — see the note in
+this is the IMP adapter into the generic fixpoint bridge (and parallel
+to the `LTSCollectingAbstraction` path — see the note in
 `## Fixpoint bridge for IMP collecting soundness` below for the
 packaging trade-off).
 -/

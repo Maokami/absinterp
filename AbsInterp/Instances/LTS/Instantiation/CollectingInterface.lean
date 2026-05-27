@@ -15,7 +15,7 @@ captures the labeled one-step soundness obligation used for trace
 soundness.
 
 This interface is the adapter from the LTS collecting semantics to the
-generic Session 4 post-fixpoint bridge
+generic post-fixpoint bridge
 (`AbsInterp.Framework.Iteration.Fixpoint.Collecting`).
 -/
 

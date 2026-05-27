@@ -13,6 +13,7 @@ import Tests.Instances.LTS.Collecting
 import Tests.Instances.LTS.CollectingTrace
 import Tests.Instances.LTS.IntervalHook
 import Tests.Instances.LTS.SignHook
+import Tests.Instances.LTS.ParityHook
 import Tests.Instances.LTS.CollectingHook
 import Tests.Instances.LTS.Weak
 import Tests.Instances.LTS.Omega

@@ -12,7 +12,7 @@ Reusable corollaries that combine:
 
 - the LTS unlabeled collecting semantics (`postAny_collectingStep`),
 - a sound abstract collecting transfer bundled as `LTSCollectingAbstraction`,
-- the generic Session 4 post-fixpoint bridge.
+- the generic post-fixpoint bridge.
 
 Each theorem takes an abstract post-fixpoint of `cfg.reachTransfer initAbs`
 and concludes a concrete safety statement: every finite Kleene iterate,
