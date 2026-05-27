@@ -295,17 +295,17 @@ theorem soundAny_imp (program : Stmt) :
 /-! ## Fixpoint bridge for IMP collecting soundness
 
 `gammaProgram d program` is a `Concretization`, not a `ConcretizationDomain`
-(it carries an `ActiveIn` constraint that rules out `gamma_top`). We therefore
-package the IMP-side collecting bridge as direct specialisations of the
-framework theorems `Iteration.omegaReachable_subset_of_isPostFixpoint` and
-`Iteration.kleeneNat_subset_of_isPostFixpoint`, rather than as a strict
-`LTSCollectingAbstraction`.
+(it carries an `ActiveIn` constraint that rules out `gamma_top`), so IMP cannot
+instantiate the bundled `LTSCollectingAbstraction`. It instead reuses the
+bare-`gamma` primitives `reachTransferAny` / `sound_reachTransferAny` and the
+framework theorems `Iteration.kleeneNat_subset_of_isPostFixpoint` /
+`Iteration.omegaReachable_subset_of_isPostFixpoint` directly.
 -/
 
 /-- The reach transfer over the generic IMP collecting transfer. -/
 def impReachTransfer (d : IMPAnalysisDomain A) (program : Stmt)
     (initAbs : ConfigSharp A) : PostSharp (ConfigSharp A) :=
-  fun a => initAbs ⊔ transferAnyProgram d program a
+  reachTransferAny (transferAnyProgram d program) initAbs
 
 /--
 Soundness of the IMP reach transfer with an abstract initial over-approximation.
@@ -320,17 +320,10 @@ theorem sound_impReachTransfer
     (hInit : init ⊆ gammaProgram d program initAbs) :
     Sound ((postAny_collectingStep impLTS).reachF init)
       (gammaProgram d program)
-      (impReachTransfer d program initAbs) := by
-  intro a c hc
-  rcases hc with hInitMem | hPostMem
-  · -- init contribution
-    have hLeft : initAbs ≤ impReachTransfer d program initAbs a := le_sup_left
-    exact gammaProgram_monotone d hLeft program (hInit hInitMem)
-  · -- postAny contribution
-    have hSound : c ∈ gammaProgram d program (transferAnyProgram d program a) :=
-      soundAny_imp d program a hPostMem
-    have hRight : transferAnyProgram d program a ≤ impReachTransfer d program initAbs a := le_sup_right
-    exact gammaProgram_monotone d hRight program hSound
+      (impReachTransfer d program initAbs) :=
+  sound_reachTransferAny impLTS (gammaProgram d program)
+    (fun h => gammaProgram_monotone d h program) (transferAnyProgram d program)
+    (soundAny_imp d program) hInit
 
 /-- Specialisation of the generic Kleene-iterate bridge to IMP. -/
 theorem kleeneNat_subset_of_isPostFixpoint_imp

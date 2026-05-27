@@ -29,6 +29,53 @@ open AbsInterp.Framework.Domains
 universe u v w
 
 /--
+Unbundled reach transfer, shared by the bundled `LTSCollectingAbstraction`
+and by bare-`gamma` clients (e.g. program-relative concretizations that are
+not full `ConcretizationDomain`s): add the abstract initial approximation
+`initAbs` at every step.
+-/
+def reachTransferAny
+    {Abstract : Type w}
+    [SemilatticeSup Abstract]
+    (transferAny : PostSharp Abstract)
+    (initAbs : Abstract) :
+    PostSharp Abstract :=
+  fun a => initAbs ⊔ transferAny a
+
+/--
+Soundness of `reachTransferAny` against the LTS collecting reachability
+operator, stated for a bare concretization `gamma` plus a monotonicity proof.
+This is the primary statement; the `ConcretizationDomain`-bundled
+`LTSCollectingAbstraction.sound_reachTransfer` is a convenience wrapper and
+clients without `gamma_top`/`OrderTop` (such as IMP) call this directly.
+-/
+theorem sound_reachTransferAny
+    {State : Type u}
+    {Label : Type v}
+    {Abstract : Type w}
+    [SemilatticeSup Abstract]
+    (lts : Cslib.LTS State Label)
+    (gamma : Concretization Abstract State)
+    (gamma_mono : ∀ {a b : Abstract}, a ≤ b → gamma a ⊆ gamma b)
+    (transferAny : PostSharp Abstract)
+    (soundAny : Sound (postAny lts) gamma transferAny)
+    {init : Set State}
+    {initAbs : Abstract}
+    (hInit : init ⊆ gamma initAbs) :
+    Sound ((postAny_collectingStep lts).reachF init) gamma
+      (reachTransferAny transferAny initAbs) := by
+  intro a s hs
+  rcases hs with hInitMem | hPostMem
+  · have hLeft : initAbs ≤ reachTransferAny transferAny initAbs a := by
+      show initAbs ≤ initAbs ⊔ transferAny a
+      exact le_sup_left
+    exact gamma_mono hLeft (hInit hInitMem)
+  · have hRight : transferAny a ≤ reachTransferAny transferAny initAbs a := by
+      show transferAny a ≤ initAbs ⊔ transferAny a
+      exact le_sup_right
+    exact gamma_mono hRight (soundAny a hPostMem)
+
+/--
 Reusable interface for unlabeled collecting abstract interpretation over a
 CSLib LTS.
 
@@ -84,7 +131,7 @@ def reachTransfer
     (cfg : LTSCollectingAbstraction State Label Abstract)
     (initAbs : Abstract) :
     PostSharp Abstract :=
-  fun a => initAbs ⊔ cfg.transferAny a
+  reachTransferAny cfg.transferAny initAbs
 
 /--
 The abstract reachability transfer is sound w.r.t. the concrete LTS
@@ -98,19 +145,9 @@ theorem sound_reachTransfer
     (hInit : init ⊆ cfg.domain.gamma initAbs) :
     Sound ((postAny_collectingStep cfg.lts).reachF init)
       cfg.domain.gamma
-      (cfg.reachTransfer initAbs) := by
-  intro a s hs
-  rcases hs with hInitMem | hPostMem
-  ·
-    have hLeft : initAbs ≤ cfg.reachTransfer initAbs a := by
-      change initAbs ≤ initAbs ⊔ cfg.transferAny a
-      exact le_sup_left
-    exact cfg.domain.gamma_monotone hLeft (hInit hInitMem)
-  ·
-    have hRight : cfg.transferAny a ≤ cfg.reachTransfer initAbs a := by
-      change cfg.transferAny a ≤ initAbs ⊔ cfg.transferAny a
-      exact le_sup_right
-    exact cfg.domain.gamma_monotone hRight (cfg.soundAny a hPostMem)
+      (cfg.reachTransfer initAbs) :=
+  sound_reachTransferAny cfg.lts cfg.domain.gamma
+    (fun h => cfg.domain.gamma_monotone h) cfg.transferAny cfg.soundAny hInit
 
 end LTSCollectingAbstraction
 
