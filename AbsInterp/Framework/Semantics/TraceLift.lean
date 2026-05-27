@@ -16,8 +16,9 @@ For `compose : T -> T -> T`, identity `id : T`, and `step : Label -> T`:
 
 ## References
 
-* X. Leroy, *Semantics and Verification of Computer Programs*,
-  MPRI lecture notes (N40AI), 2023–2024.
+* X. Leroy, *Mechanizing abstract interpretation*,
+  Workshop on the Next 40 years of Abstract Interpretation (N40AI), 2024.
+  https://xavierleroy.org/talks/N40AI.pdf
   (trace semantics as sequential composition of step semantics)
 -/
 

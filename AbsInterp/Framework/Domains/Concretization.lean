@@ -22,8 +22,9 @@ soundness is derived generically when `[SemilatticeSup]` is available. An opt-in
 * P. Cousot, R. Cousot, *Abstract Interpretation: A Unified Lattice Model for
   Static Analysis of Programs by Construction or Approximation of Fixpoints*,
   POPL 1977. doi:10.1145/512950.512973
-* X. Leroy, *Semantics and Verification of Computer Programs*,
-  MPRI lecture notes (N40AI), 2023–2024.
+* X. Leroy, *Mechanizing abstract interpretation*,
+  Workshop on the Next 40 years of Abstract Interpretation (N40AI), 2024.
+  https://xavierleroy.org/talks/N40AI.pdf
 -/
 
 namespace AbsInterp

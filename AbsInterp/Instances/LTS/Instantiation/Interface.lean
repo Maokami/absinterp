@@ -12,10 +12,11 @@ trace-soundness proofs via `soundTrace_of_soundStep`.
 
 ## References
 
-* X. Leroy, *Semantics and Verification of Computer Programs*,
-  MPRI lecture notes (N40AI), 2023–2024.
-* R. Montesi et al., *CSLib: A Lean 4 Library for Computer Science Foundations*,
-  leanprover/cslib, 2024–2025. https://github.com/leanprover/cslib
+* X. Leroy, *Mechanizing abstract interpretation*,
+  Workshop on the Next 40 years of Abstract Interpretation (N40AI), 2024.
+  https://xavierleroy.org/talks/N40AI.pdf
+* C. Barrett et al., *CSLib: The Lean Computer Science Library*,
+  arXiv:2602.04846, 2026. https://github.com/leanprover/cslib
 -/
 
 namespace AbsInterp

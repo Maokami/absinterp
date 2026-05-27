@@ -16,8 +16,9 @@ soundness through sequential composition.
 
 ## References
 
-* X. Leroy, *Semantics and Verification of Computer Programs*,
-  MPRI lecture notes (N40AI), 2023–2024.
+* X. Leroy, *Mechanizing abstract interpretation*,
+  Workshop on the Next 40 years of Abstract Interpretation (N40AI), 2024.
+  https://xavierleroy.org/talks/N40AI.pdf
   (γ-only soundness propagation over trace semantics)
 * P. Cousot, R. Cousot, *Abstract Interpretation: A Unified Lattice Model for
   Static Analysis of Programs by Construction or Approximation of Fixpoints*,
